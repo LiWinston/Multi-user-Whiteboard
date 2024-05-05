@@ -1,11 +1,10 @@
-package Main;
+package Service;
 
-import GUI.PeerGUI;
 import WBSYS.WhiteBoard;
 
 import static WBSYS.parameters.isValidPort;
 
-public class JoinWhiteBoard {
+public class WBClient {
     private static final String DEFAULT_WHITEBOARD_NAME = "unnamed whiteboard";
 
     public static void main(String[] args) {

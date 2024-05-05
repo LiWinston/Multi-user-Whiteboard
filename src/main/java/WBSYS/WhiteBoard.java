@@ -4,6 +4,7 @@ package WBSYS;
 import GUI.ManagerGUI;
 import GUI.PeerGUI;
 import GUI.IClient;
+import io.grpc.ManagedChannel;
 
 import java.util.ArrayList;
 
@@ -77,8 +78,8 @@ public class WhiteBoard{
     }
 
 
-    public synchronized void registerManager(String IpAddress, String port, String name){
-        ManagerGUI managerGUI = new ManagerGUI(this, IpAddress, port, name);
+    public synchronized void registerManager(String IpAddress, String port, String name, ManagedChannel channel){
+        ManagerGUI managerGUI = new ManagerGUI(this, IpAddress, port, name, channel);
         clientArrayList.add(managerGUI);
         this.SynchronizeUser();
     }

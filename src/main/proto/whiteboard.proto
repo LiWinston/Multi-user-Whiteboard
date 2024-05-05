@@ -6,7 +6,7 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/wrappers.proto"; // 引入包含StringValue的文件
 
 // 基本图形数据结构
-message CanvasShape {
+message _CanvasShape {
   string type = 1;
   repeated int32 points = 2;  // 假设为简单的点数组，根据需求调整
   string color = 3;
@@ -38,7 +38,7 @@ message Response {
 
 service WhiteBoardService {
   // 同步画布
-  rpc SynchronizeCanvas(CanvasShape) returns (google.protobuf.Empty);
+  rpc SynchronizeCanvas(_CanvasShape) returns (google.protobuf.Empty);
 
   // 同步消息
   rpc SynchronizeMessage(ChatMessage) returns (google.protobuf.Empty);
@@ -59,7 +59,7 @@ service WhiteBoardService {
   rpc RegisterManager(UserRegistration) returns (google.protobuf.Empty);
 
   // 获取画布数组
-  rpc GetCanvasShapeArrayList(google.protobuf.Empty) returns (stream CanvasShape);
+  rpc GetCanvasShapeArrayList(google.protobuf.Empty) returns (stream _CanvasShape);
 
   // 获取客户端列表
   rpc GetClientArrayList(google.protobuf.Empty) returns (UserList);
@@ -77,7 +77,7 @@ service WhiteBoardService {
   rpc NewFile(google.protobuf.Empty) returns (google.protobuf.Empty);
 
   // 打开文件
-  rpc OpenFile(stream CanvasShape) returns (google.protobuf.Empty);
+  rpc OpenFile(stream _CanvasShape) returns (google.protobuf.Empty);
 
   // 管理员关闭
   rpc ManagerClose(google.protobuf.Empty) returns (google.protobuf.Empty);
@@ -88,7 +88,7 @@ service ClientService {
   rpc WarningFromManager(ChatMessage) returns (google.protobuf.Empty);
 
   // 更新画布形状
-  rpc UpdateShapes(CanvasShape) returns (google.protobuf.Empty);
+  rpc UpdateShapes(_CanvasShape) returns (google.protobuf.Empty);
 
   // 更新聊天框
   rpc UpdateChatBox(ChatMessage) returns (google.protobuf.Empty);

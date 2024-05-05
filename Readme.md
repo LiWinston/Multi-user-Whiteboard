@@ -17,7 +17,7 @@
 2. "File" menu with options for new, open, save, saveAs, and close (manager control only).
 3. Manager can kick out a certain peer/user from the whiteboard.
 
-## Main Challenges
+## Service Challenges
 
 - Dealing with concurrency:
     - Properly handling access to shared resources.

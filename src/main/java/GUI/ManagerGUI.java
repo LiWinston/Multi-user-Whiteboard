@@ -2,6 +2,9 @@ package GUI;
 
 import WBSYS.CanvasShape;
 import WBSYS.WhiteBoard;
+import io.grpc.ManagedChannel;
+import whiteboard.WhiteBoardServiceGrpc;
+import whiteboard.Whiteboard._CanvasShape;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,6 +23,8 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     private final String WBName;
     private final WhiteBoard wb;
     private final String IpAddress;
+    private final ManagedChannel channel;
+    private final Object blockingStub;
     private int ipAddress;
     private JPanel managerPanel;
     private JPanel canvasPanel;
@@ -60,12 +65,14 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     private Graphics2D canvasGraphics;
     private boolean isFill = false;
 
-    public ManagerGUI(WhiteBoard whiteBoard, String IpAddress, String port, String WBName) {
+    public ManagerGUI(WhiteBoard whiteBoard, String IpAddress, String port, String WBName, ManagedChannel channel) {
 
         this.wb = whiteBoard;
         username = "Manager";
         this.WBName = WBName;
         this.IpAddress = IpAddress;
+        this.channel = channel;
+        this.blockingStub = WhiteBoardServiceGrpc.newBlockingStub(channel);
 
         this.portNumber = Integer.parseInt(port);
         IpLabel.setText(IpAddress);
@@ -392,6 +399,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
         canvasShape.setFill(isFill);
         wb.SynchronizeCanvas(canvasShape);
+//        blockingStub.synchronizeCanvas(_CanvasShape.newBuilder().setShapeString(canvasShape.getShapeString()).setColor(canvasShape.getColor().getRGB()).setX1(canvasShape.getX1()).setX2(canvasShape.getX2()).setY1(canvasShape.getY1()).setY2(canvasShape.getY2()).setFill(canvasShape.isFill()).setUsername(canvasShape.getUsername()).setStrokeInt(canvasShape.getStrokeInt()).build());
 
     }
 
