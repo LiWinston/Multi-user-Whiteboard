@@ -70,7 +70,7 @@ public class WhiteBoard{
     public void managerClose(){
         for (IClient iClient : clientArrayList) {
             if (!iClient.getUsername().equals("Manager")) {
-                iClient.worningFromManager("Manager is closing Whiteboard...Window is closing...");
+                iClient.warningFromManager("Manager is closing Whiteboard...Window is closing...");
                 iClient.closeWindow();
             }
         }

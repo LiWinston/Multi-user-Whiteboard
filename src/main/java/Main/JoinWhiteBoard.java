@@ -6,7 +6,7 @@ import WBSYS.WhiteBoard;
 import static WBSYS.parameters.isValidPort;
 
 public class JoinWhiteBoard {
-    private static final String DEFAULT_WHITEBOARD_NAME = "whiteboard";
+    private static final String DEFAULT_WHITEBOARD_NAME = "unnamed whiteboard";
 
     public static void main(String[] args) {
         if (args.length == 3 || args.length == 4) {
@@ -29,7 +29,7 @@ public class JoinWhiteBoard {
 
 
                 WhiteBoard wb = new WhiteBoard();
-                PeerGUI peerGUI = new PeerGUI(wb, username);
+
 //                    System.out.println("Successfully looked up to server.");
 //                    if (WBServer.checkPeerName(username)) {
 //                        if (WBServer.getApprove(username)) {
@@ -48,8 +48,8 @@ public class JoinWhiteBoard {
 //                    }
 
 
-                System.out.println("successfully looked up to - " + address);
-                System.out.println("trying to get approve from Manager...");
+//                System.out.println("successfully looked up to - " + address);
+//                System.out.println("trying to get approve from Manager...");
             }
         } else {
             System.out.println("Expected args : <serverIPAddress> <serverPort> username");

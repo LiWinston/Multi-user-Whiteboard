@@ -5,7 +5,7 @@ import WBSYS.CanvasShape;
 import java.util.ArrayList;
 
 public interface IClient{
-    void worningFromManager(String message);
+    void warningFromManager(String message);
 
     void updateShapes(CanvasShape canvasShape);
 

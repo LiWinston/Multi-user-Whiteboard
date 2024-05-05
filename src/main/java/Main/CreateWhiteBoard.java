@@ -10,7 +10,7 @@ import static WBSYS.parameters.isValidPort;
 
 
 public class CreateWhiteBoard {
-    private static final String DEFAULT_WHITEBOARD_NAME = "whiteboard";
+    private static final String DEFAULT_WHITEBOARD_NAME = "unnamed whiteboard";
 
     public static void main(String[] args) {
         if (args.length == 3 || args.length == 4) {
@@ -35,7 +35,7 @@ public class CreateWhiteBoard {
                     WhiteBoard wb = new WhiteBoard();
                     wb.registerManager(Ip, port, name);
                     //public ManagerGUI(WhiteBoard whiteBoard, String IpAddress, String port, String WBName)
-                    new ManagerGUI(wb, Ip, port, name);
+//                    new ManagerGUI(wb, Ip, port, name);
                     System.out.println("Manager GUI is created, welcome manager.");
                 } catch (UnknownHostException unknownHostException) {
                     System.out.println("please provide correct ip address");

@@ -2,32 +2,122 @@ syntax = "proto3";
 
 package whiteboard;
 
-// 消息类型，用于绘制动作
-message DrawAction {
-  string user_id = 1;     // 用户标识
-  string shape_id = 2;    // 图形对象标识
-  Action action = 3;      // 绘制动作
-  Shape shape = 4;        // 图形数据
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto"; // 引入包含StringValue的文件
+
+// 基本图形数据结构
+message CanvasShape {
+  string type = 1;
+  repeated int32 points = 2;  // 假设为简单的点数组，根据需求调整
+  string color = 3;
+  int32 stroke_width = 4;
 }
 
-// 用户绘制的动作类型
-enum Action {
-  DRAW_START = 0;   // 开始绘制
-  DRAW_UPDATE = 1;  // 更新绘制
-  DRAW_END = 2;     // 结束绘制
+// 用户列表和用户名
+message UserList {
+  repeated string usernames = 1;
 }
 
-// 图形数据
-message Shape {
-  string type = 1;         // 图形类型，例如“rectangle”, “circle”等
-  repeated int32 points = 2;  // 图形的坐标点，以连续的(x, y)对序列表示
-  string color = 3;        // 颜色
-  int32 stroke_width = 4;  // 笔触宽度
+// 用于同步聊天消息
+message ChatMessage {
+  string message = 1;
 }
 
-// 定义服务
-service WhiteboardService {
-  // 流式传输绘制动作
-  rpc StreamDrawAction (stream DrawAction) returns (stream DrawAction);
+// 用户注册信息
+message UserRegistration {
+  string ip_address = 1;
+  string port = 2;
+  string username = 3;
+}
+
+// 请求或通知的通用响应
+message Response {
+  bool success = 1;
+  string message = 2;
+}
+
+service WhiteBoardService {
+  // 同步画布
+  rpc SynchronizeCanvas(CanvasShape) returns (google.protobuf.Empty);
+
+  // 同步消息
+  rpc SynchronizeMessage(ChatMessage) returns (google.protobuf.Empty);
+
+  // 同步用户信息
+  rpc SynchronizeUser(google.protobuf.Empty) returns (UserList);
+
+  // 检查用户名
+  rpc CheckPeerName(google.protobuf.StringValue) returns (Response);
+
+  // 用户请求批准
+  rpc GetApprove(google.protobuf.StringValue) returns (Response);
+
+  // 注册用户
+  rpc RegisterPeer(google.protobuf.StringValue) returns (google.protobuf.Empty);
+
+  // 注册管理员
+  rpc RegisterManager(UserRegistration) returns (google.protobuf.Empty);
+
+  // 获取画布数组
+  rpc GetCanvasShapeArrayList(google.protobuf.Empty) returns (stream CanvasShape);
+
+  // 获取客户端列表
+  rpc GetClientArrayList(google.protobuf.Empty) returns (UserList);
+
+  // 同步编辑状态
+  rpc SynchronizeEditing(google.protobuf.StringValue) returns (google.protobuf.Empty);
+
+  // 删除用户
+  rpc RemovePeer(google.protobuf.StringValue) returns (google.protobuf.Empty);
+
+  // 用户退出
+  rpc PeerExit(google.protobuf.StringValue) returns (google.protobuf.Empty);
+
+  // 新建文件
+  rpc NewFile(google.protobuf.Empty) returns (google.protobuf.Empty);
+
+  // 打开文件
+  rpc OpenFile(stream CanvasShape) returns (google.protobuf.Empty);
+
+  // 管理员关闭
+  rpc ManagerClose(google.protobuf.Empty) returns (google.protobuf.Empty);
+}
+
+service ClientService {
+  // 从管理员处接收警告信息
+  rpc WarningFromManager(ChatMessage) returns (google.protobuf.Empty);
+
+  // 更新画布形状
+  rpc UpdateShapes(CanvasShape) returns (google.protobuf.Empty);
+
+  // 更新聊天框
+  rpc UpdateChatBox(ChatMessage) returns (google.protobuf.Empty);
+
+  // 客户端请求批准
+  rpc ApproveClientRequest(google.protobuf.StringValue) returns (Response);
+
+  // 更新用户列表
+  rpc UpdatePeerList(UserList) returns (google.protobuf.Empty);
+
+  // 来自同伴的请求
+  rpc RequestFromPeer(google.protobuf.StringValue) returns (Response);
+
+  // 获取用户名
+  rpc GetUsername(google.protobuf.Empty) returns (google.protobuf.StringValue);
+
+  // 重新绘制画布
+  rpc ReDraw(google.protobuf.Empty) returns (google.protobuf.Empty);
+
+  // 关闭窗口
+  rpc CloseWindow(google.protobuf.Empty) returns (google.protobuf.Empty);
+
+  // 客户端退出
+  rpc Exit(google.protobuf.Empty) returns (google.protobuf.Empty);
+
+  // 清除画布
+  rpc ClearCanvas(google.protobuf.Empty) returns (google.protobuf.Empty);
+
+  // 显示正在编辑的用户名
+  rpc ShowEditing(google.protobuf.StringValue) returns (google.protobuf.Empty);
 }
 

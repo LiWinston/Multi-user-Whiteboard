@@ -436,7 +436,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     }
 
     @Override
-    public void worningFromManager(String message) {
+    public void warningFromManager(String message) {
 
     }
 
