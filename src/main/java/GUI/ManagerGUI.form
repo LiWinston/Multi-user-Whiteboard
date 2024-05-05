@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="GUI.ManagerGUI">
+  <grid id="27dc6" binding="managerPanel" layout-manager="GridLayoutManager" row-count="5" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="0" right="0"/>
+    <constraints>
+      <xy x="20" y="20" width="1490" height="1100"/>
+    </constraints>
+    <properties>
+      <maximumSize width="1490" height="850"/>
+      <minimumSize width="1490" height="850"/>
+      <preferredSize width="1490" height="850"/>
+    </properties>
+    <border type="none"/>
+    <children>
+      <grid id="ac61e" binding="canvasPanel" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="10" left="10" bottom="10" right="10"/>
+        <constraints>
+          <grid row="2" column="0" row-span="2" col-span="1" vsize-policy="2" hsize-policy="0" anchor="2" fill="1" indent="0" use-parent-layout="false">
+            <minimum-size width="1130" height="700"/>
+            <preferred-size width="1130" height="700"/>
+            <maximum-size width="1130" height="700"/>
+          </grid>
+        </constraints>
+        <properties>
+          <background color="-1"/>
+        </properties>
+        <border type="etched" title="Canvas area" title-justification="2">
+          <font size="14"/>
+        </border>
+        <children/>
+      </grid>
+      <grid id="9b3c1" binding="chatPanel" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="10" left="10" bottom="10" right="10"/>
+        <constraints>
+          <grid row="0" column="1" row-span="3" col-span="1" vsize-policy="3" hsize-policy="0" anchor="6" fill="0" indent="0" use-parent-layout="false">
+            <minimum-size width="350" height="700"/>
+            <preferred-size width="350" height="700"/>
+            <maximum-size width="350" height="700"/>
+          </grid>
+        </constraints>
+        <properties>
+          <inheritsPopupMenu value="false"/>
+        </properties>
+        <border type="none">
+          <font/>
+        </border>
+        <children>
+          <scrollpane id="bd555" binding="usersSP">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                <minimum-size width="350" height="220"/>
+                <preferred-size width="350" height="220"/>
+                <maximum-size width="350" height="220"/>
+              </grid>
+            </constraints>
+            <properties/>
+            <border type="none" title="Users connecting" title-justification="2">
+              <font size="14"/>
+              <title-color color="-16777216"/>
+            </border>
+            <children>
+              <component id="3ac25" class="javax.swing.JTextArea" binding="userTA">
+                <constraints/>
+                <properties>
+                  <editable value="false"/>
+                  <margin top="10" left="10" bottom="10" right="10"/>
+                </properties>
+              </component>
+            </children>
+          </scrollpane>
+          <scrollpane id="8ec88" binding="ChatSP">
+            <constraints>
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                <minimum-size width="350" height="460"/>
+                <preferred-size width="350" height="460"/>
+              </grid>
+            </constraints>
+            <properties/>
+            <border type="none" title="Chat area" title-justification="2">
+              <font size="14"/>
+            </border>
+            <children>
+              <component id="db49b" class="javax.swing.JTextArea" binding="chatTA">
+                <constraints/>
+                <properties>
+                  <editable value="false"/>
+                  <maximumSize width="350" height="460"/>
+                  <minimumSize width="350" height="460"/>
+                  <preferredSize width="350" height="460"/>
+                </properties>
+              </component>
+            </children>
+          </scrollpane>
+        </children>
+      </grid>
+      <toolbar id="468ae" binding="settingBar">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false">
+            <minimum-size width="1130" height="30"/>
+            <preferred-size width="1130" height="30"/>
+            <maximum-size width="1130" height="30"/>
+          </grid>
+        </constraints>
+        <properties>
+          <background color="-1"/>
+          <enabled value="true"/>
+          <floatable value="false"/>
+          <margin top="5" left="5" bottom="5" right="5"/>
+        </properties>
+        <border type="line">
+          <font/>
+          <title-color color="-16777216"/>
+        </border>
+        <children>
+          <component id="a865a" class="javax.swing.JButton" binding="newFileButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="newFile"/>
+            </properties>
+          </component>
+          <component id="9f312" class="javax.swing.JButton" binding="openButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="open"/>
+            </properties>
+          </component>
+          <component id="4f4ec" class="javax.swing.JButton" binding="saveButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="save"/>
+            </properties>
+          </component>
+          <component id="a3e59" class="javax.swing.JButton" binding="saveAsButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="saveAs"/>
+            </properties>
+          </component>
+          <component id="57c16" class="javax.swing.JButton" binding="closeButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="close"/>
+            </properties>
+          </component>
+          <component id="a51a3" class="javax.swing.JLabel">
+            <constraints/>
+            <properties>
+              <text value="Host : "/>
+            </properties>
+          </component>
+          <component id="8d763" class="javax.swing.JLabel" binding="IpLabel">
+            <constraints/>
+            <properties>
+              <text value=""/>
+            </properties>
+          </component>
+          <component id="ad972" class="javax.swing.JLabel">
+            <constraints/>
+            <properties>
+              <text value="  Port : "/>
+            </properties>
+          </component>
+          <component id="f04a2" class="javax.swing.JLabel" binding="portLabel">
+            <constraints/>
+            <properties>
+              <text value=""/>
+            </properties>
+          </component>
+          <component id="b3188" class="javax.swing.JLabel">
+            <constraints/>
+            <properties>
+              <text value=" whiteboard name : "/>
+            </properties>
+          </component>
+          <component id="d17f0" class="javax.swing.JLabel" binding="nameLabel">
+            <constraints/>
+            <properties>
+              <text value=""/>
+            </properties>
+          </component>
+        </children>
+      </toolbar>
+      <toolbar id="79ed" binding="shapeColorBar">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false">
+            <minimum-size width="1130" height="70"/>
+            <preferred-size width="1130" height="70"/>
+            <maximum-size width="1130" height="70"/>
+          </grid>
+        </constraints>
+        <properties>
+          <background color="-1"/>
+          <floatable value="false"/>
+          <margin top="5" left="5" bottom="5" right="5"/>
+        </properties>
+        <border type="line"/>
+        <children>
+          <component id="7a7d2" class="javax.swing.JButton" binding="colorButton">
+            <constraints/>
+            <properties>
+              <maximumSize width="108" height="40"/>
+              <minimumSize width="108" height="40"/>
+              <preferredSize width="108" height="40"/>
+              <text value="choose Color"/>
+            </properties>
+          </component>
+          <component id="431bc" class="javax.swing.JLabel" binding="colorLabel">
+            <constraints/>
+            <properties>
+              <autoscrolls value="false"/>
+              <background color="-16777216"/>
+              <maximumSize width="40" height="40"/>
+              <minimumSize width="40" height="40"/>
+              <opaque value="true"/>
+              <preferredSize width="40" height="40"/>
+              <text value=""/>
+            </properties>
+          </component>
+          <component id="f1cd7" class="javax.swing.JButton" binding="penButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="pen"/>
+            </properties>
+          </component>
+          <component id="34175" class="javax.swing.JButton" binding="lineButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="line"/>
+            </properties>
+          </component>
+          <component id="d7689" class="javax.swing.JButton" binding="circleButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="circle"/>
+            </properties>
+          </component>
+          <component id="6f937" class="javax.swing.JButton" binding="ovalButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="oval"/>
+            </properties>
+          </component>
+          <component id="b5329" class="javax.swing.JButton" binding="rectButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="rect"/>
+            </properties>
+          </component>
+          <component id="77c6b" class="javax.swing.JButton" binding="earserButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="earser"/>
+            </properties>
+          </component>
+          <component id="a0b5f" class="javax.swing.JButton" binding="textButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="text"/>
+            </properties>
+          </component>
+          <component id="75cfc" class="javax.swing.JButton" binding="fillButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="Fill"/>
+            </properties>
+          </component>
+          <component id="edb69" class="javax.swing.JLabel">
+            <constraints/>
+            <properties>
+              <text value="Stroke"/>
+            </properties>
+          </component>
+          <component id="97643" class="javax.swing.JComboBox" binding="strokeCB">
+            <constraints/>
+            <properties>
+              <maximumSize width="78" height="30"/>
+              <minimumSize width="78" height="30"/>
+              <toolTipText value="stroke"/>
+            </properties>
+          </component>
+          <component id="7c17a" class="javax.swing.JButton" binding="kickButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="kick"/>
+            </properties>
+          </component>
+          <component id="fd4a4" class="javax.swing.JLabel" binding="editingJLabel">
+            <constraints/>
+            <properties>
+              <text value=""/>
+            </properties>
+          </component>
+        </children>
+      </toolbar>
+      <component id="f7f4d" class="javax.swing.JButton" binding="SendButton">
+        <constraints>
+          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Send"/>
+        </properties>
+      </component>
+      <component id="c126a" class="javax.swing.JTextField" binding="sendTextField">
+        <constraints>
+          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <minimum-size width="350" height="100"/>
+            <preferred-size width="350" height="100"/>
+            <maximum-size width="350" height="100"/>
+          </grid>
+        </constraints>
+        <properties/>
+      </component>
+    </children>
+  </grid>
+</form>

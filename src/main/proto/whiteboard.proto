@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package whiteboard;
+
+// 消息类型，用于绘制动作
+message DrawAction {
+  string user_id = 1;     // 用户标识
+  string shape_id = 2;    // 图形对象标识
+  Action action = 3;      // 绘制动作
+  Shape shape = 4;        // 图形数据
+}
+
+// 用户绘制的动作类型
+enum Action {
+  DRAW_START = 0;   // 开始绘制
+  DRAW_UPDATE = 1;  // 更新绘制
+  DRAW_END = 2;     // 结束绘制
+}
+
+// 图形数据
+message Shape {
+  string type = 1;         // 图形类型，例如“rectangle”, “circle”等
+  repeated int32 points = 2;  // 图形的坐标点，以连续的(x, y)对序列表示
+  string color = 3;        // 颜色
+  int32 stroke_width = 4;  // 笔触宽度
+}
+
+// 定义服务
+service WhiteboardService {
+  // 流式传输绘制动作
+  rpc StreamDrawAction (stream DrawAction) returns (stream DrawAction);
+}
+
