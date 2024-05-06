@@ -84,7 +84,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
         peerFrame.addWindowListener(this);
         peerFrame.pack();
         peerFrame.setVisible(true);
-
+        System.out.println("peerGUI is built.");
     }
 
     private void setFileButtons() {

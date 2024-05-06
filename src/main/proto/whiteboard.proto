@@ -8,9 +8,15 @@ import "google/protobuf/wrappers.proto"; // 引入包含StringValue的文件
 // 基本图形数据结构
 message _CanvasShape {
   string type = 1;
-  repeated int32 points = 2;  // 假设为简单的点数组，根据需求调整
+  repeated point points = 2;  // 假设为简单的点数组，根据需求调整
   string color = 3;
   int32 stroke_width = 4;
+}
+
+// 点
+message point {
+  int32 x = 1;
+  int32 y = 2;
 }
 
 // 用户列表和用户名
@@ -83,7 +89,7 @@ service WhiteBoardService {
   rpc ManagerClose(google.protobuf.Empty) returns (google.protobuf.Empty);
 }
 
-service ClientService {
+service WhiteBoardClientService {
   // 从管理员处接收警告信息
   rpc WarningFromManager(ChatMessage) returns (google.protobuf.Empty);
 

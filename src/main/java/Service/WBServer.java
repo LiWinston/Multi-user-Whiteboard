@@ -52,7 +52,8 @@ public class WBServer {
                         }
                     }).start();
 
-                    Thread.sleep(1000);
+
+                    logger.info("IP address set for sv: " + Ip);
                     ManagedChannel channel = ManagedChannelBuilder.forAddress(Ip, Integer.parseInt(port)).usePlaintext().build();
                     wb.registerManager(Ip, port, name, channel);
                     //public ManagerGUI(WhiteBoard whiteBoard, String IpAddress, String port, String WBName)
@@ -60,8 +61,6 @@ public class WBServer {
                     logger.info("Manager GUI is created, welcome manager.");
                 } catch (IOException e) {
                     logger.severe("IOException: Server failed to start");
-                } catch (InterruptedException e) {
-                    logger.severe("InterruptedException: Server failed to block until shutdown");
                 }
             }
         } else {
@@ -71,7 +70,7 @@ public class WBServer {
 
     public void start() throws IOException {
         server = ServerBuilder.forPort(Integer.parseInt(port)).addService(new WhiteBoardServiceImpl(wb, logger)).build().start();
-        logger.info("Server started, listening on " + port);
+        logger.info("grpc Server started, listening on " + port);
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
 

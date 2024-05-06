@@ -4,28 +4,41 @@ package WBSYS;
 import GUI.ManagerGUI;
 import GUI.PeerGUI;
 import GUI.IClient;
+import com.google.protobuf.Empty;
 import io.grpc.ManagedChannel;
-
+import io.grpc.stub.StreamObserver;
+import whiteboard.WhiteBoardClientServiceGrpc;
+import whiteboard.Whiteboard;
+import whiteboard.Whiteboard.UserList;
+import whiteboard.Whiteboard._CanvasShape;
+import whiteboard.Whiteboard.point;
+import whiteboard.Whiteboard.ChatMessage;
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class WhiteBoard{
-    private ArrayList<CanvasShape> canvasShapeArrayList = new ArrayList<CanvasShape>();
+    private ArrayList<CanvasShape> canvasShapeArrayList = new ArrayList<>();
     private ArrayList<IClient> clientArrayList = new ArrayList<>();
+    //这样就完全允许p2p操作了，真上线必须加鉴权
+    public ConcurrentHashMap<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> userAgents = new ConcurrentHashMap<>();
+
     private ArrayList<String> messageArrayList = new ArrayList<>();
 
+    public ArrayList<IClient> getClientArrayList() {
+        return clientArrayList;
+    }
 
     public synchronized void removePeer(String username){
-        int index = -1;
-        for (int i = 0; i < clientArrayList.size(); i++) {
-            if (clientArrayList.get(i).getUsername().equals(username)) {
-                index = i;
-            }
-        }
-        if (index >= 0 && clientArrayList.get(index).getUsername().equals(username)) {
-            IClient kickedClient = clientArrayList.get(index);
+        IClient kickedClient = clientArrayList.stream()
+                                      .filter(client -> client.getUsername().equals(username))
+                                      .findFirst()
+                                      .orElse(null);
+
+        if (kickedClient != null) {
             kickedClient.closeWindow();
-            clientArrayList.remove(index);
+            clientArrayList.remove(kickedClient);
+            userAgents.remove(username);
             this.SynchronizeMessage(parameters.managerMessage(kickedClient.getUsername() + " have been removed"));
             this.SynchronizeUser();
         } else {
@@ -35,25 +48,18 @@ public class WhiteBoard{
 
 
     public synchronized void peerExit(String username){
-        for (IClient iClient : clientArrayList) {
-            if (iClient.getUsername().equals(username)) {
-                clientArrayList.remove(iClient);
-                break;
-            }
-        }
-        this.SynchronizeMessage(parameters.managerMessage(username + " has exitd!\n"));
-        this.SynchronizeUser();
-    }
+    clientArrayList.removeIf(iClient -> iClient.getUsername().equals(username));
+    userAgents.remove(username);
+    this.SynchronizeMessage(parameters.managerMessage(username + " has exited!\n"));
+    this.SynchronizeUser();
+}
 
 
     public synchronized void newFile(){
         for (IClient iClient : clientArrayList) {
             iClient.clearCanvas();
         }
-        this.canvasShapeArrayList = new ArrayList<CanvasShape>();
-        for (CanvasShape canvasShape : this.canvasShapeArrayList) {
-            this.SynchronizeCanvas(canvasShape);
-        }
+        this.canvasShapeArrayList = new ArrayList<>();
     }
 
 
@@ -81,14 +87,16 @@ public class WhiteBoard{
     public synchronized void registerManager(String IpAddress, String port, String name, ManagedChannel channel){
         ManagerGUI managerGUI = new ManagerGUI(this, IpAddress, port, name, channel);
         clientArrayList.add(managerGUI);
+        userAgents.put(name, WhiteBoardClientServiceGrpc.newStub(channel));
         this.SynchronizeUser();
     }
 
 
-    public synchronized void registerPeer(String username){
+    public synchronized void registerPeer(String username, ManagedChannel channel){
         PeerGUI peerGUI = new PeerGUI(this, username);
         peerGUI.Build();
         clientArrayList.add(peerGUI);
+        userAgents.put(username, WhiteBoardClientServiceGrpc.newStub(channel));
         this.SynchronizeUser();
 
 
@@ -101,15 +109,6 @@ public class WhiteBoard{
 
     public synchronized void setCanvasShapeArrayList(ArrayList<CanvasShape> canvasShapeArrayList) {
         this.canvasShapeArrayList = canvasShapeArrayList;
-    }
-
-
-    public ArrayList<IClient> getClientArrayList(){
-        return clientArrayList;
-    }
-
-    public void setClientArrayList(ArrayList<IClient> clientArrayList) {
-        this.clientArrayList = clientArrayList;
     }
 
 
@@ -150,24 +149,30 @@ public class WhiteBoard{
         for (IClient client : clientArrayList) {
             peers.add(client.getUsername());
         }
+
+        UserList userList = UserList.newBuilder().addAllUsernames(peers).build();
+
         for (IClient client : clientArrayList) {
-            client.updatePeerList(peers);
+            userAgents.get(client.getUsername()).updatePeerList(userList, new StreamObserver<Empty>() {
+                @Override
+                public void onNext(Empty value) {
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                }
+
+                @Override
+                public void onCompleted() {
+                }
+            });
         }
 
     }
 
 
-    public synchronized boolean checkPeerName(String peerName){
-        for (IClient client : clientArrayList) {
-            if (peerName.equals(client.getUsername())) {
-                return false;
-            }
-        }
-        return true;
-    }
 
-
-    public synchronized boolean getApprove(String request){
+    public synchronized boolean getApproveFromUI(String request){
         for (IClient client : clientArrayList) {
             if ("Manager".equals(client.getUsername())) {
                 return client.requestFromPeer(request);

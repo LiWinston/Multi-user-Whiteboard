@@ -75,8 +75,8 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         this.blockingStub = WhiteBoardServiceGrpc.newBlockingStub(channel);
 
         this.portNumber = Integer.parseInt(port);
-        IpLabel.setText(IpAddress);
         nameLabel.setText(WBName);
+        IpLabel.setText(IpAddress);
         portLabel.setText(port);
         managerFrame = new JFrame();
         managerFrame.setBounds(150, 100, 1490, 800);
