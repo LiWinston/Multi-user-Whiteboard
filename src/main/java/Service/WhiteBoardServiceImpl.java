@@ -1,12 +1,17 @@
 package Service;
 
 import GUI.WhiteBoard;
+import WBSYS.CanvasShape;
 import io.grpc.stub.StreamObserver;
 import whiteboard.WhiteBoardServiceGrpc;
+import whiteboard.Whiteboard;
 import whiteboard.Whiteboard.ChatMessage;
 import whiteboard.Whiteboard.Response;
 import whiteboard.Whiteboard._CanvasShape;
 
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServiceImplBase {
@@ -54,11 +59,14 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
     }
 
     @Override
-    public synchronized void synchronizeCanvas(_CanvasShape request, StreamObserver<com.google.protobuf.Empty> responseObserver) {
+    public synchronized void synchronizeCanvas(_CanvasShape requestShape, StreamObserver<com.google.protobuf.Empty> responseObserver) {
         // 业务逻辑- 拆分出网络功能
-        logger.severe("Received shape: " + request.getType());
-
-        // 假设操作成功完成
+        logger.severe("Received shape: " + requestShape.getShapeString());
+        CanvasShape shape =
+                requestShape.getShapeString() == "text" ?
+                        new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())),protoPointsToArrayList(requestShape.getPointsList().stream().toList()), requestShape.getStrokeInt()) :
+                new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getX(0), requestShape.getX(1), requestShape.getX(2), requestShape.getX(3), requestShape.getStrokeInt());
+        wb.SynchronizeCanvas(shape);
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
         responseObserver.onCompleted();
     }
@@ -78,6 +86,12 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
 //        responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
 //        responseObserver.onCompleted();
 //    }
-
+private ArrayList<Point> protoPointsToArrayList(List<Whiteboard.point> list){
+        ArrayList<Point> points = new ArrayList<>();
+    for (Whiteboard.point point : list) {
+        points.add(new Point(point.getX(), point.getY()));
+    }
+        return points;
+    };
 
 }

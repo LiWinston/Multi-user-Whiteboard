@@ -1,6 +1,6 @@
 package GUI;
 
-import WBSYS.CanvasShape;
+import WBSYS.*;
 import io.grpc.ManagedChannel;
 
 import java.util.ArrayList;

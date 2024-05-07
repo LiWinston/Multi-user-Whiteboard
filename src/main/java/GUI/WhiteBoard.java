@@ -179,6 +179,7 @@ public class WhiteBoard implements IWhiteBoard {
         userList.add("Manager");
         setSelfUI(managerGUI);
         userAgents.put("Manager", WhiteBoardClientServiceGrpc.newStub(channel));
+
     }
 
 
@@ -263,7 +264,7 @@ public class WhiteBoard implements IWhiteBoard {
 
                     @Override
                     public void onError(Throwable t) {
-                        System.out.println("Show editing failed.");
+                        System.out.println("Show editing failed." + t.getMessage());
                     }
 
                     @Override
@@ -288,6 +289,7 @@ public class WhiteBoard implements IWhiteBoard {
 
     public synchronized void SynchronizeCanvas(CanvasShape canvasShape) {
         canvasShapeArrayList.add(canvasShape);
+        getSelfUI().updateShapes(canvasShape);
         for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
             WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
             if (stb != null) {
@@ -295,7 +297,7 @@ public class WhiteBoard implements IWhiteBoard {
                         setShapeString(canvasShape.getShapeString()).
                         setColor(String.valueOf(canvasShape.getColor().getRGB())).
                         addX(canvasShape.getX1()).addX(canvasShape.getX2()).addX(canvasShape.getY1()).addX(canvasShape.getY2()).
-                        setText(canvasShape.getText()).
+                        setText(canvasShape.getText()!=null ? canvasShape.getText() : "").
                         setFill(canvasShape.isFill()).
                         setUsername(canvasShape.getUsername()).
                         addAllPoints((ArrayList) canvasShape.getPoints().stream().toList()).
@@ -326,19 +328,34 @@ public class WhiteBoard implements IWhiteBoard {
 
     public synchronized void SynchronizeMessage(String chatMessage) {
         messageArrayList.add(chatMessage);
-        for (IClient client : clientUIList) {
-            client.updateChatBox(chatMessage);
+        for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
+            WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
+            if (stb != null) {
+                stb.updateChatBox(Whiteboard.ChatMessage.newBuilder().setMessage(chatMessage).build(), new StreamObserver<com.google.protobuf.Empty>() {
+                    @Override
+                    public void onNext(Empty empty) {
+                        System.out.println("chatMessage to peer success.");
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        System.out.println("chatMessage to peer failed.");
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                    }
+                });
+            } else {
+                System.out.println("Cannot get stub for " + ent.getKey());
+                System.out.println("UserAgents: " + userAgents);
+            }
         }
     }
 
 
     public synchronized boolean getApproveFromUI(String request) {
-        for (IClient client : clientUIList) {
-            if ("Manager".equals(client.getUsername())) {
-                return client.requestFromPeer(request);
-            }
-        }
-        return false;
+        return isManager && getSelfUI().requestFromPeer(request);
     }
 
 

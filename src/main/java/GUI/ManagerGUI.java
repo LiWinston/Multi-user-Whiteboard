@@ -349,7 +349,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     @Override
     public void mouseReleased(MouseEvent e) {
 
-        wb.SynchronizeEditing(null);
+        wb.SynchronizeEditing("");
 
         x2 = e.getX();
         y2 = e.getY();

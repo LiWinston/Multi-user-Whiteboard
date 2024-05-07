@@ -27,4 +27,13 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
         responseObserver.onCompleted();
     }
 
+    @Override
+    public void showEditing(com.google.protobuf.StringValue request,
+                            io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
+        logger.severe("Received show editing request: " + request.getValue());
+        wb.getSelfUI().showEditing(request.getValue());
+        responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
+        responseObserver.onCompleted();
+    }
+
 }

@@ -69,7 +69,10 @@ public class WBServer {
     }
 
     public void start() throws IOException {
-        server = ServerBuilder.forPort(Integer.parseInt(port)).addService(new WhiteBoardServiceImpl(wb, logger)).build().start();
+        server = ServerBuilder.forPort(Integer.parseInt(port)).
+                addService(new WhiteBoardServiceImpl(wb, logger)).
+                addService(new WhiteBoardClientImpl(wb, logger)).
+                build().start();
         logger.info("grpc Server started, listening on " + port);
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
