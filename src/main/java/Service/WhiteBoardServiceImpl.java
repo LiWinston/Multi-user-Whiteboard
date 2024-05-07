@@ -100,4 +100,10 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
 //        responseObserver.onCompleted();
 //    }
 
+    public void synchronizeEditing(whiteboard.Whiteboard.SynchronizeUserRequest request,
+                                   io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
+        logger.severe("Received synchronize editing request: " + request.getOperation() +" "+ request.getUsername());
+        wb.SynchronizeEditing(request.getOperation(), request.getUsername());
+        responseObserver.onCompleted();
+    }
 }

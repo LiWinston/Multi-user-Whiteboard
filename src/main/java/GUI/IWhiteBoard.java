@@ -21,7 +21,7 @@ public interface IWhiteBoard{
 
     ArrayList<CanvasShape> getCanvasShapeArrayList();
 
-    void SynchronizeEditing(String username);
+    void SynchronizeEditing(String operation, String username);
 
     void removePeer(String username);
 

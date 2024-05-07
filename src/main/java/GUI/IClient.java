@@ -27,6 +27,6 @@ public interface IClient{
 
     void clearCanvas();
 
-    void showEditing(String username);
+    void showEditing();
 
 }

@@ -343,7 +343,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     @Override
     public void mousePressed(MouseEvent e) {
 
-        wb.SynchronizeEditing(username);
+        wb.SynchronizeEditing("add", username);
 
         x1 = e.getX();
         y1 = e.getY();
@@ -355,7 +355,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     @Override
     public void mouseReleased(MouseEvent e) {
 
-        wb.SynchronizeEditing("");
+        wb.SynchronizeEditing("remove", username);
 
         x2 = e.getX();
         y2 = e.getY();
@@ -505,18 +505,24 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     }
 
     @Override
-    public void showEditing(String username) {
+    public void showEditing() {
         new Thread() {
             @Override
             public void run() {
-                if (username != null) {
-                    editingJLabel.setText(username + " is editing.");
-                } else {
-                    editingJLabel.setText(null);
+                StringBuilder stringBuilder = new StringBuilder();
+                for(String str : wb.getEditingUser()){
+                    stringBuilder.append(str).append(",");
                 }
+
+                if(stringBuilder.isEmpty()){
+                    stringBuilder.append("Nobody");
+                }else{
+                    stringBuilder.deleteCharAt(stringBuilder.length()-1);
+                }
+                stringBuilder.append(" is editing.");
+                editingJLabel.setText(stringBuilder.toString());
             }
         }.start();
-
     }
 
     @Override

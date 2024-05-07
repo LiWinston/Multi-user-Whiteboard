@@ -84,7 +84,7 @@ service WhiteBoardService {
   rpc GetClientArrayList(google.protobuf.Empty) returns (UserList);
 
   // 同步编辑状态
-  rpc SynchronizeEditing(google.protobuf.StringValue) returns (google.protobuf.Empty);
+  rpc SynchronizeEditing(SynchronizeUserRequest) returns (google.protobuf.Empty);
 
   // 删除用户
   rpc RemovePeer(google.protobuf.StringValue) returns (google.protobuf.Empty);
@@ -136,6 +136,7 @@ service WhiteBoardClientService {
   // 清除画布
   rpc ClearCanvas(google.protobuf.Empty) returns (google.protobuf.Empty);
 
+  rpc SynchronizeEditing(SynchronizeUserRequest) returns (google.protobuf.Empty);
   // 显示正在编辑的用户名
   rpc ShowEditing(google.protobuf.StringValue) returns (google.protobuf.Empty);
 }

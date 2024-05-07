@@ -3,8 +3,8 @@ package GUI;
 
 import WBSYS.CanvasShape;
 import WBSYS.parameters;
+import com.google.common.collect.ConcurrentHashMultiset;
 import com.google.protobuf.Empty;
-import com.google.protobuf.StringValue;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
 import whiteboard.WhiteBoardClientServiceGrpc;
@@ -20,15 +20,18 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WhiteBoard implements IWhiteBoard {
     //    private final ArrayList<IClient> clientUIList = new ArrayList<>();
     private final ArrayList<String> userList = new ArrayList<>();
-
+    private final ConcurrentHashMultiset<String> editingUser = ConcurrentHashMultiset.create();
     public ConcurrentHashMap<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> userAgents = new ConcurrentHashMap<>();
-
     boolean isManager = false;
     //仅管理员存吧还是
     private WhiteBoardServiceGrpc.WhiteBoardServiceStub managerStub;
     private IClient selfUI;
     private ArrayList<CanvasShape> canvasShapeArrayList = new ArrayList<>();
     private ArrayList<String> messageArrayList = new ArrayList<>();
+
+    public ConcurrentHashMultiset<String> getEditingUser() {
+        return editingUser;
+    }
 
     public IClient getSelfUI() {
         return selfUI;
@@ -262,9 +265,9 @@ public class WhiteBoard implements IWhiteBoard {
                         @Override
                         public void onNext(Whiteboard.Response response) {
                             if (response.getSuccess()) {
-                                System.out.println("Sync to peer success." + username);
+                                System.out.println("peer updatePeerList success." + username);
                             } else {
-                                System.out.println("Sync to peer failed." + username);
+                                System.out.println("peer updatePeerList failed." + response.getMessage());
                             }
                         }
 
@@ -287,12 +290,12 @@ public class WhiteBoard implements IWhiteBoard {
                     setUsername(username).build(), new StreamObserver<Whiteboard.UserList>() {
                 @Override
                 public void onNext(Whiteboard.UserList userList) {
-                    System.out.println("Sync to manager success.");
+                    System.out.println("Manager synchronizeUser success.");
                 }
 
                 @Override
                 public void onError(Throwable t) {
-                    System.out.println("Sync to manager failed.");
+                    System.out.println("Manager synchronizeUser failed." + t.getMessage());
                 }
 
                 @Override
@@ -312,34 +315,63 @@ public class WhiteBoard implements IWhiteBoard {
     }
 
 
-    public synchronized void SynchronizeEditing(String username) {
-        if (!isManager) {
-            getSelfUI().showEditing(username);
-            return;
+    public synchronized void SynchronizeEditing(String operation, String username) {
+        switch (operation) {
+            case "add":
+                if(editingUser.count(username) == 0)
+                    editingUser.add(username);
+                break;
+            case "remove":
+                editingUser.remove(username);
+                break;
         }
-        for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
-            WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
-            if (stb != null) {
-                stb.showEditing(StringValue.newBuilder().setValue(username).build(),
-                        new StreamObserver<Empty>() {
-                            @Override
-                            public void onNext(Empty empty) {
-                                System.out.println("Show editing success on" + stb);
-                                System.out.println("user Agents: " + userAgents);
-                            }
+        getSelfUI().showEditing();
+        //peer用户自身更改完毕后仅向manager同步
+        if (!isManager) {
+            managerStub.synchronizeEditing(Whiteboard.SynchronizeUserRequest.newBuilder().setOperation(operation).
+                    setUsername(username).build(), new StreamObserver<Empty>() {
+                @Override
+                public void onNext(Empty empty) {
+                    System.out.println("manager synchronizeEditing success.");
+                }
 
-                            @Override
-                            public void onError(Throwable t) {
-                                System.out.println("Show editing failed." + t.getMessage());
-                            }
+                @Override
+                public void onError(Throwable t) {
+                    System.out.println("manager synchronizeEditing failed." + t.getMessage());
+                }
 
-                            @Override
-                            public void onCompleted() {
-                            }
-                        });
-            } else {
-                System.out.println("Cannot get stub for " + ent.getKey());
-                System.out.println("UserAgents: " + userAgents);
+                @Override
+                public void onCompleted() {
+                }
+            });
+        }else{
+            //manager自身更改更改完毕后向所有peer同步 除了自身客户端
+            for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
+                if (ent.getKey().equals("Manager")) {
+                    continue;
+                }
+                WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
+                if (stb != null) {
+                    stb.synchronizeEditing(Whiteboard.SynchronizeUserRequest.newBuilder().setOperation(operation).
+                            setUsername(username).build(), new StreamObserver<Empty>() {
+                        @Override
+                        public void onNext(Empty empty) {
+                            System.out.println("peer synchronizeEditing success.");
+                        }
+
+                        @Override
+                        public void onError(Throwable t) {
+                            System.out.println("peer synchronizeEditing failed." + t.getMessage());
+                        }
+
+                        @Override
+                        public void onCompleted() {
+                        }
+                    });
+                } else {
+                    System.out.println("Cannot get stub for " + ent.getKey());
+                    System.out.println("UserAgents: " + userAgents);
+                }
             }
         }
     }
@@ -369,19 +401,19 @@ public class WhiteBoard implements IWhiteBoard {
                 build(), new StreamObserver<Empty>() {
             @Override
             public void onNext(Empty empty) {
-                System.out.println("Sync to manager success.");
+                System.out.println("manager synchronizeCanvas success.");
             }
 
             @Override
             public void onError(Throwable t) {
-                System.out.println("Sync to manager failed.");
+                System.out.println("manager synchronizeCanvas failed." + t.getMessage());
             }
 
             @Override
             public void onCompleted() {
             }
         });
-        if(isManager){
+        if (isManager) {
             for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
                 if (ent.getKey().equals("Manager")) {
                     continue;
@@ -400,12 +432,12 @@ public class WhiteBoard implements IWhiteBoard {
                             build(), new StreamObserver<Empty>() {
                         @Override
                         public void onNext(Empty empty) {
-                            System.out.println("Sync to peer success.");
+                            System.out.println("peer updateShapes success.");
                         }
 
                         @Override
                         public void onError(Throwable t) {
-                            System.out.println("Sync to peer failed.");
+                            System.out.println("peer updateShapes failed." + t.getMessage());
                         }
 
                         @Override
@@ -430,12 +462,12 @@ public class WhiteBoard implements IWhiteBoard {
                         new StreamObserver<Empty>() {
                             @Override
                             public void onNext(Empty empty) {
-                                System.out.println("chatMessage to peer success.");
+                                System.out.println("peer updateChatBox success.");
                             }
 
                             @Override
                             public void onError(Throwable t) {
-                                System.out.println("chatMessage to peer failed.");
+                                System.out.println("peer updateChatBox failed." + t.getMessage());
                             }
 
                             @Override
