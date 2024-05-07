@@ -164,10 +164,11 @@ public class WBClient {
                             // 进行另一个RPC调用
                             ServerStub.getApprove(GetApproveRequest, GetApproveResponseObserver);
                         } else {
-                            logger.info(response.getMessage() + "Please try again.");
+                            logger.info(response.getMessage() + ", Please try again.");
                             if (null != wb.getSelfUI()) {
                                 wb.getSelfUI().closeWindow();
                             };
+                            checkPeerNamelatch.countDown();
 //                            exit(0);
                         }
                     }
