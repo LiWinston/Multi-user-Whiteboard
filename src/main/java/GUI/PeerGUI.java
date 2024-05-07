@@ -1,16 +1,16 @@
 package GUI;
 
+import WBSYS.CanvasShape;
+import com.intellij.uiDesigner.core.GridConstraints;
+import com.intellij.uiDesigner.core.GridLayoutManager;
+
+import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
-import WBSYS.CanvasShape;
-
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import com.intellij.uiDesigner.core.GridConstraints;
-import com.intellij.uiDesigner.core.GridLayoutManager;
 
 import static WBSYS.parameters.chatMessageFormat;
 
@@ -66,7 +66,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
         peerFrame.addWindowListener(this);
         peerFrame.pack();
         peerFrame.setVisible(true);
-        System.out.println("peerGUI is built.");
+        System.out.println("peerGUI built. _______From PeerUI________");
     }
 
     private void setFileButtons() {

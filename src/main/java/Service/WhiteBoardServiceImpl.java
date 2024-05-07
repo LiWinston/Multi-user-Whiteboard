@@ -2,6 +2,8 @@ package Service;
 
 import GUI.WhiteBoard;
 import WBSYS.CanvasShape;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import whiteboard.WhiteBoardServiceGrpc;
 import whiteboard.Whiteboard;
@@ -44,6 +46,17 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
         } else {
             responseObserver.onNext(Response.newBuilder().setSuccess(false).setMessage("You have been rejected by manager").build());
         }
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void registerPeer(Whiteboard.IP_Port ip_port,
+                             io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver){
+        logger.severe("Received registerPeer request: " + ip_port.getIp() + " " + ip_port.getPort());
+        ManagedChannel channel = ManagedChannelBuilder.forAddress(ip_port.getIp(), Integer.parseInt(ip_port.getPort())).usePlaintext().build();
+        wb.registerPeer(ip_port.getUsername(), ip_port.getIp(), ip_port.getPort(), channel);
+        System.out.println("registerPeer generated channel" + channel);
+        responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
         responseObserver.onCompleted();
     }
 

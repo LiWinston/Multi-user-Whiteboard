@@ -15,7 +15,7 @@ public interface IWhiteBoard{
 
     boolean getApproveFromUI(String request);
 
-    void registerPeer(String username, ManagedChannel channel);
+    void registerPeer(String username, String IpAddress, String port, ManagedChannel channel);
 
     void registerManager(String IpAddress, String port, String name, ManagedChannel channel);
 

@@ -43,7 +43,11 @@ message SynchronizeUserRequest {
   string operation = 1;
   string username = 2;
 }
-
+message IP_Port {
+  string username = 1;
+  string ip = 2;
+  string port = 3;
+}
 
 // 请求或通知的通用响应
 message Response {
@@ -68,7 +72,7 @@ service WhiteBoardService {
   rpc GetApprove(google.protobuf.StringValue) returns (Response);
 
   // 注册用户
-  rpc RegisterPeer(google.protobuf.StringValue) returns (google.protobuf.Empty);
+  rpc RegisterPeer(IP_Port) returns (google.protobuf.Empty);
 
   // 注册管理员
   rpc RegisterManager(UserRegistration) returns (google.protobuf.Empty);

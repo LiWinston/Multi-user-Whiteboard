@@ -41,7 +41,7 @@ public class WhiteBoard implements IWhiteBoard {
         return managerStub;
     }
 
-    public void setManagerStub(WhiteBoardServiceGrpc.WhiteBoardServiceStub managerStub) {
+    public void setServerStub(WhiteBoardServiceGrpc.WhiteBoardServiceStub managerStub) {
         this.managerStub = managerStub;
     }
 
@@ -55,21 +55,22 @@ public class WhiteBoard implements IWhiteBoard {
         }
         if (kickedClient != null) {
             userList.remove(kickedClient);
-            userAgents.get(kickedClient).closeWindow(com.google.protobuf.Empty.newBuilder().build(), new StreamObserver<com.google.protobuf.Empty>() {
-                @Override
-                public void onNext(Empty empty) {
-                    System.out.println("Remove peer success.");
-                }
+            userAgents.get(kickedClient).closeWindow(com.google.protobuf.Empty.newBuilder().build(),
+                    new StreamObserver<com.google.protobuf.Empty>() {
+                        @Override
+                        public void onNext(Empty empty) {
+                            System.out.println("Remove peer success.");
+                        }
 
-                @Override
-                public void onError(Throwable t) {
-                    System.out.println("Remove peer failed.");
-                }
+                        @Override
+                        public void onError(Throwable t) {
+                            System.out.println("Remove peer failed.");
+                        }
 
-                @Override
-                public void onCompleted() {
-                }
-            });
+                        @Override
+                        public void onCompleted() {
+                        }
+                    });
             this.SynchronizeMessage(parameters.managerMessage(kickedClient + " have been removed"));
             this.SynchronizeUser("remove", username);
             userAgents.remove(username);
@@ -184,27 +185,54 @@ public class WhiteBoard implements IWhiteBoard {
     }
 
 
-    public synchronized void registerPeer(String username, ManagedChannel channel) {
-        PeerGUI peerGUI = new PeerGUI(this, username);
-        peerGUI.Build();
-        userList.add(username);
-        setSelfUI(peerGUI);
-//        userAgents.put(username, WhiteBoardClientServiceGrpc.newStub(channel));
-        managerStub.synchronizeUser(Whiteboard.SynchronizeUserRequest.newBuilder().setOperation("add").setUsername(username).build(), new StreamObserver<Whiteboard.UserList>() {
-            @Override
-            public void onNext(Whiteboard.UserList userList) {
-                System.out.println("Register peer success.");
-            }
+    //对管理员，调用从managerStub的实现发起，inputChannel是registerPeer调用中生成的
+    //对peer，直接调用,暂时没用到inputChannel
+    public synchronized void registerPeer(String username, String peerServiceIP, String peerServicePort, ManagedChannel inputChannel) {
+        if (isManager) {
+            //负责加入客户服务句柄 channel是用客户自己的ip port建立的
+            userAgents.put(username, WhiteBoardClientServiceGrpc.newStub(inputChannel));
+        } else {
+            PeerGUI peerGUI = new PeerGUI(this, username);
+            peerGUI.Build();
+            userList.add(username);
+            setSelfUI(peerGUI);
+            System.out.println(managerStub + "  **  " + managerStub.getChannel().toString());
+            managerStub.registerPeer(Whiteboard.IP_Port.newBuilder().setUsername(username).
+                            setIp(peerServiceIP).setPort(peerServicePort).setUsername(username).build(),
+                    new StreamObserver<com.google.protobuf.Empty>() {
+                        @Override
+                        public void onNext(Empty empty) {
+                            System.out.println("Register peer success.");
+                        }
 
-            @Override
-            public void onError(Throwable t) {
-                System.out.println("Register peer failed.");
-            }
+                        @Override
+                        public void onError(Throwable t) {
+                            System.out.println("Register peer failed.");
+                        }
 
-            @Override
-            public void onCompleted() {
-            }
-        });
+                        @Override
+                        public void onCompleted() {
+                        }
+                    });
+
+            //已经包含wb.addUser(request.getUsername());
+            managerStub.synchronizeUser(Whiteboard.SynchronizeUserRequest.newBuilder().setOperation("add").
+                    setUsername(username).build(), new StreamObserver<Whiteboard.UserList>() {
+                @Override
+                public void onNext(Whiteboard.UserList userList) {
+                    System.out.println("Register peer success.");
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                    System.out.println("Register peer failed.");
+                }
+
+                @Override
+                public void onCompleted() {
+                }
+            });
+        }
     }
 
     public synchronized void SynchronizeUser(String operation, String username) {
@@ -254,24 +282,30 @@ public class WhiteBoard implements IWhiteBoard {
 
 
     public synchronized void SynchronizeEditing(String username) {
+        if (!isManager) {
+            getSelfUI().showEditing(username);
+            return;
+        }
         for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
             WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
             if (stb != null) {
-                stb.showEditing(com.google.protobuf.StringValue.newBuilder().setValue(username).build(), new StreamObserver<com.google.protobuf.Empty>() {
-                    @Override
-                    public void onNext(Empty empty) {
-                        System.out.println("Show editing success.");
-                    }
+                stb.showEditing(com.google.protobuf.StringValue.newBuilder().setValue(username).build(),
+                        new StreamObserver<com.google.protobuf.Empty>() {
+                            @Override
+                            public void onNext(Empty empty) {
+                                System.out.println("Show editing success on" + stb);
+                                System.out.println("user Agents: " + userAgents);
+                            }
 
-                    @Override
-                    public void onError(Throwable t) {
-                        System.out.println("Show editing failed." + t.getMessage());
-                    }
+                            @Override
+                            public void onError(Throwable t) {
+                                System.out.println("Show editing failed." + t.getMessage());
+                            }
 
-                    @Override
-                    public void onCompleted() {
-                    }
-                });
+                            @Override
+                            public void onCompleted() {
+                            }
+                        });
             } else {
                 System.out.println("Cannot get stub for " + ent.getKey());
                 System.out.println("UserAgents: " + userAgents);
@@ -332,21 +366,22 @@ public class WhiteBoard implements IWhiteBoard {
         for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
             WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
             if (stb != null) {
-                stb.updateChatBox(Whiteboard.ChatMessage.newBuilder().setMessage(chatMessage).build(), new StreamObserver<com.google.protobuf.Empty>() {
-                    @Override
-                    public void onNext(Empty empty) {
-                        System.out.println("chatMessage to peer success.");
-                    }
+                stb.updateChatBox(Whiteboard.ChatMessage.newBuilder().setMessage(chatMessage).build(),
+                        new StreamObserver<com.google.protobuf.Empty>() {
+                            @Override
+                            public void onNext(Empty empty) {
+                                System.out.println("chatMessage to peer success.");
+                            }
 
-                    @Override
-                    public void onError(Throwable t) {
-                        System.out.println("chatMessage to peer failed.");
-                    }
+                            @Override
+                            public void onError(Throwable t) {
+                                System.out.println("chatMessage to peer failed.");
+                            }
 
-                    @Override
-                    public void onCompleted() {
-                    }
-                });
+                            @Override
+                            public void onCompleted() {
+                            }
+                        });
             } else {
                 System.out.println("Cannot get stub for " + ent.getKey());
                 System.out.println("UserAgents: " + userAgents);
