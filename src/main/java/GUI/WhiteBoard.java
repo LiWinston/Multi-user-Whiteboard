@@ -47,7 +47,7 @@ public class WhiteBoard implements IWhiteBoard {
     }
 
 
-    //管理员only
+    //only manager, thus no need for specific type check
     public synchronized void removePeer(String username) {
         String kickedClient = userList.stream().filter(client -> client.equals(username)).findFirst().orElse(null);
 
@@ -83,12 +83,14 @@ public class WhiteBoard implements IWhiteBoard {
 
     public synchronized void peerExit(String username) {
         userList.removeIf(s -> s.equals(username));
-        userAgents.remove(username);
+//        userAgents.remove(username); 没用 本地改这个没意义
+        this.SynchronizeUser("remove", username);
         this.SynchronizeMessage(parameters.managerMessage(username + " has exited!\n"));
 //        managerStub.synchronizeUser("remove", username);
     }
 
 
+    //only manager, thus no need for specific type check
     public synchronized void newFile() {
         for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
             WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
@@ -116,7 +118,7 @@ public class WhiteBoard implements IWhiteBoard {
         this.canvasShapeArrayList = new ArrayList<>();
     }
 
-
+    //only manager, thus no need for specific type check
     public synchronized void openFile(ArrayList<CanvasShape> newShapes) {
         for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
             WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
@@ -147,7 +149,7 @@ public class WhiteBoard implements IWhiteBoard {
         }
     }
 
-
+    //only manager, thus no need for specific type check
     public void managerClose() {
         for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
             WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
@@ -174,7 +176,7 @@ public class WhiteBoard implements IWhiteBoard {
         }
     }
 
-
+    //only manager, thus no need for specific type check
     public synchronized void registerManager(String IpAddress, String port, String name, ManagedChannel channel) {
         ManagerGUI managerGUI = null;
         isManager = true;
@@ -281,7 +283,22 @@ public class WhiteBoard implements IWhiteBoard {
                 }
             }
         } else {
-//            managerStub.synchronizeUser(
+            managerStub.synchronizeUser(Whiteboard.SynchronizeUserRequest.newBuilder().setOperation(operation).
+                    setUsername(username).build(), new StreamObserver<Whiteboard.UserList>() {
+                @Override
+                public void onNext(Whiteboard.UserList userList) {
+                    System.out.println("Sync to manager success.");
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                    System.out.println("Sync to manager failed.");
+                }
+
+                @Override
+                public void onCompleted() {
+                }
+            });
         }
     }
 
@@ -415,5 +432,6 @@ public class WhiteBoard implements IWhiteBoard {
 
     public void removeUser(String username) {
         userList.remove(username);
+        userAgents.remove(username);
     }
 }
