@@ -94,7 +94,7 @@ public class WBClient {
                 System.out.println("optionally add <board name> to end of args");
                 System.out.println("valid port range : 1024-65535");
             } else {
-                CountDownLatch checkPeerNamelatch = new CountDownLatch(1);
+                CountDownLatch clientDownLatch = new CountDownLatch(1);
                 destPort = args[1];
                 String name = (args.length == 4) ? args[3] : DEFAULT_WHITEBOARD_NAME;
                 String destIpAddress = args[0];
@@ -149,6 +149,7 @@ public class WBClient {
                                         System.out.println("Peer GUI successfully created. ______From WBClient____");
                                     } else {
                                         System.out.println(response.getMessage());
+                                        clientDownLatch.countDown();
                                     }
 
                                 }
@@ -168,7 +169,7 @@ public class WBClient {
                             if (null != wb.getSelfUI()) {
                                 wb.getSelfUI().closeWindow();
                             };
-                            checkPeerNamelatch.countDown();
+                            clientDownLatch.countDown();
 //                            exit(0);
                         }
                     }
@@ -185,7 +186,7 @@ public class WBClient {
                             logger.severe("RPC statusRuntimeException: " + throwable.getCause().getMessage());
                         }
                         System.out.println("Cannot connect to whiteboard, please use valid Ip, port and name");
-                        checkPeerNamelatch.countDown();
+                        clientDownLatch.countDown();
 //                        exit(-100);
                     }
 
@@ -196,7 +197,7 @@ public class WBClient {
                 };
                 try{
                     ServerStub.withDeadlineAfter(5, TimeUnit.SECONDS).checkPeerName(checkPeerNameRequest, checkPeerNameResponseObserver);
-                    checkPeerNamelatch.await();
+                    clientDownLatch.await();
 //                    client.channel.awaitTermination(10, TimeUnit.SECONDS);
 
                 } catch (Exception e) {
