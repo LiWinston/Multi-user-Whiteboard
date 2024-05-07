@@ -29,8 +29,13 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
     @Override
     public void checkPeerName(com.google.protobuf.StringValue request, StreamObserver<Response> responseObserver) {
         logger.severe("Received checkPeerName request: " + request.getValue());
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         if (wb.userAgents.containsKey(request.getValue())) {
-            responseObserver.onNext(Response.newBuilder().setSuccess(false).build());
+            responseObserver.onNext(Response.newBuilder().setSuccess(false).setMessage("Username Already exists").build());
         } else {
             responseObserver.onNext(Response.newBuilder().setSuccess(true).build());
         }

@@ -2,11 +2,9 @@ package Service;
 
 import GUI.WhiteBoard;
 import com.google.protobuf.StringValue;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import io.grpc.Server;
-import io.grpc.ServerBuilder;
+import io.grpc.*;
 import io.grpc.stub.StreamObserver;
+import org.slf4j.LoggerFactory;
 import whiteboard.WhiteBoardServiceGrpc;
 import whiteboard.Whiteboard.Response;
 
@@ -18,10 +16,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import static WBSYS.parameters.isValidPort;
+import static java.lang.System.exit;
 
 public class WBClient {
     private static final String DEFAULT_WHITEBOARD_NAME = "unnamed whiteboard";
     private static final Logger logger = Logger.getLogger(WBClient.class.getName());
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(WBClient.class);
     private static String destPort;
     private static String selfIp;
     private static int selfPort;
@@ -160,14 +160,27 @@ public class WBClient {
                             // 进行另一个RPC调用
                             ServerStub.getApprove(GetApproveRequest, GetApproveResponseObserver);
                         } else {
-                            logger.info("Existing username, try again.");
+                            logger.info(response.getMessage() + "Please try again.");
+                            if (null != wb.getSelfUI()) {
+                                wb.getSelfUI().closeWindow();
+                            };
+//                            exit(0);
                         }
                     }
 
                     @Override
                     public void onError(Throwable throwable) {
-                        System.out.println("Cannot connect to whiteboard, " +
-                                "please use valid Ip, port and name");
+                        if (throwable instanceof StatusRuntimeException statusRuntimeException) {
+                            // 检查具体的状态码
+                            if (statusRuntimeException.getStatus().getCode() == Status.Code.DEADLINE_EXCEEDED) {
+                                logger.severe("Timeout, please check your network connection.");
+                            }
+                        } else {
+                            // 可以处理其他类型的错误
+                            logger.severe("RPC statusRuntimeException: " + throwable.getCause().getMessage());
+                        }
+                        System.out.println("Cannot connect to whiteboard, please use valid Ip, port and name");
+                        exit(-100);
                     }
 
                     @Override
@@ -176,11 +189,11 @@ public class WBClient {
                     }
                 };
                 try{
-                    ServerStub.checkPeerName(checkPeerNameRequest, checkPeerNameResponseObserver);
-                    client.channel.awaitTermination(10L, TimeUnit.SECONDS);
+                    ServerStub.withDeadlineAfter(5, TimeUnit.SECONDS).checkPeerName(checkPeerNameRequest, checkPeerNameResponseObserver);
+//                    client.channel.awaitTermination(10, TimeUnit.SECONDS);
+                    client.channel.
                 } catch (Exception e) {
-                    System.out.println("Cannot connect to whiteboard, " +
-                            "please use valid Ip, port and name");
+                    System.out.println("Connection failed, please check your args or network connection.");
                 }
             }
         } else {
