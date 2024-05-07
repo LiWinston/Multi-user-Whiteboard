@@ -12,6 +12,7 @@ import whiteboard.Whiteboard;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -297,7 +298,7 @@ public class WhiteBoard implements IWhiteBoard {
                         setShapeString(canvasShape.getShapeString()).
                         setColor(String.valueOf(canvasShape.getColor().getRGB())).
                         addX(canvasShape.getX1()).addX(canvasShape.getX2()).addX(canvasShape.getY1()).addX(canvasShape.getY2()).
-                        setText(canvasShape.getText()!=null ? canvasShape.getText() : "").
+                        setText(!Objects.equals(canvasShape.getText(), "") ? canvasShape.getText() : "Nobody").
                         setFill(canvasShape.isFill()).
                         setUsername(canvasShape.getUsername()).
                         addAllPoints((ArrayList) canvasShape.getPoints().stream().toList()).
