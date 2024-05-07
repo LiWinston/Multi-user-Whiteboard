@@ -4,6 +4,7 @@ package GUI;
 import WBSYS.CanvasShape;
 import WBSYS.parameters;
 import com.google.protobuf.Empty;
+import com.google.protobuf.StringValue;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
 import whiteboard.WhiteBoardClientServiceGrpc;
@@ -55,8 +56,8 @@ public class WhiteBoard implements IWhiteBoard {
         }
         if (kickedClient != null) {
             userList.remove(kickedClient);
-            userAgents.get(kickedClient).closeWindow(com.google.protobuf.Empty.newBuilder().build(),
-                    new StreamObserver<com.google.protobuf.Empty>() {
+            userAgents.get(kickedClient).closeWindow(Empty.newBuilder().build(),
+                    new StreamObserver<Empty>() {
                         @Override
                         public void onNext(Empty empty) {
                             System.out.println("Remove peer success.");
@@ -92,7 +93,7 @@ public class WhiteBoard implements IWhiteBoard {
         for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
             WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
             if (stb != null) {
-                stb.clearCanvas(com.google.protobuf.Empty.newBuilder().build(), new StreamObserver<com.google.protobuf.Empty>() {
+                stb.clearCanvas(Empty.newBuilder().build(), new StreamObserver<Empty>() {
                     @Override
                     public void onNext(Empty empty) {
                         System.out.println("Clear canvas success.");
@@ -120,7 +121,7 @@ public class WhiteBoard implements IWhiteBoard {
         for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
             WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
             if (stb != null) {
-                stb.clearCanvas(com.google.protobuf.Empty.newBuilder().build(), new StreamObserver<com.google.protobuf.Empty>() {
+                stb.clearCanvas(Empty.newBuilder().build(), new StreamObserver<Empty>() {
                     @Override
                     public void onNext(Empty empty) {
                         System.out.println("Clear canvas success.");
@@ -151,7 +152,7 @@ public class WhiteBoard implements IWhiteBoard {
         for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
             WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
             if (stb != null) {
-                stb.closeWindow(com.google.protobuf.Empty.newBuilder().build(), new StreamObserver<com.google.protobuf.Empty>() {
+                stb.closeWindow(Empty.newBuilder().build(), new StreamObserver<Empty>() {
                     @Override
                     public void onNext(Empty empty) {
                         System.out.println("Manager close success.");
@@ -197,24 +198,36 @@ public class WhiteBoard implements IWhiteBoard {
             userList.add(username);
             setSelfUI(peerGUI);
             System.out.println(managerStub + "  **  " + managerStub.getChannel().toString());
-            managerStub.registerPeer(Whiteboard.IP_Port.newBuilder().setUsername(username).
-                            setIp(peerServiceIP).setPort(peerServicePort).setUsername(username).build(),
-                    new StreamObserver<com.google.protobuf.Empty>() {
-                        @Override
-                        public void onNext(Empty empty) {
-                            System.out.println("Register peer success.");
-                        }
+            Whiteboard.IP_Port ipp = null;
+            try {
+                ipp = Whiteboard.IP_Port.newBuilder()
+                        .setUsername(username)
+                        .setIp(peerServiceIP)
+                        .setPort(peerServicePort)
+                        .build();
+                System.out.println("C side registerPeer : grpc call beginning");
+            } catch (Exception e) {
+                System.out.println("Error creating IP_Port object:");
+                e.printStackTrace();
+            }
 
-                        @Override
-                        public void onError(Throwable t) {
-                            System.out.println("Register peer failed.");
-                        }
 
-                        @Override
-                        public void onCompleted() {
-                        }
-                    });
+            managerStub.registerPeer(ipp, new StreamObserver<>() {
+                @Override
+                public void onNext(Empty empty) {
+                    System.out.println("C side registerPeer : grpc call success.");
+                }
 
+                @Override
+                public void onError(Throwable t) {
+                    System.out.println("C side registerPeer : grpc call failed." + t.getMessage());
+                }
+
+                @Override
+                public void onCompleted() {
+                    System.out.println("C side registerPeer : grpc call 1 registerPeer completed");
+                }
+            });
             //已经包含wb.addUser(request.getUsername());
             managerStub.synchronizeUser(Whiteboard.SynchronizeUserRequest.newBuilder().setOperation("add").
                     setUsername(username).build(), new StreamObserver<Whiteboard.UserList>() {
@@ -230,6 +243,7 @@ public class WhiteBoard implements IWhiteBoard {
 
                 @Override
                 public void onCompleted() {
+                    System.out.println("C side registerPeer : grpc call 2 synchronizeUser completed");
                 }
             });
         }
@@ -289,8 +303,8 @@ public class WhiteBoard implements IWhiteBoard {
         for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
             WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
             if (stb != null) {
-                stb.showEditing(com.google.protobuf.StringValue.newBuilder().setValue(username).build(),
-                        new StreamObserver<com.google.protobuf.Empty>() {
+                stb.showEditing(StringValue.newBuilder().setValue(username).build(),
+                        new StreamObserver<Empty>() {
                             @Override
                             public void onNext(Empty empty) {
                                 System.out.println("Show editing success on" + stb);
@@ -337,7 +351,7 @@ public class WhiteBoard implements IWhiteBoard {
                         setUsername(canvasShape.getUsername()).
                         addAllPoints((ArrayList) canvasShape.getPoints().stream().toList()).
                         setStrokeInt(canvasShape.getStrokeInt()).
-                        build(), new StreamObserver<com.google.protobuf.Empty>() {
+                        build(), new StreamObserver<Empty>() {
                     @Override
                     public void onNext(Empty empty) {
                         System.out.println("Sync to peer success.");
@@ -367,7 +381,7 @@ public class WhiteBoard implements IWhiteBoard {
             WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
             if (stb != null) {
                 stb.updateChatBox(Whiteboard.ChatMessage.newBuilder().setMessage(chatMessage).build(),
-                        new StreamObserver<com.google.protobuf.Empty>() {
+                        new StreamObserver<Empty>() {
                             @Override
                             public void onNext(Empty empty) {
                                 System.out.println("chatMessage to peer success.");

@@ -1,8 +1,5 @@
 package GUI;
 
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.LineBorder;
-import javax.swing.border.TitledBorder;
 import WBSYS.CanvasShape;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
@@ -10,6 +7,9 @@ import io.grpc.ManagedChannel;
 import whiteboard.WhiteBoardServiceGrpc;
 
 import javax.swing.*;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -530,6 +530,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     @Override
     public void windowClosed(WindowEvent e) {
         managerFrame.setVisible(false);
+        wb.managerClose();
     }
 
     @Override

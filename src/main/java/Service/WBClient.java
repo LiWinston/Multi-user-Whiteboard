@@ -13,6 +13,7 @@ import whiteboard.Whiteboard.Response;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -28,6 +29,7 @@ public class WBClient {
     Server clientServer;
     private final ManagedChannel channel;
     private WhiteBoardServiceGrpc.WhiteBoardServiceStub stub;
+
 
     public WBClient(WhiteBoard wb, String destHost,int destPort) {
         this.wb = wb;
@@ -116,14 +118,21 @@ public class WBClient {
                                 public void onNext(Response response) {
                                     if (response.getSuccess()) {
                                         System.out.println(response.getMessage());
+                                        CountDownLatch latch = new CountDownLatch(1);
                                         new Thread(() -> {
                                             try {
                                                 client.start();
+                                                latch.countDown();
                                                 client.blockUntilShutdown();
                                             } catch (Exception e) {
                                                 e.printStackTrace();
                                             }
                                         }).start();
+                                        try {
+                                            latch.await();
+                                        } catch (InterruptedException e) {
+                                            throw new RuntimeException(e);
+                                        }
                                         if (ServerStub == null) {
                                             logger.info("Cannot get constructed stub, please check.");
                                             return;
@@ -132,21 +141,7 @@ public class WBClient {
                                             wb.setServerStub(ServerStub);
                                         }
                                         wb.registerPeer(username, selfIp, String.valueOf(selfPort), null);
-//                                        ServerStub.registerPeer(Whiteboard.IP_Port.newBuilder().setUsername(username).setIp(selfIp).setPort(String.valueOf(selfPort)).setUsername(username).build(), new StreamObserver<com.google.protobuf.Empty>() {
-//                                            @Override
-//                                            public void onNext(Empty empty) {
-//                                                System.out.println("Register peer success.");
-//                                            }
 //
-//                                            @Override
-//                                            public void onError(Throwable t) {
-//                                                System.out.println("Register peer failed.");
-//                                            }
-//
-//                                            @Override
-//                                            public void onCompleted() {
-//                                            }
-//                                        });
                                         System.out.println("Peer GUI successfully created. ______From WBClient____");
                                     } else {
                                         System.out.println(response.getMessage());
@@ -177,7 +172,7 @@ public class WBClient {
 
                     @Override
                     public void onCompleted() {
-                        System.out.println("completed");
+
                     }
                 };
                 try{

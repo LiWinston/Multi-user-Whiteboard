@@ -377,13 +377,10 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
 
     @Override
     public void closeWindow() {
-        new Thread() {
-            @Override
-            public void run() {
-                JOptionPane.showMessageDialog(peerFrame, "Window is closing, you have been kicked out by Manager.");
-                peerFrame.setVisible(false);
-            }
-        }.start();
+        Thread.ofVirtual().start((() -> {
+            JOptionPane.showMessageDialog(peerFrame, "Window is closing.");
+            peerFrame.setVisible(false);
+        }));
     }
 
     @Override

@@ -36,4 +36,11 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
         responseObserver.onCompleted();
     }
 
+    @Override
+    public void closeWindow(com.google.protobuf.Empty request,
+                            io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
+        logger.severe("Received close window request");
+        wb.getSelfUI().closeWindow();
+    }
+
 }
