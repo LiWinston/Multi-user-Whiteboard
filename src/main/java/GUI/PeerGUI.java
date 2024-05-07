@@ -10,6 +10,7 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import static WBSYS.parameters.chatMessageFormat;
@@ -33,7 +34,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
     private JLabel IpLabel;
     private JLabel portLabel;
     private JButton kickButton;
-    private ArrayList<Point> pointArrayList;
+    private ArrayList<Point2D> pointArrayList;
     private Graphics2D canvasGraphics;
     private boolean isFill = false;
 
@@ -182,10 +183,15 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
             canvasGraphics.setFont(new Font("Times New Roman", Font.PLAIN, size * 2 + 10));
             canvasGraphics.drawString(canvasShape.getText(), x1, y1);
         } else if (shapeType.equals("pen") || shapeType.equals("eraser")) {
-            ArrayList<Point> points = canvasShape.getPoints();
+            ArrayList<Point2D> points = canvasShape.getPoints();
             canvasGraphics.setStroke(stroke);
             for (int i = 1; i < points.size(); i++) {
-                canvasGraphics.drawLine(points.get(i - 1).x, points.get(i - 1).y, points.get(i).x, points.get(i).y);
+                int x3 = (int) points.get(i - 1).getX();
+                int y3 = (int) points.get(i - 1).getY();
+                int x4 = (int) points.get(i).getX();
+                int y4 = (int) points.get(i).getY();
+                canvasGraphics.setPaint(shapeColor);
+                canvasGraphics.drawLine(x3, y3, x4, y4);
             }
         }
 
@@ -228,7 +234,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
         x1 = e.getX();
         y1 = e.getY();
         if (shapeDrawing.equals("pen") || shapeDrawing.equals("eraser")) {
-            pointArrayList = new ArrayList<Point>();
+            pointArrayList = new ArrayList<>();
         }
     }
 
@@ -249,7 +255,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
             if (shapeDrawing.equals("eraser")) {
                 tempColor = Color.white;
             }
-            canvasShape = new CanvasShape(shapeDrawing, tempColor, pointArrayList, strokeInShape);
+            canvasShape = new CanvasShape(shapeDrawing, tempColor, username,pointArrayList, strokeInShape);
         } else if (shapeDrawing.equals("text")) {
             canvasShape = new CanvasShape(shapeDrawing, color, x1, x2, y1, y2, strokeInShape);
             String texts = JOptionPane.showInputDialog(peerFrame, "input your text", "text", JOptionPane.PLAIN_MESSAGE, null, null, null).toString();
@@ -284,8 +290,8 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
         Stroke tempStroke = new BasicStroke(Integer.parseInt(strokeCB.getSelectedItem().toString()));
         if (shapeDrawing.equals("pen") || shapeDrawing.equals("eraser")) {
             if (!pointArrayList.isEmpty()) {
-                x4 = pointArrayList.get(pointArrayList.size() - 1).x;
-                y4 = pointArrayList.get(pointArrayList.size() - 1).y;
+                x4 = (int) pointArrayList.get(pointArrayList.size() - 1).getX();
+                y4 = (int) pointArrayList.get(pointArrayList.size() - 1).getY();
             }
             Color tempColor = color;
             if (shapeDrawing.equals("eraser")) {

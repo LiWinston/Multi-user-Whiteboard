@@ -1,18 +1,19 @@
 package WBSYS;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.io.Serializable;
 import java.util.ArrayList;
 
 public class CanvasShape implements Serializable {
-    private String shapeString;
-    private Color color;
-    private int x1, x2, y1, y2;
-    private String text;
-    private boolean fill;
-    private String username;
-    private ArrayList<Point> points;
-    private int strokeInt;
+    private String shapeString = "";
+    private Color color = Color.BLACK;
+    private int x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+    private String text = "";
+    private boolean fill = false;
+    private String username = "";
+    private ArrayList<Point2D> points;
+    private int strokeInt = 1;
 
 
     public CanvasShape(String shapeString, Color color, int x1, int x2, int y1, int y2, int strokeInt) {
@@ -25,9 +26,23 @@ public class CanvasShape implements Serializable {
         this.strokeInt = strokeInt;
     }
 
-    public CanvasShape(String shapeString, Color color, ArrayList<Point> points, int strokeInt) {
+    public CanvasShape(String shapeString, Color color, int x1, int x2, int y1, int y2, boolean fill, String username, int strokeInt) {
         this.shapeString = shapeString;
         this.color = color;
+        this.x1 = x1;
+        this.x2 = x2;
+        this.y1 = y1;
+        this.y2 = y2;
+        this.fill = fill;
+        this.username = username;
+        this.strokeInt = strokeInt;
+    }
+
+
+    public CanvasShape(String shapeString, Color color, String username, ArrayList<Point2D> points, int strokeInt) {
+        this.shapeString = shapeString;
+        this.color = color;
+        this.username = username;
         this.points = points;
         this.strokeInt = strokeInt;
     }
@@ -104,11 +119,11 @@ public class CanvasShape implements Serializable {
         this.username = username;
     }
 
-    public ArrayList<Point> getPoints() {
+    public ArrayList<Point2D> getPoints() {
         return points;
     }
 
-    public void setPoints(ArrayList<Point> points) {
+    public void setPoints(ArrayList<Point2D> points) {
         this.points = points;
     }
 

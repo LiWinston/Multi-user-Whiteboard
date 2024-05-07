@@ -12,9 +12,9 @@ import whiteboard.Whiteboard.Response;
 import whiteboard.Whiteboard._CanvasShape;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
+
+import static Service.Utils.protoPointsToArrayList;
 
 public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServiceImplBase {
     public WhiteBoard wb;
@@ -77,7 +77,7 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
         logger.severe("Received shape: " + requestShape.getShapeString());
         CanvasShape shape =
                 requestShape.getShapeString() == "text" ?
-                        new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())),protoPointsToArrayList(requestShape.getPointsList().stream().toList()), requestShape.getStrokeInt()) :
+                        new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())),requestShape.getUsername(),protoPointsToArrayList(requestShape.getPointsList().stream().toList()), requestShape.getStrokeInt()) :
                 new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getX(0), requestShape.getX(1), requestShape.getX(2), requestShape.getX(3), requestShape.getStrokeInt());
         wb.SynchronizeCanvas(shape);
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
@@ -99,12 +99,5 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
 //        responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
 //        responseObserver.onCompleted();
 //    }
-private ArrayList<Point> protoPointsToArrayList(List<Whiteboard.point> list){
-        ArrayList<Point> points = new ArrayList<>();
-    for (Whiteboard.point point : list) {
-        points.add(new Point(point.getX(), point.getY()));
-    }
-        return points;
-    };
 
 }

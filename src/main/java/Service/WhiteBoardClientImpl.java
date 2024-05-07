@@ -2,10 +2,14 @@ package Service;
 
 import GUI.IWhiteBoard;
 import GUI.WhiteBoard;
+import WBSYS.CanvasShape;
 import whiteboard.WhiteBoardClientServiceGrpc;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.logging.Logger;
+
+import static Service.Utils.protoPointsToArrayList;
 
 public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoardClientServiceImplBase {
     public IWhiteBoard wb;
@@ -42,5 +46,17 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
         logger.severe("Received close window request");
         wb.getSelfUI().closeWindow();
     }
+
+    @Override
+    public void updateShapes(whiteboard.Whiteboard._CanvasShape requestShape,
+                             io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
+        logger.info("Received update shape request: " + requestShape.getShapeString());
+        CanvasShape shape =
+                requestShape.getShapeString() == "text" ?
+                        new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())),requestShape.getUsername(),protoPointsToArrayList(requestShape.getPointsList().stream().toList()), requestShape.getStrokeInt()) :
+                        new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getX(0), requestShape.getX(1), requestShape.getX(2), requestShape.getX(3), requestShape.getStrokeInt());
+        wb.SynchronizeCanvas(shape);
+    }
+
 
 }

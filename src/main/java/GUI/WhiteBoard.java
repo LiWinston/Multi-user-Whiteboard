@@ -12,8 +12,8 @@ import whiteboard.WhiteBoardServiceGrpc;
 import whiteboard.Whiteboard;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -356,39 +356,68 @@ public class WhiteBoard implements IWhiteBoard {
     public synchronized void SynchronizeCanvas(CanvasShape canvasShape) {
         canvasShapeArrayList.add(canvasShape);
         getSelfUI().updateShapes(canvasShape);
-        for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
-            WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
-            if (stb != null) {
-                stb.updateShapes(Whiteboard._CanvasShape.newBuilder().
-                        setShapeString(canvasShape.getShapeString()).
-                        setColor(String.valueOf(canvasShape.getColor().getRGB())).
-                        addX(canvasShape.getX1()).addX(canvasShape.getX2()).addX(canvasShape.getY1()).addX(canvasShape.getY2()).
-                        setText(!Objects.equals(canvasShape.getText(), "") ? canvasShape.getText() : "Nobody").
-                        setFill(canvasShape.isFill()).
-                        setUsername(canvasShape.getUsername()).
-                        addAllPoints((ArrayList) canvasShape.getPoints().stream().toList()).
-                        setStrokeInt(canvasShape.getStrokeInt()).
-                        build(), new StreamObserver<Empty>() {
-                    @Override
-                    public void onNext(Empty empty) {
-                        System.out.println("Sync to peer success.");
-                    }
+        List<Whiteboard.point> protoPoints = canvasShape.getPoints().stream().map(point -> Whiteboard.point.newBuilder().setX(point.getX()).setY(point.getY()).build()).toList();
+        managerStub.synchronizeCanvas(Whiteboard._CanvasShape.newBuilder().
+                setShapeString(canvasShape.getShapeString()).
+                setColor(String.valueOf(canvasShape.getColor().getRGB())).
+                addX(canvasShape.getX1()).addX(canvasShape.getX2()).addX(canvasShape.getY1()).addX(canvasShape.getY2()).
+                setText(canvasShape.getText() == null ? "" : canvasShape.getText()).
+                setFill(canvasShape.isFill()).
+                setUsername(canvasShape.getUsername()).
+                addAllPoints(protoPoints).
+                setStrokeInt(canvasShape.getStrokeInt()).
+                build(), new StreamObserver<Empty>() {
+            @Override
+            public void onNext(Empty empty) {
+                System.out.println("Sync to manager success.");
+            }
 
-                    @Override
-                    public void onError(Throwable t) {
-                        System.out.println("Sync to peer failed.");
-                    }
+            @Override
+            public void onError(Throwable t) {
+                System.out.println("Sync to manager failed.");
+            }
 
-                    @Override
-                    public void onCompleted() {
-                    }
-                });
-            } else {
-                System.out.println("Cannot get stub for " + ent.getKey());
-                System.out.println("UserAgents: " + userAgents);
+            @Override
+            public void onCompleted() {
+            }
+        });
+        if(isManager){
+            for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
+                if (ent.getKey().equals("Manager")) {
+                    continue;
+                }
+                WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
+                if (stb != null) {
+                    stb.updateShapes(Whiteboard._CanvasShape.newBuilder().
+                            setShapeString(canvasShape.getShapeString()).
+                            setColor(String.valueOf(canvasShape.getColor().getRGB())).
+                            addX(canvasShape.getX1()).addX(canvasShape.getX2()).addX(canvasShape.getY1()).addX(canvasShape.getY2()).
+                            setText(canvasShape.getText() == null ? "" : canvasShape.getText()).
+                            setFill(canvasShape.isFill()).
+                            setUsername(canvasShape.getUsername()).
+                            addAllPoints((ArrayList) canvasShape.getPoints().stream().toList()).
+                            setStrokeInt(canvasShape.getStrokeInt()).
+                            build(), new StreamObserver<Empty>() {
+                        @Override
+                        public void onNext(Empty empty) {
+                            System.out.println("Sync to peer success.");
+                        }
+
+                        @Override
+                        public void onError(Throwable t) {
+                            System.out.println("Sync to peer failed.");
+                        }
+
+                        @Override
+                        public void onCompleted() {
+                        }
+                    });
+                } else {
+                    System.out.println("Cannot get stub for " + ent.getKey());
+                    System.out.println("UserAgents: " + userAgents);
+                }
             }
         }
-
     }
 
 
