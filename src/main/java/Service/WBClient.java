@@ -16,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import static WBSYS.parameters.isValidPort;
-import static java.lang.System.exit;
 
 public class WBClient {
     private static final String DEFAULT_WHITEBOARD_NAME = "unnamed whiteboard";
@@ -34,6 +33,9 @@ public class WBClient {
     public WBClient(WhiteBoard wb, String destHost,int destPort) {
         this.wb = wb;
         channel = ManagedChannelBuilder.forAddress(destHost, destPort)
+                .keepAliveTime(1, TimeUnit.MINUTES)  // 每分钟发送一次心跳
+                .keepAliveTimeout(10, TimeUnit.SECONDS)  // 如果10秒内没有响应，认为连接失败
+                .keepAliveWithoutCalls(true)  // 即使没有调用也发送心跳
                 .usePlaintext()
                 .build();
         stub = WhiteBoardServiceGrpc.newStub(channel);
@@ -92,10 +94,12 @@ public class WBClient {
                 System.out.println("optionally add <board name> to end of args");
                 System.out.println("valid port range : 1024-65535");
             } else {
+                CountDownLatch checkPeerNamelatch = new CountDownLatch(1);
                 destPort = args[1];
                 String name = (args.length == 4) ? args[3] : DEFAULT_WHITEBOARD_NAME;
                 String destIpAddress = args[0];
                 String username = args[2];
+
 
 
                 WhiteBoard wb = new WhiteBoard();
@@ -180,7 +184,8 @@ public class WBClient {
                             logger.severe("RPC statusRuntimeException: " + throwable.getCause().getMessage());
                         }
                         System.out.println("Cannot connect to whiteboard, please use valid Ip, port and name");
-                        exit(-100);
+                        checkPeerNamelatch.countDown();
+//                        exit(-100);
                     }
 
                     @Override
@@ -190,8 +195,9 @@ public class WBClient {
                 };
                 try{
                     ServerStub.withDeadlineAfter(5, TimeUnit.SECONDS).checkPeerName(checkPeerNameRequest, checkPeerNameResponseObserver);
+                    checkPeerNamelatch.await();
 //                    client.channel.awaitTermination(10, TimeUnit.SECONDS);
-                    client.channel.
+
                 } catch (Exception e) {
                     System.out.println("Connection failed, please check your args or network connection.");
                 }
