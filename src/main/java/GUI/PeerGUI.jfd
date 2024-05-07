@@ -1,0 +1,215 @@
+JFDML JFormDesigner: "8.2.3.0.386" Java: "17.0.10" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+			"$columnCount": 1
+			"$rowCount": 1
+		} ) {
+			name: "panel1"
+			auxiliary() {
+				"JavaCodeGenerator.variableLocal": true
+			}
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+				"$columnCount": 2
+				"$rowCount": 5
+			} ) {
+				name: "peerPanel"
+				"maximumSize": new java.awt.Dimension( 1490, 850 )
+				"minimumSize": new java.awt.Dimension( 1490, 850 )
+				"preferredSize": new java.awt.Dimension( 1490, 850 )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+					"$columnCount": 1
+					"$rowCount": 1
+					"margin": new java.awt.Insets( 10, 10, 10, 10 )
+				} ) {
+					name: "canvasPanel"
+					"background": new java.awt.Color( 255, 255, 255, 255 )
+					"border": new javax.swing.border.TitledBorder( new javax.swing.border.EtchedBorder( 1, null, null ), "Canvas area", 2, 0, new com.jformdesigner.model.SwingDerivedFont( null, 0, 14, true ), null )
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"row": 2
+					"rowSpan": 2
+					"anchor": 2
+					"fill": 1
+					"hSizePolicy": 0
+					"vSizePolicy": 2
+					"minimumSize": new java.awt.Dimension( 1130, 700 )
+					"preferredSize": new java.awt.Dimension( 1130, 700 )
+					"maximumSize": new java.awt.Dimension( 1130, 700 )
+				} )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+					"$columnCount": 1
+					"$rowCount": 2
+					"margin": new java.awt.Insets( 10, 10, 10, 10 )
+				} ) {
+					name: "chatPanel"
+					"inheritsPopupMenu": false
+					add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+						name: "usersSP"
+						"border": new javax.swing.border.TitledBorder( null, "Users connecting", 2, 0, new com.jformdesigner.model.SwingDerivedFont( null, 0, 14, true ), new java.awt.Color( 0, 0, 0, 255 ) )
+						add( new FormComponent( "javax.swing.JTextArea" ) {
+							name: "userTA"
+							"editable": false
+							"margin": new java.awt.Insets( 10, 10, 10, 10 )
+						} )
+					}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+						"fill": 3
+						"hSizePolicy": 7
+						"vSizePolicy": 7
+						"minimumSize": new java.awt.Dimension( 350, 220 )
+						"preferredSize": new java.awt.Dimension( 350, 220 )
+						"maximumSize": new java.awt.Dimension( 350, 220 )
+					} )
+					add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+						name: "ChatSP"
+						"border": new javax.swing.border.TitledBorder( null, "Chat area", 2, 0, new com.jformdesigner.model.SwingDerivedFont( null, 0, 14, true ), null )
+						add( new FormComponent( "javax.swing.JTextArea" ) {
+							name: "chatTA"
+							"editable": false
+							"maximumSize": new java.awt.Dimension( 350, 460 )
+							"minimumSize": new java.awt.Dimension( 350, 460 )
+							"preferredSize": new java.awt.Dimension( 350, 460 )
+						} )
+					}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+						"row": 1
+						"fill": 3
+						"hSizePolicy": 7
+						"vSizePolicy": 7
+						"minimumSize": new java.awt.Dimension( 350, 460 )
+						"preferredSize": new java.awt.Dimension( 350, 460 )
+					} )
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 1
+					"rowSpan": 3
+					"anchor": 6
+					"hSizePolicy": 0
+					"minimumSize": new java.awt.Dimension( 350, 700 )
+					"preferredSize": new java.awt.Dimension( 350, 700 )
+					"maximumSize": new java.awt.Dimension( 350, 700 )
+				} )
+				add( new FormContainer( "javax.swing.JToolBar", new FormLayoutManager( class javax.swing.JToolBar ) ) {
+					name: "settingBar"
+					"background": new java.awt.Color( 255, 255, 255, 255 )
+					"enabled": true
+					"floatable": false
+					"margin": new java.awt.Insets( 5, 5, 5, 5 )
+					"border": new javax.swing.border.TitledBorder( &LineBorder0 new javax.swing.border.LineBorder( sfield java.awt.Color black, 1, false ), "" )
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"fill": 1
+					"hSizePolicy": 0
+					"vSizePolicy": 0
+					"minimumSize": new java.awt.Dimension( 1130, 30 )
+					"preferredSize": new java.awt.Dimension( 1130, 30 )
+					"maximumSize": new java.awt.Dimension( 1130, 30 )
+				} )
+				add( new FormContainer( "javax.swing.JToolBar", new FormLayoutManager( class javax.swing.JToolBar ) ) {
+					name: "shapeColorBar"
+					"background": new java.awt.Color( 255, 255, 255, 255 )
+					"floatable": false
+					"margin": new java.awt.Insets( 5, 5, 5, 5 )
+					"border": new javax.swing.border.TitledBorder( #LineBorder0, "" )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "colorButton"
+						"maximumSize": new java.awt.Dimension( 108, 40 )
+						"minimumSize": new java.awt.Dimension( 108, 40 )
+						"preferredSize": new java.awt.Dimension( 108, 40 )
+						"text": "choose Color"
+					} )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "colorLabel"
+						"autoscrolls": false
+						"background": new java.awt.Color( 0, 0, 0, 255 )
+						"maximumSize": new java.awt.Dimension( 40, 40 )
+						"minimumSize": new java.awt.Dimension( 40, 40 )
+						"opaque": true
+						"preferredSize": new java.awt.Dimension( 40, 40 )
+						"text": ""
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "penButton"
+						"text": "pen"
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "lineButton"
+						"text": "line"
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "circleButton"
+						"text": "circle"
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "ovalButton"
+						"text": "oval"
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "rectButton"
+						"text": "rect"
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "earserButton"
+						"text": "earser"
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "textButton"
+						"text": "text"
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "fillButton"
+						"text": "Fill"
+					} )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "label1"
+						"text": "Stroke"
+						auxiliary() {
+							"JavaCodeGenerator.variableLocal": true
+						}
+					} )
+					add( new FormComponent( "javax.swing.JComboBox" ) {
+						name: "strokeCB"
+						"maximumSize": new java.awt.Dimension( 78, 30 )
+						"minimumSize": new java.awt.Dimension( 78, 30 )
+						"toolTipText": "stroke"
+					} )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "editingJLabel"
+						"text": ""
+					} )
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"row": 1
+					"fill": 1
+					"hSizePolicy": 0
+					"vSizePolicy": 0
+					"minimumSize": new java.awt.Dimension( 1130, 70 )
+					"preferredSize": new java.awt.Dimension( 1130, 70 )
+					"maximumSize": new java.awt.Dimension( 1130, 70 )
+				} )
+				add( new FormComponent( "javax.swing.JButton" ) {
+					name: "SendButton"
+					"text": "Send"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 1
+					"row": 4
+					"fill": 1
+					"vSizePolicy": 0
+				} )
+				add( new FormComponent( "javax.swing.JTextField" ) {
+					name: "sendTextField"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 1
+					"row": 3
+					"anchor": 8
+					"fill": 1
+					"hSizePolicy": 6
+					"vSizePolicy": 0
+					"minimumSize": new java.awt.Dimension( 350, 100 )
+					"preferredSize": new java.awt.Dimension( 350, 100 )
+					"maximumSize": new java.awt.Dimension( 350, 100 )
+				} )
+			}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 1494, 854 )
+		} )
+	}
+}
