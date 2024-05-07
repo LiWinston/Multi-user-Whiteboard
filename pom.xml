@@ -16,6 +16,12 @@
 
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>3.5.3</version>
+            <type>maven-plugin</type>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/com.intellij/forms_rt -->
         <dependency>
             <groupId>com.intellij</groupId>
@@ -93,7 +99,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.3.0</version> <!-- 确保版本一致 -->
+                <version>3.5.3</version> <!-- 确保版本一致 -->
                 <executions>
                     <!-- 执行配置生成 WBServer.jar -->
                     <execution>
