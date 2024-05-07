@@ -5,7 +5,7 @@ import io.grpc.stub.StreamObserver;
 import whiteboard.Whiteboard.*;
 import whiteboard.WhiteBoardServiceGrpc;
 import whiteboard.Whiteboard._CanvasShape;
-
+import whiteboard.Whiteboard.UserList;
 import whiteboard.Whiteboard.ChatMessage;
 
 import java.util.logging.Logger;

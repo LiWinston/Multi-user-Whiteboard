@@ -56,8 +56,8 @@ public class WBClient {
                 }else {
                     logger.info("Successfully get stub, channel is connected." + client.channel.toString());
                 }
-                com.google.protobuf.StringValue request = StringValue.newBuilder().setValue(username).build();
-                StreamObserver<Response> responseObserver = new StreamObserver<Response>() {
+                com.google.protobuf.StringValue checkPeerNameRequest = StringValue.newBuilder().setValue(username).build();
+                StreamObserver<Response> checkPeerNameResponseObserver = new StreamObserver<Response>() {
                     @Override
                     public void onNext(Response response) {
                         if (response.getSuccess()) {
@@ -84,6 +84,7 @@ public class WBClient {
                                 }
                                 @Override
                                 public void onCompleted() {
+
                                 }
                             };
 
@@ -106,7 +107,7 @@ public class WBClient {
                     }
                 };
                 try{
-                    stub.checkPeerName(request, responseObserver);
+                    stub.checkPeerName(checkPeerNameRequest, checkPeerNameResponseObserver);
                     client.channel.awaitTermination(10L, TimeUnit.SECONDS);
                 } catch (Exception e) {
                     System.out.println("Cannot connect to whiteboard, " +
@@ -119,9 +120,4 @@ public class WBClient {
         }
     }
 
-//    private void blockUntilShutdown() throws InterruptedException {
-//        if (channel != null) {
-//            channel.awaitTermination(50L, TimeUnit. SECONDS);
-//        }
-//    }
 }

@@ -66,7 +66,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     private boolean isFill = false;
 
     public ManagerGUI(WhiteBoard whiteBoard, String IpAddress, String port, String WBName, ManagedChannel channel) {
-
+        initComponents();
         this.wb = whiteBoard;
         username = "Manager";
         this.WBName = WBName;
@@ -102,6 +102,8 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         managerFrame.pack();
         managerFrame.setVisible(true);
     }
+
+
 
 
     private void setFileButtons() {

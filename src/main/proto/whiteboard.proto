@@ -103,7 +103,7 @@ service WhiteBoardClientService {
   rpc ApproveClientRequest(google.protobuf.StringValue) returns (Response);
 
   // 更新用户列表
-  rpc UpdatePeerList(UserList) returns (google.protobuf.Empty);
+  rpc UpdatePeerList(UserList) returns (Response);
 
   // 来自同伴的请求
   rpc RequestFromPeer(google.protobuf.StringValue) returns (Response);
