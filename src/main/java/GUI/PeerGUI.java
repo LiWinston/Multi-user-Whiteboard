@@ -4,7 +4,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import WBSYS.CanvasShape;
-import WBSYS.WhiteBoard;
 
 import javax.swing.*;
 import java.awt.*;

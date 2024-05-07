@@ -4,12 +4,10 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import WBSYS.CanvasShape;
-import WBSYS.WhiteBoard;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import io.grpc.ManagedChannel;
 import whiteboard.WhiteBoardServiceGrpc;
-import whiteboard.Whiteboard._CanvasShape;
 
 import javax.swing.*;
 import java.awt.*;

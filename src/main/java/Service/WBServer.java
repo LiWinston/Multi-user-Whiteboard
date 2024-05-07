@@ -1,6 +1,6 @@
 package Service;
 
-import WBSYS.WhiteBoard;
+import GUI.WhiteBoard;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
@@ -32,7 +32,7 @@ public class WBServer {
                 System.out.println("valid port range : 1024-65535");
             } else {
                 port = args[1];
-                String name = (args.length == 4) ? args[2] : DEFAULT_WHITEBOARD_NAME;
+                String name = (args.length == 3) ? args[2] : DEFAULT_WHITEBOARD_NAME;
                 String IpAddress = args[0];
 
 

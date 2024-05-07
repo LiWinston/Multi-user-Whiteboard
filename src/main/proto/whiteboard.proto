@@ -7,10 +7,14 @@ import "google/protobuf/wrappers.proto"; // 引入包含StringValue的文件
 
 // 基本图形数据结构
 message _CanvasShape {
-  string type = 1;
-  repeated point points = 2;  // 假设为简单的点数组，根据需求调整
-  string color = 3;
-  int32 stroke_width = 4;
+  string shapeString = 1;
+  string color = 2;
+  repeated int32 x = 3;//x1, x2, y1, y2
+  string text = 4;
+  bool fill = 5;
+  string username = 6;
+  repeated point points = 7;
+  int32 strokeInt = 8;
 }
 
 // 点
@@ -35,6 +39,11 @@ message UserRegistration {
   string port = 2;
   string username = 3;
 }
+message SynchronizeUserRequest {
+  string operation = 1;
+  string username = 2;
+}
+
 
 // 请求或通知的通用响应
 message Response {
@@ -50,7 +59,7 @@ service WhiteBoardService {
   rpc SynchronizeMessage(ChatMessage) returns (google.protobuf.Empty);
 
   // 同步用户信息
-  rpc SynchronizeUser(google.protobuf.Empty) returns (UserList);
+  rpc SynchronizeUser(SynchronizeUserRequest) returns (UserList);
 
   // 检查用户名
   rpc CheckPeerName(google.protobuf.StringValue) returns (Response);

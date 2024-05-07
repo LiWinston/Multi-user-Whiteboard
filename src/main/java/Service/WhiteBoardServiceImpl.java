@@ -1,12 +1,11 @@
 package Service;
 
-import WBSYS.WhiteBoard;
+import GUI.WhiteBoard;
 import io.grpc.stub.StreamObserver;
-import whiteboard.Whiteboard.*;
 import whiteboard.WhiteBoardServiceGrpc;
-import whiteboard.Whiteboard._CanvasShape;
-import whiteboard.Whiteboard.UserList;
 import whiteboard.Whiteboard.ChatMessage;
+import whiteboard.Whiteboard.Response;
+import whiteboard.Whiteboard._CanvasShape;
 
 import java.util.logging.Logger;
 
@@ -41,6 +40,17 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
             responseObserver.onNext(Response.newBuilder().setSuccess(false).setMessage("You have been rejected by manager").build());
         }
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public void synchronizeUser(whiteboard.Whiteboard.SynchronizeUserRequest request,
+                                io.grpc.stub.StreamObserver<whiteboard.Whiteboard.UserList> responseObserver) {
+        logger.severe("Received synchronizeUser request: " + request.getOperation() + " " + request.getUsername());
+        if (request.getOperation().equals("add")) {
+            wb.addUser(request.getUsername());
+        } else if (request.getOperation().equals("remove")) {
+            wb.removeUser(request.getUsername());
+        }
     }
 
     @Override

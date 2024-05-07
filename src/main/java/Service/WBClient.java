@@ -1,16 +1,13 @@
 package Service;
 
-import WBSYS.WhiteBoard;
+import GUI.WhiteBoard;
 import com.google.protobuf.StringValue;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.grpc.Server;
 import io.grpc.stub.StreamObserver;
-import whiteboard.WhiteBoardClientServiceGrpc;
 import whiteboard.WhiteBoardServiceGrpc;
 import whiteboard.Whiteboard.Response;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
