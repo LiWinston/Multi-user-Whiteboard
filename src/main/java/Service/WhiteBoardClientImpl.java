@@ -67,4 +67,12 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
         responseObserver.onCompleted();
     }
+
+    @Override
+    public void updateChatBox(whiteboard.Whiteboard.ChatMessage request,
+                              io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
+        logger.severe("Received chat message: " + request.getMessage());
+        wb.getMessageArrayList().add(request.getMessage());
+        wb.getSelfUI().updateChatBox(request.getMessage());
+    }
 }

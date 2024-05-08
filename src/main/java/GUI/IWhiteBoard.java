@@ -1,15 +1,16 @@
 package GUI;
 
-import WBSYS.*;
+import WBSYS.CanvasShape;
 import io.grpc.ManagedChannel;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public interface IWhiteBoard{
     IClient getSelfUI();
     void SynchronizeCanvas(CanvasShape canvasShape);
 
-    void SynchronizeMessage(String chatMessage);
+    void pushMessage(String chatMessage);
 
     void SynchronizeUser(String operation, String username);
 
@@ -36,4 +37,8 @@ public interface IWhiteBoard{
     void broadCastEditing(String operation, String username);
 
     void updEditing(String operation, String username);
+
+    void broadCastChatMessage(String message);
+
+    <E> List<E> getMessageArrayList();
 }

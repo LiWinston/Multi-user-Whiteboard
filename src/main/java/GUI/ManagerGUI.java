@@ -209,7 +209,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 String message = sendTextField.getText();
                 if (message != null) {
 
-                    wb.SynchronizeMessage(chatMessageFormat(username, message));
+                    wb.pushMessage(chatMessageFormat(username, message));
                     sendTextField.setText(null);
 
                 } else {

@@ -76,7 +76,7 @@ public class WhiteBoard implements IWhiteBoard {
                         public void onCompleted() {
                         }
                     });
-            this.SynchronizeMessage(parameters.managerMessage(kickedClient + " have been removed"));
+            this.pushMessage(parameters.managerMessage(kickedClient + " have been removed"));
             this.SynchronizeUser("remove", username);
             userAgents.remove(username);
         } else {
@@ -89,7 +89,7 @@ public class WhiteBoard implements IWhiteBoard {
         userList.removeIf(s -> s.equals(username));
 //        userAgents.remove(username); 没用 本地改这个没意义
         this.SynchronizeUser("remove", username);
-        this.SynchronizeMessage(parameters.managerMessage(username + " has exited!\n"));
+        this.pushMessage(parameters.managerMessage(username + " has exited!\n"));
 //        managerStub.synchronizeUser("remove", username);
     }
 
@@ -335,11 +335,12 @@ public class WhiteBoard implements IWhiteBoard {
             }
         });
     }
+
     public void updEditing(String operation, String username) {
 
         switch (operation) {
             case "add":
-                if(editingUser.count(username) == 0)
+                if (editingUser.count(username) == 0)
                     editingUser.add(username);
                 break;
             case "remove":
@@ -348,6 +349,7 @@ public class WhiteBoard implements IWhiteBoard {
         }
         getSelfUI().showEditing();
     }
+
 
     public void broadCastEditing(String operation, String username) {
         System.out.println(userAgents);
@@ -463,27 +465,47 @@ public class WhiteBoard implements IWhiteBoard {
     }
 
 
-    public synchronized void SynchronizeMessage(String chatMessage) {
-        messageArrayList.add(chatMessage);
+    public synchronized void pushMessage(String chatMessage) {
+        managerStub.pushMessage(Whiteboard.ChatMessage.newBuilder().setMessage(chatMessage).build(), new StreamObserver<Empty>() {
+            @Override
+            public void onNext(Empty empty) {
+                System.out.println("manager pushMessage success.");
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                System.out.println("manager pushMessage failed." + t.getMessage());
+            }
+
+            @Override
+            public void onCompleted() {
+            }
+        });
+    }
+
+    public void broadCastChatMessage(String message) {
         for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
             WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
             if (stb != null) {
-                stb.updateChatBox(Whiteboard.ChatMessage.newBuilder().setMessage(chatMessage).build(),
-                        new StreamObserver<Empty>() {
-                            @Override
-                            public void onNext(Empty empty) {
-                                System.out.println("peer updateChatBox success.");
-                            }
+                Context.current().fork().run(() -> {
+                            stb.updateChatBox(Whiteboard.ChatMessage.newBuilder().setMessage(message).build(), new StreamObserver<Empty>() {
+                                @Override
+                                public void onNext(Empty empty) {
+                                    System.out.println("peer updateChatBox success.");
+                                }
 
-                            @Override
-                            public void onError(Throwable t) {
-                                System.out.println("peer updateChatBox failed." + t.getMessage());
-                            }
+                                @Override
+                                public void onError(Throwable t) {
+                                    System.out.println("peer updateChatBox failed." + t.getMessage());
+                                }
 
-                            @Override
-                            public void onCompleted() {
-                            }
-                        });
+                                @Override
+                                public void onCompleted() {
+                                }
+                            });
+                        }
+                );
+
             } else {
                 System.out.println("Cannot get stub for " + ent.getKey());
                 System.out.println("UserAgents: " + userAgents);

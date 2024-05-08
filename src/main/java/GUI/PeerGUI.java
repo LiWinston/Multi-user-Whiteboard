@@ -107,7 +107,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
                 String message = sendTextField.getText();
                 if (message != null) {
 
-                    wb.SynchronizeMessage(chatMessageFormat(username, message));
+                    wb.pushMessage(chatMessageFormat(username, message));
                     sendTextField.setText(null);
 
                 } else {

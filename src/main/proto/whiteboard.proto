@@ -60,7 +60,7 @@ service WhiteBoardService {
   rpc SynchronizeCanvas(_CanvasShape) returns (google.protobuf.Empty);
 
   // 同步消息
-  rpc SynchronizeMessage(ChatMessage) returns (google.protobuf.Empty);
+  rpc pushMessage(ChatMessage) returns (google.protobuf.Empty);
 
   // 同步用户信息
   rpc SynchronizeUser(SynchronizeUserRequest) returns (UserList);

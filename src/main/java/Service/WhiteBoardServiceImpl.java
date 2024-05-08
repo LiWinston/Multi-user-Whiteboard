@@ -8,7 +8,6 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import whiteboard.WhiteBoardServiceGrpc;
 import whiteboard.Whiteboard;
-import whiteboard.Whiteboard.ChatMessage;
 import whiteboard.Whiteboard.Response;
 import whiteboard.Whiteboard._CanvasShape;
 
@@ -94,7 +93,7 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
         }
         var responseList = whiteboard.Whiteboard.UserList.newBuilder().addAllUsernames(wb.userAgents.keySet()).build();
         Context.current().fork().run(() -> {
-            for(var me : wb.userAgents.entrySet()){
+            for (var me : wb.userAgents.entrySet()) {
                 me.getValue().updatePeerList(responseList, new StreamObserver<Response>() {
                     @Override
                     public void onNext(Response value) {
@@ -129,27 +128,21 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
         responseObserver.onCompleted();
     }
 
-    @Override
-    public void synchronizeMessage(ChatMessage request, StreamObserver<com.google.protobuf.Empty> responseObserver) {
-        // 处理消息同步
-        logger.severe("Received message: " + request.getMessage());
-        responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
-        responseObserver.onCompleted();
-    }
-
-//    @Override
-//    public void registerPeer(AttributeContext.Peer request, StreamObserver<com.google.protobuf.Empty> responseObserver) {
-//        // 处理注册
-//        System.out.println("Received registration request from: " + request.getName());
-//        responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
-//        responseObserver.onCompleted();
-//    }
 
     @Override
     public void reportUpdEditing(whiteboard.Whiteboard.SynchronizeUserRequest request,
                                  io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         logger.severe("Received synchronize editing request: " + request.getOperation() + " " + request.getUsername());
         wb.broadCastEditing(request.getOperation(), request.getUsername());
+        responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void pushMessage(whiteboard.Whiteboard.ChatMessage request,
+                            io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
+        logger.severe("Received message: " + request.getMessage());
+        wb.broadCastChatMessage(request.getMessage());
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
         responseObserver.onCompleted();
     }
