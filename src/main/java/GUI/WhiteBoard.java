@@ -345,6 +345,7 @@ public class WhiteBoard implements IWhiteBoard {
                 }
             });
         }else{
+            System.out.println(userAgents);
             //manager自身更改更改完毕后向所有peer同步 除了自身客户端
             //也得除了username消息来源
             for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
