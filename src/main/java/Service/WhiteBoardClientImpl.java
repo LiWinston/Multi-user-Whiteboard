@@ -60,7 +60,7 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
             shape.setUsername(requestShape.getUsername());
         }
 
-        wb.SynchronizeCanvas(shape);
+        wb.acceptRemoteShape(shape);
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
         responseObserver.onCompleted();
     }

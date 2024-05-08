@@ -384,7 +384,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         }
 
         canvasShape.setFill(isFill);
-        wb.SynchronizeCanvas(canvasShape);
+        wb.pushShape(canvasShape);
 //        blockingStub.synchronizeCanvas(_CanvasShape.newBuilder().setShapeString(canvasShape.getShapeString()).setColor(canvasShape.getColor().getRGB()).setX1(canvasShape.getX1()).setX2(canvasShape.getX2()).setY1(canvasShape.getY1()).setY2(canvasShape.getY2()).setFill(canvasShape.isFill()).setUsername(canvasShape.getUsername()).setStrokeInt(canvasShape.getStrokeInt()).build());
 
     }

@@ -8,7 +8,11 @@ import java.util.List;
 
 public interface IWhiteBoard{
     IClient getSelfUI();
-    void SynchronizeCanvas(CanvasShape canvasShape);
+    void pushShape(CanvasShape canvasShape);
+
+    void broadCastShape(CanvasShape canvasShape);
+
+    void acceptRemoteShape(CanvasShape canvasShape);
 
     void pushMessage(String chatMessage);
 

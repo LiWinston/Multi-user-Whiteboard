@@ -116,7 +116,7 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
     }
 
     @Override
-    public synchronized void synchronizeCanvas(_CanvasShape requestShape, StreamObserver<com.google.protobuf.Empty> responseObserver) {
+    public synchronized void pushShape(_CanvasShape requestShape, StreamObserver<com.google.protobuf.Empty> responseObserver) {
         // 业务逻辑- 拆分出网络功能
         logger.severe("Received shape: " + requestShape.getShapeString());
         CanvasShape shape;
@@ -131,7 +131,7 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
 
         new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getX(0), requestShape.getX(1), requestShape.getX(2), requestShape.getX(3), requestShape.getStrokeInt());
         shape.setFill(requestShape.getFill());
-        wb.SynchronizeCanvas(shape);
+        wb.broadCastShape(shape);
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
         responseObserver.onCompleted();
     }

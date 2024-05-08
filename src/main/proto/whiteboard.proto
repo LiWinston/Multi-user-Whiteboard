@@ -57,7 +57,7 @@ message Response {
 
 service WhiteBoardService {
   // 同步画布
-  rpc SynchronizeCanvas(_CanvasShape) returns (google.protobuf.Empty);
+  rpc pushShape(_CanvasShape) returns (google.protobuf.Empty);
 
   // 同步消息
   rpc pushMessage(ChatMessage) returns (google.protobuf.Empty);

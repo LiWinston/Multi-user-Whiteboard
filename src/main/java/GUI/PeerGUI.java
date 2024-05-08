@@ -271,7 +271,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
         }
 
         canvasShape.setFill(isFill);
-        wb.SynchronizeCanvas(canvasShape);
+        wb.pushShape(canvasShape);
 
     }
 
