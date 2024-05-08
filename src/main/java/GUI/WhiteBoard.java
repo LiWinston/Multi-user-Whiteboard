@@ -70,6 +70,14 @@ public class WhiteBoard implements IWhiteBoard {
                         @Override
                         public void onError(Throwable t) {
                             System.out.println("Remove peer failed.");
+                            for(int i = 3; i > 0; i--){
+                                System.out.println("Remove peer failed. Retry in " + i + " seconds.");
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
                         }
 
                         @Override

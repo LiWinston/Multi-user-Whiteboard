@@ -4,7 +4,6 @@ import WBSYS.CanvasShape;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import io.grpc.ManagedChannel;
-import whiteboard.WhiteBoardServiceGrpc;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -15,7 +14,6 @@ import java.awt.event.*;
 import java.awt.geom.Point2D;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static WBSYS.parameters.chatMessageFormat;
 
@@ -29,7 +27,6 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     private final WhiteBoard wb;
     private final String IpAddress;
     private final ManagedChannel channel;
-    private final Object blockingStub;
     private int ipAddress;
     private String currentShapeType = "pen";
     private Color color = Color.BLACK;
@@ -39,15 +36,12 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     private boolean isFill = false;
 
     public ManagerGUI(WhiteBoard whiteBoard, String IpAddress, String port, String WBName, ManagedChannel channel) {
-//        initComponents();
-        initComponents();
         initComponents();
         this.wb = whiteBoard;
         username = "Manager";
         this.WBName = WBName;
         this.IpAddress = IpAddress;
         this.channel = channel;
-        this.blockingStub = WhiteBoardServiceGrpc.newBlockingStub(channel);
 
         this.portNumber = Integer.parseInt(port);
         nameLabel.setText(WBName);
@@ -390,7 +384,8 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         }
 
         canvasShape.setFill(isFill);
-        new AtomicReference<>(wb.getCanvasShapeArrayList()).get().add(canvasShape);
+//        new AtomicReference<>(wb.getCanvasShapeArrayList()).get().add(canvasShape);
+        wb.getCanvasShapeArrayList().add(canvasShape);
         wb.pushShape(canvasShape);
 
     }
@@ -490,8 +485,8 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     @Override
     public void reDraw() {
         new Thread(() -> {
-            AtomicReference<ArrayList<CanvasShape>> shapeArrayList = new AtomicReference<>(wb.getCanvasShapeArrayList());
-            for (CanvasShape shape : shapeArrayList.get()) {
+//            AtomicReference<ArrayList<CanvasShape>> shapeArrayList = new AtomicReference<>(wb.getCanvasShapeArrayList());
+            for (CanvasShape shape : wb.getCanvasShapeArrayList()) {
                 drawCanvasShape(shape);
             }
         }).start();
@@ -563,9 +558,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
     @Override
     public void windowDeiconified(WindowEvent e) {
-
         reDraw();
-
     }
 
     @Override
