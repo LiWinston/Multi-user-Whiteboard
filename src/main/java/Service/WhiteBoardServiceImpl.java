@@ -119,10 +119,6 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
     public synchronized void synchronizeCanvas(_CanvasShape requestShape, StreamObserver<com.google.protobuf.Empty> responseObserver) {
         // 业务逻辑- 拆分出网络功能
         logger.severe("Received shape: " + requestShape.getShapeString());
-        if(requestShape.getShapeString().equals("pen")){
-            System.out.println(requestShape.getPointsList());
-            System.out.println(protoPointsToArrayList(requestShape.getPointsList().stream().toList()));
-        }
         CanvasShape shape;
         if(requestShape.getShapeString().equals("pen") || requestShape.getShapeString().equals("eraser")){
             shape = new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getUsername(), protoPointsToArrayList(requestShape.getPointsList().stream().toList()), requestShape.getStrokeInt());

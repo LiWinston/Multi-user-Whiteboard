@@ -50,7 +50,6 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
     public void updateShapes(whiteboard.Whiteboard._CanvasShape requestShape,
                              io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         logger.info("Received update shape request: " + requestShape.getShapeString());
-        logger.info(requestShape.getPointsList().stream().toList().toString());
         CanvasShape shape;
         if(requestShape.getShapeString().equals("pen") || requestShape.getShapeString().equals("eraser")){
             shape = new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getUsername(), protoPointsToArrayList(requestShape.getPointsList().stream().toList()), requestShape.getStrokeInt());
