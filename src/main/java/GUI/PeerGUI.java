@@ -185,13 +185,15 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
         } else if (shapeType.equals("pen") || shapeType.equals("eraser")) {
             ArrayList<Point2D> points = canvasShape.getPoints();
             canvasGraphics.setStroke(stroke);
-            for (int i = 1; i < points.size(); i++) {
-                int x3 = (int) points.get(i - 1).getX();
-                int y3 = (int) points.get(i - 1).getY();
-                int x4 = (int) points.get(i).getX();
-                int y4 = (int) points.get(i).getY();
-                canvasGraphics.setPaint(shapeColor);
-                canvasGraphics.drawLine(x3, y3, x4, y4);
+            if(points != null && points.size() > 1) {
+                for (int i = 0; i < points.size() - 1; i++) {
+                    int x3 = (int) points.get(i).getX();
+                    int y3 = (int) points.get(i).getY();
+                    int x4 = (int) points.get(i + 1).getX();
+                    int y4 = (int) points.get(i + 1).getY();
+                    canvasGraphics.setPaint(shapeColor);
+                    canvasGraphics.drawLine(x3, y3, x4, y4);
+                }
             }
         }
 
@@ -305,6 +307,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
             canvasGraphics.drawLine(x4, y4, x3, y3);
             pointArrayList.add(new Point(x3, y3));
         }
+//        drawCanvasShape(new CanvasShape(currentShapeType, color, x4, x3, y4, y3, Integer.parseInt(strokeCB.getSelectedItem().toString())));
 
     }
 
