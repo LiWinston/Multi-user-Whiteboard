@@ -387,7 +387,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 //        new AtomicReference<>(wb.getCanvasShapeArrayList()).get().add(canvasShape);
         wb.getCanvasShapeArrayList().add(canvasShape);
         wb.pushShape(canvasShape);
-
+        reDraw();//让pen落实到画布上
     }
 
     @Override
@@ -402,6 +402,8 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
     @Override
     public void mouseDragged(MouseEvent e) {
+        clearCanvas();
+        reDraw();
         int x3 = e.getX();
         int y3 = e.getY();
         int x4 = x1;
@@ -421,6 +423,14 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
             canvasGraphics.setStroke(tempStroke);
             canvasGraphics.drawLine(x4, y4, x3, y3);
             pointArrayList.add(new Point(x3, y3));
+
+            CanvasShape tmp = new CanvasShape(currentShapeType, tempColor, username, pointArrayList, Integer.parseInt(strokeCB.getSelectedItem().toString()));
+            drawCanvasShape(tmp);
+            wb.tempShapes.put(username, tmp);
+        }else{
+            CanvasShape tmp = new CanvasShape(currentShapeType, color, x1, x3, y1, y3, Integer.parseInt(strokeCB.getSelectedItem().toString()));
+            drawCanvasShape(tmp);
+            wb.tempShapes.put(username, tmp);
         }
     }
 
