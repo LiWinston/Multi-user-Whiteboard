@@ -33,9 +33,9 @@ public class WBClient {
     public WBClient(WhiteBoard wb, String destHost,int destPort) {
         this.wb = wb;
         channel = ManagedChannelBuilder.forAddress(destHost, destPort)
-                .keepAliveTime(1, TimeUnit.MINUTES)  // 每分钟发送一次心跳
-                .keepAliveTimeout(10, TimeUnit.SECONDS)  // 如果10秒内没有响应，认为连接失败
-                .keepAliveWithoutCalls(true)  // 即使没有调用也发送心跳
+//                .keepAliveTime(1, TimeUnit.MINUTES)  // 每分钟发送一次心跳
+//                .keepAliveTimeout(10, TimeUnit.SECONDS)  // 如果10秒内没有响应，认为连接失败
+//                .keepAliveWithoutCalls(true)  // 即使没有调用也发送心跳
                 .usePlaintext()
                 .build();
         stub = WhiteBoardServiceGrpc.newStub(channel);
