@@ -38,6 +38,19 @@ public class CanvasShape implements Serializable {
         this.strokeInt = strokeInt;
     }
 
+    public CanvasShape(String shapeString, Color color, int x1, int x2, int y1, int y2, String text, boolean fill, String username, int strokeInt) {
+        this.shapeString = shapeString;
+        this.color = color;
+        this.x1 = x1;
+        this.x2 = x2;
+        this.y1 = y1;
+        this.y2 = y2;
+        this.text = text;
+        this.fill = fill;
+        this.username = username;
+        this.strokeInt = strokeInt;
+    }
+
 
     public CanvasShape(String shapeString, Color color, String username, ArrayList<Point2D> points, int strokeInt) {
         this.shapeString = shapeString;

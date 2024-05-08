@@ -119,10 +119,20 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
     public synchronized void synchronizeCanvas(_CanvasShape requestShape, StreamObserver<com.google.protobuf.Empty> responseObserver) {
         // 业务逻辑- 拆分出网络功能
         logger.severe("Received shape: " + requestShape.getShapeString());
-        CanvasShape shape =
-                requestShape.getShapeString() == "text" ?
-                        new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getUsername(), protoPointsToArrayList(requestShape.getPointsList().stream().toList()), requestShape.getStrokeInt()) :
-                        new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getX(0), requestShape.getX(1), requestShape.getX(2), requestShape.getX(3), requestShape.getStrokeInt());
+        if(requestShape.getShapeString().equals("pen")){
+            System.out.println(requestShape.getPointsList());
+            System.out.println(protoPointsToArrayList(requestShape.getPointsList().stream().toList()));
+        }
+        CanvasShape shape;
+        if(requestShape.getShapeString().equals("pen") || requestShape.getShapeString().equals("eraser")){
+            shape = new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getUsername(), protoPointsToArrayList(requestShape.getPointsList().stream().toList()), requestShape.getStrokeInt());
+        } else if (requestShape.getShapeString().equals("text")) {
+            shape = new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getX(0), requestShape.getX(1), requestShape.getX(2), requestShape.getX(3), requestShape.getText(), requestShape.getFill(), requestShape.getUsername(), requestShape.getStrokeInt());
+        } else {
+            shape = new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getX(0), requestShape.getX(1), requestShape.getX(2), requestShape.getX(3), requestShape.getStrokeInt());
+        }
+
+        new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getX(0), requestShape.getX(1), requestShape.getX(2), requestShape.getX(3), requestShape.getStrokeInt());
         shape.setFill(requestShape.getFill());
         wb.SynchronizeCanvas(shape);
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
