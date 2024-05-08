@@ -154,29 +154,31 @@ public class WhiteBoard implements IWhiteBoard {
 
     //only manager, thus no need for specific type check
     public void managerClose() {
-        for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
-            WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
-            if (stb != null) {
-                stb.closeWindow(Empty.newBuilder().build(), new StreamObserver<Empty>() {
-                    @Override
-                    public void onNext(Empty empty) {
-                        System.out.println("Manager close success.");
-                    }
+        Context.current().fork().run(() -> {
+            for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
+                WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
+                if (stb != null) {
+                    stb.closeWindow(Empty.newBuilder().build(), new StreamObserver<Empty>() {
+                        @Override
+                        public void onNext(Empty empty) {
+                            System.out.println("Manager close success.");
+                        }
 
-                    @Override
-                    public void onError(Throwable t) {
-                        System.out.println("Manager close failed.");
-                    }
+                        @Override
+                        public void onError(Throwable t) {
+                            System.out.println("Manager close failed.");
+                        }
 
-                    @Override
-                    public void onCompleted() {
-                    }
-                });
-            } else {
-                System.out.println("Cannot get stub for " + ent.getKey());
-                System.out.println("UserAgents: " + userAgents);
+                        @Override
+                        public void onCompleted() {
+                        }
+                    });
+                } else {
+                    System.out.println("Cannot get stub for " + ent.getKey());
+                    System.out.println("UserAgents: " + userAgents);
+                }
             }
-        }
+        });
     }
 
     //only manager, thus no need for specific type check
@@ -217,45 +219,49 @@ public class WhiteBoard implements IWhiteBoard {
             }
 
 
-            managerStub.registerPeer(ipp, new StreamObserver<>() {
-                @Override
-                public void onNext(Empty empty) {
-                    System.out.println("C side registerPeer : grpc call success.");
-                }
+            Whiteboard.IP_Port finalIpp = ipp;
+            Context.current().fork().run(() -> {
+                managerStub.registerPeer(finalIpp, new StreamObserver<>() {
+                    @Override
+                    public void onNext(Empty empty) {
+                        System.out.println("C side registerPeer : grpc call success.");
+                    }
 
-                @Override
-                public void onError(Throwable t) {
-                    System.out.println("C side registerPeer : grpc call failed." + t.getMessage());
-                }
+                    @Override
+                    public void onError(Throwable t) {
+                        System.out.println("C side registerPeer : grpc call failed." + t.getMessage());
+                    }
 
-                @Override
-                public void onCompleted() {
-                    System.out.println("C side registerPeer : grpc call 1 registerPeer completed");
-                }
+                    @Override
+                    public void onCompleted() {
+                        System.out.println("C side registerPeer : grpc call 1 registerPeer completed");
+                    }
+                });
             });
             //已经包含wb.addUser(request.getUsername());
-            managerStub.synchronizeUser(Whiteboard.SynchronizeUserRequest.newBuilder().setOperation("add").
-                    setUsername(username).build(), new StreamObserver<Whiteboard.UserList>() {
-                @Override
-                public void onNext(Whiteboard.UserList userList) {
-                    System.out.println("Register peer success.");
-                }
+            Context.current().fork().run(() -> {
+                managerStub.synchronizeUser(Whiteboard.SynchronizeUserRequest.newBuilder().setOperation("add").
+                        setUsername(username).build(), new StreamObserver<Whiteboard.UserList>() {
+                    @Override
+                    public void onNext(Whiteboard.UserList userList) {
+                        System.out.println("Register peer success.");
+                    }
 
-                @Override
-                public void onError(Throwable t) {
-                    System.out.println("Register peer failed.");
-                }
+                    @Override
+                    public void onError(Throwable t) {
+                        System.out.println("Register peer failed.");
+                    }
 
-                @Override
-                public void onCompleted() {
-                    System.out.println("C side registerPeer : grpc call 2 synchronizeUser completed");
-                }
+                    @Override
+                    public void onCompleted() {
+                        System.out.println("C side registerPeer : grpc call 2 synchronizeUser completed");
+                    }
+                });
             });
         }
     }
 
     public synchronized void SynchronizeUser(String operation, String username) {
-
         if (isManager) {
             for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
                 WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();

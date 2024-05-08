@@ -81,4 +81,13 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
         wb.getMessageArrayList().add(request.getMessage());
         wb.getSelfUI().updateChatBox(request.getMessage());
     }
+
+    @Override
+    public void clearCanvas(com.google.protobuf.Empty request,
+                            io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
+        logger.severe("Received clear canvas request");
+        wb.getSelfUI().clearCanvas();
+        responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
+        responseObserver.onCompleted();
+    }
 }

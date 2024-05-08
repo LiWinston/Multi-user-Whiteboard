@@ -390,8 +390,6 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
         canvasShape.setFill(isFill);
         wb.pushShape(canvasShape);
-//        blockingStub.synchronizeCanvas(_CanvasShape.newBuilder().setShapeString(canvasShape.getShapeString()).setColor(canvasShape.getColor().getRGB()).setX1(canvasShape.getX1()).setX2(canvasShape.getX2()).setY1(canvasShape.getY1()).setY2(canvasShape.getY2()).setFill(canvasShape.isFill()).setUsername(canvasShape.getUsername()).setStrokeInt(canvasShape.getStrokeInt()).build());
-
     }
 
     @Override
@@ -426,8 +424,6 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
             canvasGraphics.drawLine(x4, y4, x3, y3);
             pointArrayList.add(new Point(x3, y3));
         }
-
-//        drawCanvasShape(new CanvasShape(currentShapeType, color, x4, x3, y4, y3, Integer.parseInt(strokeCB.getSelectedItem().toString())));
     }
 
     @Override
@@ -512,6 +508,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
     @Override
     public void clearCanvas() {
+        wb.getCanvasShapeArrayList().clear();
         canvasPanel.repaint();
     }
 
