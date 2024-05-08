@@ -24,9 +24,8 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
     @Override
     public void updatePeerList(whiteboard.Whiteboard.UserList request,
                                io.grpc.stub.StreamObserver<whiteboard.Whiteboard.Response> responseObserver) {
-        logger.severe("Received peer list update request: " + request.getUsernamesList());
-        System.out.println((ArrayList<String>) request.getUsernamesList().stream().toList());
-        wb.getSelfUI().updatePeerList((ArrayList<String>) request.getUsernamesList().stream().toList());
+        logger.severe("Received peer list update list: " + request.getUsernamesList());
+        wb.getSelfUI().updatePeerList(new ArrayList<>(request.getUsernamesList()));
         responseObserver.onNext(whiteboard.Whiteboard.Response.newBuilder().setSuccess(true).setMessage("Successfully upd usrlst").build());
         responseObserver.onCompleted();
     }

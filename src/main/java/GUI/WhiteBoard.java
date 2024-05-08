@@ -188,7 +188,7 @@ public class WhiteBoard implements IWhiteBoard {
         userList.add("Manager");
         setSelfUI(managerGUI);
         userAgents.put("Manager", WhiteBoardClientServiceGrpc.newStub(channel));
-
+        SynchronizeUser("add", "Manager");
     }
 
 
