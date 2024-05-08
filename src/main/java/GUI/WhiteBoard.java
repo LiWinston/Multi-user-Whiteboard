@@ -90,7 +90,6 @@ public class WhiteBoard implements IWhiteBoard {
 //        userAgents.remove(username); 没用 本地改这个没意义
         this.SynchronizeUser("remove", username);
         this.pushMessage(parameters.managerMessage(username + " has exited!\n"));
-//        managerStub.synchronizeUser("remove", username);
     }
 
 
