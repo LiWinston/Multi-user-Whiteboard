@@ -9,7 +9,6 @@ import io.grpc.stub.StreamObserver;
 import whiteboard.WhiteBoardServiceGrpc;
 import whiteboard.Whiteboard;
 import whiteboard.Whiteboard.Response;
-import whiteboard.Whiteboard._CanvasShape;
 
 import java.awt.*;
 import java.util.logging.Logger;
@@ -115,23 +114,12 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
         responseObserver.onCompleted();
     }
 
-    @Override
-    public synchronized void pushShape(_CanvasShape requestShape, StreamObserver<com.google.protobuf.Empty> responseObserver) {
-        // 业务逻辑- 拆分出网络功能
-        logger.severe("Received shape: " + requestShape.getShapeString());
-        CanvasShape shape;
-        if(requestShape.getShapeString().equals("pen") || requestShape.getShapeString().equals("eraser")){
-            shape = new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getUsername(), protoPointsToArrayList(requestShape.getPointsList().stream().toList()), requestShape.getStrokeInt());
-        } else if (requestShape.getShapeString().equals("text")) {
-            shape = new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getX(0), requestShape.getX(1), requestShape.getX(2), requestShape.getX(3), requestShape.getText(), requestShape.getFill(), requestShape.getUsername(), requestShape.getStrokeInt());
-        } else {
-            shape = new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getX(0), requestShape.getX(1), requestShape.getX(2), requestShape.getX(3), requestShape.getStrokeInt());
-            shape.setUsername(requestShape.getUsername());
-        }
 
-        new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getX(0), requestShape.getX(1), requestShape.getX(2), requestShape.getX(3), requestShape.getStrokeInt());
-        shape.setFill(requestShape.getFill());
-        wb.broadCastShape(shape);
+    @Override
+    public void pushMessage(whiteboard.Whiteboard.ChatMessage request,
+                            io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
+        logger.severe("Received message: " + request.getMessage());
+        wb.broadCastChatMessage(request.getMessage());
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
         responseObserver.onCompleted();
     }
@@ -146,11 +134,24 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
         responseObserver.onCompleted();
     }
 
+
     @Override
-    public void pushMessage(whiteboard.Whiteboard.ChatMessage request,
-                            io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
-        logger.severe("Received message: " + request.getMessage());
-        wb.broadCastChatMessage(request.getMessage());
+    public synchronized void pushShape(Whiteboard._CanvasShape requestShape, StreamObserver<com.google.protobuf.Empty> responseObserver) {
+        // 业务逻辑- 拆分出网络功能
+        logger.severe("Received shape: " + requestShape.getShapeString());
+        CanvasShape shape;
+        if (requestShape.getShapeString().equals("pen") || requestShape.getShapeString().equals("eraser")) {
+            shape = new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getUsername(), protoPointsToArrayList(requestShape.getPointsList().stream().toList()), requestShape.getStrokeInt());
+        } else if (requestShape.getShapeString().equals("text")) {
+            shape = new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getX(0), requestShape.getX(1), requestShape.getX(2), requestShape.getX(3), requestShape.getText(), requestShape.getFill(), requestShape.getUsername(), requestShape.getStrokeInt());
+        } else {
+            shape = new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getX(0), requestShape.getX(1), requestShape.getX(2), requestShape.getX(3), requestShape.getStrokeInt());
+            shape.setUsername(requestShape.getUsername());
+        }
+
+        new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getX(0), requestShape.getX(1), requestShape.getX(2), requestShape.getX(3), requestShape.getStrokeInt());
+        shape.setFill(requestShape.getFill());
+        wb.broadCastShape(shape);
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
         responseObserver.onCompleted();
     }
