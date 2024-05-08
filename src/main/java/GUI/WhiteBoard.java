@@ -12,6 +12,9 @@ import whiteboard.WhiteBoardClientServiceGrpc;
 import whiteboard.WhiteBoardServiceGrpc;
 import whiteboard.Whiteboard;
 
+import java.awt.*;
+import java.awt.geom.Area;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
@@ -28,6 +31,7 @@ public class WhiteBoard implements IWhiteBoard {
     private WhiteBoardServiceGrpc.WhiteBoardServiceStub managerStub;
     private IClient selfUI;
     private ArrayList<CanvasShape> canvasShapeArrayList = new ArrayList<>();
+    public ConcurrentHashMap<String, CanvasShape> tempShapes = new ConcurrentHashMap<>();
     private ArrayList<String> messageArrayList = new ArrayList<>();
 
     public ConcurrentHashMultiset<String> getEditingUser() {
@@ -547,6 +551,57 @@ public class WhiteBoard implements IWhiteBoard {
                 System.out.println("UserAgents: " + userAgents);
             }
         }
+    }
+
+    @Override
+    public boolean checkConflictOk(CanvasShape newShape) {
+        for (CanvasShape editingShape : tempShapes.values()) {
+            // 使用边界框来初步判断重叠
+            if (overlapBoundingBox(newShape, editingShape)) {
+                if(newShape.getShapeString().equals("text")){
+                    return false;
+                }
+                if (newShape.getShapeString().equals("pen") && editingShape.getShapeString().equals("eraser")) {
+                    // 特殊处理，例如逐点比较
+                    if (checkPointByPoint(newShape, editingShape)) {
+                        return false;
+                    }
+                } else {
+                    // 如果是其他类型的形状，可以进一步进行精确的几何交叉检查
+                    if (checkShapeIntersection(newShape, editingShape)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean overlapBoundingBox(CanvasShape shape1, CanvasShape shape2) {
+        // 计算两个形状的边界框是否重叠
+        return shape1.getX1() < shape2.getX2() && shape1.getX2() > shape2.getX1() &&
+                shape1.getY1() < shape2.getY2() && shape1.getY2() > shape2.getY1();
+    }
+
+    private boolean checkPointByPoint(CanvasShape newShape, CanvasShape existingShape) {
+        // 详细的逐点比较，适用于“笔画”和“橡皮”之间的冲突检测
+//        Shape shape1Shape = newShape.toShape();
+        Shape shape2Shape = existingShape.toShape();
+        for (Point2D point : newShape.getPoints()) {
+            if (shape2Shape.contains(point)) {
+                return false;
+            }
+        }
+
+        return true; // 示例中默认返回false
+    }
+
+    private boolean checkShapeIntersection(CanvasShape shape1, CanvasShape shape2) {
+        // 使用Area类来判断形状间的几何交叉
+        Area area1 = new Area(shape1.toShape());
+        Area area2 = new Area(shape2.toShape());
+        area1.intersect(area2);
+        return !area1.isEmpty();
     }
 
 

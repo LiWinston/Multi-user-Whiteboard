@@ -1,6 +1,9 @@
 package WBSYS;
 
 import java.awt.*;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -146,5 +149,23 @@ public class CanvasShape implements Serializable {
 
     public void setStrokeInt(int strokeInt) {
         this.strokeInt = strokeInt;
+    }
+
+    public Shape toShape() {
+        if (shapeString.equals("line")) {
+            return new Line2D.Double(x1, y1, x2, y2);
+        } else if (shapeString.equals("rect")) {
+            return new Rectangle(x1, y1, x2 - x1, y2 - y1);
+        } else if (shapeString.equals("oval")) {
+            return new Ellipse2D.Double(x1, y1, x2 - x1, y2 - y1);
+        } else if (shapeString.equals("text")) {
+            return new Rectangle(x1, y1, x2 - x1, y2 - y1);
+        } else if (shapeString.equals("pen")) {
+            return new Path2D.Double();
+        } else if (shapeString.equals("eraser")) {
+            return new Path2D.Double();
+        } else {
+            return new Rectangle(x1, y1, x2 - x1, y2 - y1);
+        }
     }
 }

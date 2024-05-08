@@ -45,4 +45,6 @@ public interface IWhiteBoard{
     void broadCastChatMessage(String message);
 
     <E> List<E> getMessageArrayList();
+
+    boolean checkConflictOk(CanvasShape shape);
 }

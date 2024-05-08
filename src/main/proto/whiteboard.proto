@@ -92,11 +92,13 @@ service WhiteBoardService {
   // 用户退出
   rpc PeerExit(google.protobuf.StringValue) returns (google.protobuf.Empty);
 
-  // 新建文件
-  rpc NewFile(google.protobuf.Empty) returns (google.protobuf.Empty);
-
-  // 打开文件
-  rpc OpenFile(stream _CanvasShape) returns (google.protobuf.Empty);
+  //多发单收 客户端流
+  rpc s_pushShape(stream _CanvasShape) returns (Response);
+//  // 新建文件
+//  rpc NewFile(google.protobuf.Empty) returns (google.protobuf.Empty);
+//
+//  // 打开文件
+//  rpc OpenFile(stream _CanvasShape) returns (google.protobuf.Empty);
 
   // 管理员关闭
   rpc ManagerClose(google.protobuf.Empty) returns (google.protobuf.Empty);

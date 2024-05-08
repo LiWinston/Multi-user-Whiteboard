@@ -155,4 +155,47 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
         responseObserver.onCompleted();
     }
+
+    //客户端流式 没有请求参数 而是返回一个输入流供应用层操作
+    @Override
+    public io.grpc.stub.StreamObserver<whiteboard.Whiteboard._CanvasShape> sPushShape(
+            io.grpc.stub.StreamObserver<whiteboard.Whiteboard.Response> responseObserver) {
+
+        return new io.grpc.stub.StreamObserver<whiteboard.Whiteboard._CanvasShape>() {
+            @Override
+            public void onNext(Whiteboard._CanvasShape canvasShape) {
+                logger.info("Received shape: " + canvasShape.getShapeString());
+                CanvasShape shape;
+                if (canvasShape.getShapeString().equals("pen") || canvasShape.getShapeString().equals("eraser")) {
+                    shape = new CanvasShape(canvasShape.getShapeString(), new Color(Integer.parseInt(canvasShape.getColor())), canvasShape.getUsername(), protoPointsToArrayList(canvasShape.getPointsList().stream().toList()), canvasShape.getStrokeInt());
+                } else if (canvasShape.getShapeString().equals("text")) {
+                    shape = new CanvasShape(canvasShape.getShapeString(), new Color(Integer.parseInt(canvasShape.getColor())), canvasShape.getX(0), canvasShape.getX(1), canvasShape.getX(2), canvasShape.getX(3), canvasShape.getText(), canvasShape.getFill(), canvasShape.getUsername(), canvasShape.getStrokeInt());
+                } else {
+                    shape = new CanvasShape(canvasShape.getShapeString(), new Color(Integer.parseInt(canvasShape.getColor())), canvasShape.getX(0), canvasShape.getX(1), canvasShape.getX(2), canvasShape.getX(3), canvasShape.getStrokeInt());
+                    shape.setUsername(canvasShape.getUsername());
+                }
+                //shape间的交叠冲突检测，委派wb处理
+                if(wb.checkConflictOk(shape)){
+                    wb.broadCastShape(shape);
+                }else{
+                    //中止接收，发送失败消息
+                    responseObserver.onNext(Response.newBuilder().setSuccess(false).setMessage("Conflict with other shapes").build());
+                    responseObserver.onError(new Throwable("Conflict"));
+                }
+
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                logger.severe(throwable.getMessage());
+            }
+
+            @Override
+            public void onCompleted() {
+                responseObserver.onNext(Response.newBuilder().setSuccess(true).build());
+                responseObserver.onCompleted();
+            }
+
+        };
+    }
 }
