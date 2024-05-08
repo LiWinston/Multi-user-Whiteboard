@@ -69,6 +69,8 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
         } else if (request.getOperation().equals("remove")) {
             wb.removeUser(request.getUsername());
         }
+        responseObserver.onNext(whiteboard.Whiteboard.UserList.newBuilder().addAllUsernames(wb.userAgents.keySet()).build());
+        responseObserver.onCompleted();
     }
 
     @Override
@@ -104,6 +106,7 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
                                    io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         logger.severe("Received synchronize editing request: " + request.getOperation() +" "+ request.getUsername());
         wb.SynchronizeEditing(request.getOperation(), request.getUsername());
+        responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
         responseObserver.onCompleted();
     }
 }
