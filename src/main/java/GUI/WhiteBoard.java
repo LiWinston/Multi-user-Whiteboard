@@ -328,6 +328,9 @@ public class WhiteBoard implements IWhiteBoard {
         getSelfUI().showEditing();
         //peer用户自身更改完毕后仅向manager同步
         if (!isManager) {
+            if(username.equals(getSelfUI().getUsername())){
+                return;
+            }
             managerStub.synchronizeEditing(Whiteboard.SynchronizeUserRequest.newBuilder().setOperation(operation).
                     setUsername(username).build(), new StreamObserver<Empty>() {
                 @Override
