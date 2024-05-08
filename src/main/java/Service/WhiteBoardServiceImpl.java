@@ -2,6 +2,7 @@ package Service;
 
 import GUI.WhiteBoard;
 import WBSYS.CanvasShape;
+import io.grpc.Context;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
@@ -55,6 +56,26 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
         logger.severe("Received registerPeer request: " + ip_port.getIp() + " " + ip_port.getPort());
         ManagedChannel channel = ManagedChannelBuilder.forAddress(ip_port.getIp(), Integer.parseInt(ip_port.getPort())).usePlaintext().build();
         wb.registerPeer(ip_port.getUsername(), ip_port.getIp(), ip_port.getPort(), channel);
+        for (String editingUser : wb.getEditingUser()) {
+            Context.current().fork().run(() -> {
+                wb.userAgents.get(ip_port.getUsername()).updEditing(
+                        Whiteboard.SynchronizeUserRequest.newBuilder().setOperation("add").setUsername(editingUser).build(),
+                        new StreamObserver<com.google.protobuf.Empty>() {
+                            @Override
+                            public void onNext(com.google.protobuf.Empty value) {
+                            }
+
+                            @Override
+                            public void onError(Throwable t) {
+                            }
+
+                            @Override
+                            public void onCompleted() {
+                            }
+                        });
+            });
+
+        }
         System.out.println("registerPeer generated channel" + channel);
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
         responseObserver.onCompleted();
