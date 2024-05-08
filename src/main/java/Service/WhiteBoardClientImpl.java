@@ -61,10 +61,10 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
     }
 
     @Override
-    public void synchronizeEditing(whiteboard.Whiteboard.SynchronizeUserRequest request,
+    public void updEditing(whiteboard.Whiteboard.SynchronizeUserRequest request,
                                    io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         logger.severe("Received synchronize editing request: " + request.getOperation() +" "+ request.getUsername());
-        wb.SynchronizeEditing(request.getOperation(), request.getUsername());
+        wb.updEditing(request.getOperation(), request.getUsername());
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
         responseObserver.onCompleted();
     }

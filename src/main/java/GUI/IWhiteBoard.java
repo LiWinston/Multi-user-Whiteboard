@@ -21,7 +21,7 @@ public interface IWhiteBoard{
 
     ArrayList<CanvasShape> getCanvasShapeArrayList();
 
-    void SynchronizeEditing(String operation, String username);
+    void reportUpdEditing(String operation, String username);
 
     void removePeer(String username);
 
@@ -32,4 +32,8 @@ public interface IWhiteBoard{
     void openFile(ArrayList<CanvasShape> newShapes);
 
     void managerClose();
+
+    void broadCastEditing(String operation, String username);
+
+    void updEditing(String operation, String username);
 }

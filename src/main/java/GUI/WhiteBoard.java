@@ -315,68 +315,68 @@ public class WhiteBoard implements IWhiteBoard {
     }
 
 
-    public synchronized void SynchronizeEditing(String operation, String username) {
+    public synchronized void reportUpdEditing(String operation, String username) {
+        //peer用户自身更改完毕后仅向manager同步
+        managerStub.reportUpdEditing(Whiteboard.SynchronizeUserRequest.newBuilder().setOperation(operation).
+                setUsername(username).build(), new StreamObserver<Empty>() {
+            @Override
+            public void onNext(Empty empty) {
+                System.out.println("manager synchronizeEditing success.");
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                System.out.println("manager synchronizeEditing failed." + t.getMessage());
+            }
+
+            @Override
+            public void onCompleted() {
+            }
+        });
+    }
+    public void updEditing(String operation, String username) {
+
         switch (operation) {
             case "add":
                 if(editingUser.count(username) == 0)
                     editingUser.add(username);
                 break;
             case "remove":
-                editingUser.remove(username);
+                editingUser.removeIf(s -> s.equals(username));
                 break;
         }
         getSelfUI().showEditing();
-        //peer用户自身更改完毕后仅向manager同步
-        if (!isManager) {
-            if(username.equals(getSelfUI().getUsername())){
-                return;
-            }
-            managerStub.synchronizeEditing(Whiteboard.SynchronizeUserRequest.newBuilder().setOperation(operation).
-                    setUsername(username).build(), new StreamObserver<Empty>() {
-                @Override
-                public void onNext(Empty empty) {
-                    System.out.println("manager synchronizeEditing success.");
-                }
+    }
 
-                @Override
-                public void onError(Throwable t) {
-                    System.out.println("manager synchronizeEditing failed." + t.getMessage());
-                }
+    public void broadCastEditing(String operation, String username) {
+        System.out.println(userAgents);
+        //manager自身更改更改完毕后向所有peer同步 除了自身客户端
+        //也得除了username消息来源
+        for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
+//            if (ent.getKey().equals("Manager") || ent.getKey().equals(username)) {
+//                continue;
+//            }
+            WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
+            if (stb != null) {
+                stb.updEditing(Whiteboard.SynchronizeUserRequest.newBuilder().setOperation(operation).
+                        setUsername(username).build(), new StreamObserver<Empty>() {
+                    @Override
+                    public void onNext(Empty empty) {
+                        System.out.println("peer synchronizeEditing success.");
+                    }
 
-                @Override
-                public void onCompleted() {
-                }
-            });
-        }else{
-            System.out.println(userAgents);
-            //manager自身更改更改完毕后向所有peer同步 除了自身客户端
-            //也得除了username消息来源
-            for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
-                if (ent.getKey().equals("Manager") || ent.getKey().equals(username)) {
-                    continue;
-                }
-                WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
-                if (stb != null) {
-                    stb.synchronizeEditing(Whiteboard.SynchronizeUserRequest.newBuilder().setOperation(operation).
-                            setUsername(username).build(), new StreamObserver<Empty>() {
-                        @Override
-                        public void onNext(Empty empty) {
-                            System.out.println("peer synchronizeEditing success.");
-                        }
+                    @Override
+                    public void onError(Throwable t) {
+                        System.out.println("peer synchronizeEditing failed." + t.getMessage());
+                    }
 
-                        @Override
-                        public void onError(Throwable t) {
-                            System.out.println("peer synchronizeEditing failed." + t.getMessage());
-                        }
-
-                        @Override
-                        public void onCompleted() {
-                        }
-                    });
-                } else {
-                    System.out.println("Cannot get stub for " + ent.getKey());
-                    System.out.println("UserAgents: " + userAgents);
-                }
+                    @Override
+                    public void onCompleted() {
+                    }
+                });
+            } else {
+                System.out.println("Cannot get stub for " + ent.getKey());
+                System.out.println("UserAgents: " + userAgents);
             }
         }
     }

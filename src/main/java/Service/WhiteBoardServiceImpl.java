@@ -38,9 +38,9 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
     }
 
     @Override
-    public void getApprove(com.google.protobuf.StringValue request,StreamObserver<Response> responseObserver) {
+    public void getApprove(com.google.protobuf.StringValue request, StreamObserver<Response> responseObserver) {
         logger.severe("Received getApprove request: " + request.getValue());
-        if(wb.getApproveFromUI(request.getValue())) {
+        if (wb.getApproveFromUI(request.getValue())) {
             responseObserver.onNext(Response.newBuilder().setSuccess(true).setMessage("Welcome " + request.getValue()).build());
 //            chatStreamObservers.put(request.getValue(),
         } else {
@@ -51,7 +51,7 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
 
     @Override
     public void registerPeer(Whiteboard.IP_Port ip_port,
-                             io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver){
+                             io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         logger.severe("Received registerPeer request: " + ip_port.getIp() + " " + ip_port.getPort());
         ManagedChannel channel = ManagedChannelBuilder.forAddress(ip_port.getIp(), Integer.parseInt(ip_port.getPort())).usePlaintext().build();
         wb.registerPeer(ip_port.getUsername(), ip_port.getIp(), ip_port.getPort(), channel);
@@ -79,8 +79,8 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
         logger.severe("Received shape: " + requestShape.getShapeString());
         CanvasShape shape =
                 requestShape.getShapeString() == "text" ?
-                        new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())),requestShape.getUsername(),protoPointsToArrayList(requestShape.getPointsList().stream().toList()), requestShape.getStrokeInt()) :
-                new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getX(0), requestShape.getX(1), requestShape.getX(2), requestShape.getX(3), requestShape.getStrokeInt());
+                        new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getUsername(), protoPointsToArrayList(requestShape.getPointsList().stream().toList()), requestShape.getStrokeInt()) :
+                        new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getX(0), requestShape.getX(1), requestShape.getX(2), requestShape.getX(3), requestShape.getStrokeInt());
         wb.SynchronizeCanvas(shape);
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
         responseObserver.onCompleted();
@@ -102,10 +102,11 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
 //        responseObserver.onCompleted();
 //    }
 
-    public void synchronizeEditing(whiteboard.Whiteboard.SynchronizeUserRequest request,
-                                   io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
-        logger.severe("Received synchronize editing request: " + request.getOperation() +" "+ request.getUsername());
-        wb.SynchronizeEditing(request.getOperation(), request.getUsername());
+    @Override
+    public void reportUpdEditing(whiteboard.Whiteboard.SynchronizeUserRequest request,
+                                 io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
+        logger.severe("Received synchronize editing request: " + request.getOperation() + " " + request.getUsername());
+        wb.broadCastEditing(request.getOperation(), request.getUsername());
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
         responseObserver.onCompleted();
     }

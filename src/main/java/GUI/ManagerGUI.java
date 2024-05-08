@@ -343,7 +343,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     @Override
     public void mousePressed(MouseEvent e) {
 
-        wb.SynchronizeEditing("add", username);
+        wb.reportUpdEditing("add", username);
 
         x1 = e.getX();
         y1 = e.getY();
@@ -355,7 +355,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     @Override
     public void mouseReleased(MouseEvent e) {
 
-        wb.SynchronizeEditing("remove", username);
+        wb.reportUpdEditing("remove", username);
 
         x2 = e.getX();
         y2 = e.getY();
