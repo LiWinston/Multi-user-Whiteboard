@@ -27,6 +27,7 @@ new FormModel {
 					name: "canvasPanel"
 					"background": new java.awt.Color( 255, 255, 255, 255 )
 					"border": new javax.swing.border.TitledBorder( new javax.swing.border.EtchedBorder( 1, null, null ), "Canvas area", 2, 0, new com.jformdesigner.model.SwingDerivedFont( null, 0, 14, true ), null )
+					"cursor": new java.awt.Cursor( 1 )
 				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
 					"row": 2
 					"rowSpan": 2
@@ -52,6 +53,7 @@ new FormModel {
 							name: "userTA"
 							"editable": false
 							"margin": new java.awt.Insets( 10, 10, 10, 10 )
+							"focusable": false
 						} )
 					}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
 						"fill": 3

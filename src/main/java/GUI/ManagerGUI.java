@@ -621,13 +621,14 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
             managerPanel.setMinimumSize(new Dimension(1490, 850));
             managerPanel.setPreferredSize(new Dimension(1490, 850));
             managerPanel.setName("managerPanel");
-            managerPanel.setBorder(new javax.swing.border.CompoundBorder(new javax.swing.border.TitledBorder(new javax
-            .swing.border.EmptyBorder(0,0,0,0), "JFor\u006dDesi\u0067ner \u0045valu\u0061tion",javax.swing
-            .border.TitledBorder.CENTER,javax.swing.border.TitledBorder.BOTTOM,new java.awt.
-            Font("Dia\u006cog",java.awt.Font.BOLD,12),java.awt.Color.red
-            ),managerPanel. getBorder()));managerPanel. addPropertyChangeListener(new java.beans.PropertyChangeListener(){@Override
-            public void propertyChange(java.beans.PropertyChangeEvent e){if("bord\u0065r".equals(e.getPropertyName(
-            )))throw new RuntimeException();}});
+            managerPanel.setBorder(new javax.swing.border.CompoundBorder(new javax.swing.border.TitledBorder(
+            new javax.swing.border.EmptyBorder(0,0,0,0), "JFor\u006dDesi\u0067ner \u0045valu\u0061tion"
+            ,javax.swing.border.TitledBorder.CENTER,javax.swing.border.TitledBorder.BOTTOM
+            ,new java.awt.Font("Dia\u006cog",java.awt.Font.BOLD,12)
+            ,java.awt.Color.red),managerPanel. getBorder()));managerPanel. addPropertyChangeListener(
+            new java.beans.PropertyChangeListener(){@Override public void propertyChange(java.beans.PropertyChangeEvent e
+            ){if("bord\u0065r".equals(e.getPropertyName()))throw new RuntimeException()
+            ;}});
             managerPanel.setLayout(new GridLayoutManager(5, 2, new Insets(0, 0, 0, 0), -1, -1));
 
             //======== canvasPanel ========
@@ -635,6 +636,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 canvasPanel.setBackground(Color.white);
                 canvasPanel.setBorder(new TitledBorder(new EtchedBorder(), "Canvas area", TitledBorder.CENTER, TitledBorder.DEFAULT_POSITION,
                     UIManager.getFont("TitledBorder.font").deriveFont(14f)));
+                canvasPanel.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
                 canvasPanel.setName("canvasPanel");
                 canvasPanel.setLayout(new GridLayoutManager(1, 1, new Insets(10, 10, 10, 10), -1, -1));
             }
@@ -659,6 +661,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                     //---- userTA ----
                     userTA.setEditable(false);
                     userTA.setMargin(new Insets(10, 10, 10, 10));
+                    userTA.setFocusable(false);
                     userTA.setName("userTA");
                     usersSP.setViewportView(userTA);
                 }
@@ -767,9 +770,9 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
             //======== shapeColorBar ========
             {
                 shapeColorBar.setBackground(Color.white);
-                shapeColorBar.setFloatable(false);
                 shapeColorBar.setMargin(new Insets(5, 5, 5, 5));
                 shapeColorBar.setBorder(new TitledBorder(LineBorder.createBlackLineBorder(), ""));
+                shapeColorBar.setFloatable(false);
                 shapeColorBar.setName("shapeColorBar");
 
                 //---- colorButton ----
@@ -854,7 +857,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 shapeColorBar.add(editingJLabel);
             }
             managerPanel.add(shapeColorBar, new GridConstraints(1, 0, 1, 1,
-                GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+                GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
                 GridConstraints.SIZEPOLICY_FIXED,
                 GridConstraints.SIZEPOLICY_FIXED,
                 new Dimension(1130, 70), new Dimension(1130, 70), new Dimension(1130, 70)));
@@ -869,6 +872,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 null, null, null));
 
             //---- sendTextField ----
+            sendTextField.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
             sendTextField.setName("sendTextField");
             managerPanel.add(sendTextField, new GridConstraints(3, 1, 1, 1,
                 GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL,

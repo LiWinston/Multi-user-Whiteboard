@@ -19,6 +19,7 @@ new FormModel {
 				name: "canvasPanel"
 				"background": new java.awt.Color( 255, 255, 255, 255 )
 				"border": new javax.swing.border.TitledBorder( new javax.swing.border.EtchedBorder( 1, null, null ), "Canvas area", 2, 0, new com.jformdesigner.model.SwingDerivedFont( null, 0, 14, true ), null )
+				"cursor": new java.awt.Cursor( 1 )
 			}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
 				"row": 2
 				"rowSpan": 2
@@ -44,6 +45,7 @@ new FormModel {
 						name: "userTA"
 						"editable": false
 						"margin": new java.awt.Insets( 10, 10, 10, 10 )
+						"focusable": false
 					} )
 				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
 					"fill": 3
@@ -151,9 +153,9 @@ new FormModel {
 			add( new FormContainer( "javax.swing.JToolBar", new FormLayoutManager( class javax.swing.JToolBar ) ) {
 				name: "shapeColorBar"
 				"background": new java.awt.Color( 255, 255, 255, 255 )
-				"floatable": false
 				"margin": new java.awt.Insets( 5, 5, 5, 5 )
 				"border": new javax.swing.border.TitledBorder( #LineBorder0, "" )
+				"floatable": false
 				add( new FormComponent( "javax.swing.JButton" ) {
 					name: "colorButton"
 					"maximumSize": new java.awt.Dimension( 108, 40 )
@@ -226,7 +228,7 @@ new FormModel {
 				} )
 			}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
 				"row": 1
-				"fill": 1
+				"fill": 3
 				"hSizePolicy": 0
 				"vSizePolicy": 0
 				"minimumSize": new java.awt.Dimension( 1130, 70 )
@@ -244,6 +246,7 @@ new FormModel {
 			} )
 			add( new FormComponent( "javax.swing.JTextField" ) {
 				name: "sendTextField"
+				"cursor": new java.awt.Cursor( 2 )
 			}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
 				"column": 1
 				"row": 3
