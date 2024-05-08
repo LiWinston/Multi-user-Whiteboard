@@ -347,8 +347,10 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
         x1 = e.getX();
         y1 = e.getY();
-        if (shapeDrawing.equals("pen") || shapeDrawing.equals("eraser")) {
+        if(pointArrayList == null){
             pointArrayList = new ArrayList<>();
+        }else{
+            pointArrayList.clear();
         }
     }
 
