@@ -28,7 +28,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
     private JButton saveAsButton;
     private JButton closeButton;
     private JColorChooser colorChooser;
-    private String shapeDrawing = "pen";
+    private String currentShapeType = "pen";
     private Color color = Color.BLACK;
     private int x1, x2, y1, y2;
     private JLabel IpLabel;
@@ -203,7 +203,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
             int index = i; // 使用 final 局部变量来解决 Lambda 表达式中的访问问题
             buttons[i].addActionListener(e -> {
                 chooseToolButton(index);
-                shapeDrawing = shapes[index];
+                currentShapeType = shapes[index];
             });
         }
     }
@@ -252,19 +252,20 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
         int strokeInShape = Integer.parseInt(strokeCB.getSelectedItem().toString());
 
         CanvasShape canvasShape;
-        if (shapeDrawing.equals("pen") || shapeDrawing.equals("eraser")) {
+        if (currentShapeType.equals("pen") || currentShapeType.equals("eraser")) {
             Color tempColor = color;
-            if (shapeDrawing.equals("eraser")) {
+            if (currentShapeType.equals("eraser")) {
                 tempColor = Color.white;
             }
-            canvasShape = new CanvasShape(shapeDrawing, tempColor, username,pointArrayList, strokeInShape);
-        } else if (shapeDrawing.equals("text")) {
-            canvasShape = new CanvasShape(shapeDrawing, color, x1, x2, y1, y2, strokeInShape);
+            canvasShape = new CanvasShape(currentShapeType, tempColor, username,pointArrayList, strokeInShape);
+        } else if (currentShapeType.equals("text")) {
+            canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
             String texts = JOptionPane.showInputDialog(peerFrame, "input your text", "text", JOptionPane.PLAIN_MESSAGE, null, null, null).toString();
             canvasShape.setText(texts);
             canvasShape.setStrokeInt(Integer.parseInt(strokeCB.getSelectedItem().toString()));
         } else {
-            canvasShape = new CanvasShape(shapeDrawing, color, x1, x2, y1, y2, strokeInShape);
+            //起终点可界定的图形
+            canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
         }
 
         canvasShape.setFill(isFill);
@@ -290,13 +291,13 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
         int y4 = y1;
         canvasGraphics = (Graphics2D) canvasPanel.getGraphics();
         Stroke tempStroke = new BasicStroke(Integer.parseInt(strokeCB.getSelectedItem().toString()));
-        if (shapeDrawing.equals("pen") || shapeDrawing.equals("eraser")) {
+        if (currentShapeType.equals("pen") || currentShapeType.equals("eraser")) {
             if (!pointArrayList.isEmpty()) {
                 x4 = (int) pointArrayList.get(pointArrayList.size() - 1).getX();
                 y4 = (int) pointArrayList.get(pointArrayList.size() - 1).getY();
             }
             Color tempColor = color;
-            if (shapeDrawing.equals("eraser")) {
+            if (currentShapeType.equals("eraser")) {
                 tempColor = Color.white;
             }
             canvasGraphics.setPaint(tempColor);

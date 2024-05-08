@@ -5,6 +5,13 @@ package whiteboard;
 import "google/protobuf/empty.proto";
 import "google/protobuf/wrappers.proto"; // 引入包含StringValue的文件
 
+message Color {
+  uint32 red = 1;
+  uint32 green = 2;
+  uint32 blue = 3;
+  uint32 alpha = 4;
+}
+
 // 基本图形数据结构
 message _CanvasShape {
   string shapeString = 1;
