@@ -56,8 +56,9 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
         logger.severe("Received registerPeer request: " + ip_port.getIp() + " " + ip_port.getPort());
         ManagedChannel channel = ManagedChannelBuilder.forAddress(ip_port.getIp(), Integer.parseInt(ip_port.getPort())).usePlaintext().build();
         wb.registerPeer(ip_port.getUsername(), ip_port.getIp(), ip_port.getPort(), channel);
-        for (String editingUser : wb.getEditingUser()) {
-            Context.current().fork().run(() -> {
+
+        Context.current().fork().run(() -> {
+            for (String editingUser : wb.getEditingUser()) {
                 wb.userAgents.get(ip_port.getUsername()).updEditing(
                         Whiteboard.SynchronizeUserRequest.newBuilder().setOperation("add").setUsername(editingUser).build(),
                         new StreamObserver<com.google.protobuf.Empty>() {
@@ -73,9 +74,10 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
                             public void onCompleted() {
                             }
                         });
-            });
+            }
+        });
 
-        }
+
         System.out.println("registerPeer generated channel" + channel);
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
         responseObserver.onCompleted();
