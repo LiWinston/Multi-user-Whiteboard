@@ -5,6 +5,7 @@ import WBSYS.CanvasShape;
 import WBSYS.parameters;
 import com.google.common.collect.ConcurrentHashMultiset;
 import com.google.protobuf.Empty;
+import io.grpc.Context;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
 import whiteboard.WhiteBoardClientServiceGrpc;
@@ -352,33 +353,37 @@ public class WhiteBoard implements IWhiteBoard {
         System.out.println(userAgents);
         //manager自身更改更改完毕后向所有peer同步 除了自身客户端
         //也得除了username消息来源
-        for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
-//            if (ent.getKey().equals("Manager") || ent.getKey().equals(username)) {
-//                continue;
-//            }
-            WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
-            if (stb != null) {
-                stb.updEditing(Whiteboard.SynchronizeUserRequest.newBuilder().setOperation(operation).
-                        setUsername(username).build(), new StreamObserver<Empty>() {
-                    @Override
-                    public void onNext(Empty empty) {
-                        System.out.println("peer synchronizeEditing success.");
-                    }
+        Context newContext = Context.current().fork();
+        Context origContext = newContext.attach();
+        try {
+            for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
+                WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
+                if (stb != null) {
+                    stb.updEditing(Whiteboard.SynchronizeUserRequest.newBuilder().setOperation(operation).
+                            setUsername(username).build(), new StreamObserver<Empty>() {
+                        @Override
+                        public void onNext(Empty empty) {
+                            System.out.println("peer synchronizeEditing success.");
+                        }
 
-                    @Override
-                    public void onError(Throwable t) {
-                        System.out.println("peer synchronizeEditing failed." + t.getMessage());
-                    }
+                        @Override
+                        public void onError(Throwable t) {
+                            System.out.println("peer synchronizeEditing failed." + t.getMessage());
+                        }
 
-                    @Override
-                    public void onCompleted() {
-                    }
-                });
-            } else {
-                System.out.println("Cannot get stub for " + ent.getKey());
-                System.out.println("UserAgents: " + userAgents);
+                        @Override
+                        public void onCompleted() {
+                        }
+                    });
+                } else {
+                    System.out.println("Cannot get stub for " + ent.getKey());
+                    System.out.println("UserAgents: " + userAgents);
+                }
             }
+        } finally {
+            newContext.detach(origContext);
         }
+
     }
 
     public ArrayList<String> getMessageArrayList() {
