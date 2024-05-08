@@ -15,6 +15,7 @@ import java.awt.event.*;
 import java.awt.geom.Point2D;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static WBSYS.parameters.chatMessageFormat;
 
@@ -389,7 +390,9 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         }
 
         canvasShape.setFill(isFill);
+        new AtomicReference<>(wb.getCanvasShapeArrayList()).get().add(canvasShape);
         wb.pushShape(canvasShape);
+
     }
 
     @Override
@@ -486,18 +489,12 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
     @Override
     public void reDraw() {
-        new Thread() {
-            @Override
-            public void run() {
-                ArrayList<CanvasShape> shapeArrayList = null;
-
-                shapeArrayList = wb.getCanvasShapeArrayList();
-
-                for (CanvasShape shape : shapeArrayList) {
-                    drawCanvasShape(shape);
-                }
+        new Thread(() -> {
+            AtomicReference<ArrayList<CanvasShape>> shapeArrayList = new AtomicReference<>(wb.getCanvasShapeArrayList());
+            for (CanvasShape shape : shapeArrayList.get()) {
+                drawCanvasShape(shape);
             }
-        }.start();
+        }).start();
     }
 
 
@@ -578,7 +575,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
     @Override
     public void windowDeactivated(WindowEvent e) {
-        // not use it
+        reDraw();
     }
 
     private void initComponents() {

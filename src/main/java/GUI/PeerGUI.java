@@ -12,6 +12,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static WBSYS.parameters.chatMessageFormat;
 
@@ -276,6 +277,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
         }
 
         canvasShape.setFill(isFill);
+        new AtomicReference<>(wb.getCanvasShapeArrayList()).get().add(canvasShape);
         wb.pushShape(canvasShape);
 
     }
@@ -377,18 +379,12 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
 
     @Override
     public void reDraw() {
-        new Thread() {
-            @Override
-            public void run() {
-                ArrayList<CanvasShape> shapeArrayList = null;
-
-                shapeArrayList = wb.getCanvasShapeArrayList();
-
-                for (CanvasShape shape : shapeArrayList) {
-                    drawCanvasShape(shape);
-                }
+        new Thread(() -> {
+            AtomicReference<ArrayList<CanvasShape>> shapeArrayList = new AtomicReference<>(wb.getCanvasShapeArrayList());
+            for (CanvasShape shape : shapeArrayList.get()) {
+                drawCanvasShape(shape);
             }
-        }.start();
+        }).start();
     }
 
 
@@ -467,7 +463,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
 
     @Override
     public void windowDeactivated(WindowEvent e) {
-
+        reDraw();
     }
 
     private void initComponents() {
