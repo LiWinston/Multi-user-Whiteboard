@@ -56,6 +56,7 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
                         new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())),requestShape.getUsername(),protoPointsToArrayList(requestShape.getPointsList().stream().toList()), requestShape.getStrokeInt()) :
                         new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getX(0), requestShape.getX(1), requestShape.getX(2), requestShape.getX(3), requestShape.getStrokeInt());
         wb.SynchronizeCanvas(shape);
+        responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
         responseObserver.onCompleted();
     }
 
@@ -64,6 +65,7 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
                                    io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         logger.severe("Received synchronize editing request: " + request.getOperation() +" "+ request.getUsername());
         wb.SynchronizeEditing(request.getOperation(), request.getUsername());
+        responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
         responseObserver.onCompleted();
     }
 }
