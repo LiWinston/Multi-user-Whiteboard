@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.logging.Logger;
 
-import static WBSYS.parameters.isValidPort;
+import static WBSYS.Properties.isValidPort;
 
 
 public class WBServer {

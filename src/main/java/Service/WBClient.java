@@ -15,7 +15,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import static WBSYS.parameters.isValidPort;
+import static WBSYS.Properties.isValidPort;
 
 public class WBClient {
     private static final String DEFAULT_WHITEBOARD_NAME = "unnamed whiteboard";
