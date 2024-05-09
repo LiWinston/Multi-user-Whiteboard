@@ -28,6 +28,10 @@ message UserList {
   repeated string usernames = 1;
 }
 
+message UserName {
+  string username = 1;
+}
+
 // 用于同步聊天消息
 message ChatMessage {
   string message = 1;
@@ -94,6 +98,7 @@ service WhiteBoardService {
 
   //多发单收 客户端流
   rpc s_pushShape(stream _CanvasShape) returns (Response);
+
 //  // 新建文件
 //  rpc NewFile(google.protobuf.Empty) returns (google.protobuf.Empty);
 //
@@ -102,6 +107,10 @@ service WhiteBoardService {
 
   // 管理员关闭
   rpc ManagerClose(google.protobuf.Empty) returns (google.protobuf.Empty);
+}
+
+service WhiteBoardSecuredService{
+  rpc forceClearTmp(UserName) returns (google.protobuf.Empty);
 }
 
 service WhiteBoardClientService {

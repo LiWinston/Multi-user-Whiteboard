@@ -441,6 +441,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
 
     }
 
+
     @Override
     public void warningFromManager(String message) {
         JOptionPane.showMessageDialog(peerFrame, message);

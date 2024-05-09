@@ -50,4 +50,6 @@ public interface IWhiteBoard{
     boolean checkConflictOk(CanvasShape shape);
 
     <K, V> Map<K,V> getTempShapes();
+
+    void requestForceClearTmp();
 }

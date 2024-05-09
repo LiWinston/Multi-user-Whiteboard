@@ -74,6 +74,7 @@ public class WBServer {
         server = ServerBuilder.forPort(Integer.parseInt(port)).
                 addService(new WhiteBoardServiceImpl(wb, logger)).
                 addService(new WhiteBoardClientImpl(wb, logger)).
+                addService(new WhiteBoardSecuredServiceImpl(wb, logger)).
                 build().start();
         logger.info("grpc Server started, listening on " + port);
 

@@ -12,6 +12,7 @@ import io.grpc.stub.StreamObserver;
 import whiteboard.WhiteBoardClientServiceGrpc;
 import whiteboard.WhiteBoardServiceGrpc;
 import whiteboard.Whiteboard;
+import whiteboard.Whiteboard.UserName;
 
 import javax.swing.*;
 import java.awt.*;
@@ -631,6 +632,25 @@ public class WhiteBoard implements IWhiteBoard {
             }
         }
         return true;
+    }
+
+    @Override
+    public void requestForceClearTmp() {
+        managerStub.forceClearTmp(UserName.newBuilder().setUsername(getSelfUI().getUsername()).build(), new StreamObserver<Empty>() {
+            @Override
+            public void onNext(Empty empty) {
+                System.out.println("clearTmpShapes success.");
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                System.out.println("clearTmpShapes failed." + t.getMessage());
+            }
+
+            @Override
+            public void onCompleted() {
+            }
+        });
     }
 
     private boolean overlapBoundingBox(CanvasShape shape1, CanvasShape shape2) {

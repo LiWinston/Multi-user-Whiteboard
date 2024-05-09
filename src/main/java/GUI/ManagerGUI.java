@@ -413,9 +413,10 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        wb.previewTmpStream.onCompleted();
-        wb.previewTmpStream = null;
-
+        if(wb.previewTmpStream != null){
+            wb.previewTmpStream.onCompleted();
+            wb.previewTmpStream = null;
+        }
         Futures.addCallback(futurePreviewAccept, new FutureCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
@@ -454,7 +455,14 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                                 canvasShape = new CanvasShape(currentShapeType, tempColor, username, pointArrayList, strokeInShape);
                             } else if (currentShapeType.equals("text")) {
                                 canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
-                                String texts = JOptionPane.showInputDialog(managerFrame, "input your text", "text", JOptionPane.PLAIN_MESSAGE, null, null, null).toString();
+                                Object jin = JOptionPane.showInputDialog(managerFrame, "input your text", "text", JOptionPane.PLAIN_MESSAGE, null, null, null);
+                                String texts = jin.toString();
+
+                                if (jin == null || texts.isEmpty()) {
+                                    wb.requestForceClearTmp();
+                                    return;
+                                }
+
                                 canvasShape.setText(texts);
                                 canvasShape.setStrokeInt(Integer.parseInt(strokeCB.getSelectedItem().toString()));
                             } else {
@@ -489,8 +497,8 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 });
             }
         }, Executors.newSingleThreadExecutor());
-
     }
+
 
     @Override
     public void mouseEntered(MouseEvent e) {
