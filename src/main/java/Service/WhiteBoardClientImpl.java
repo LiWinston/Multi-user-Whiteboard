@@ -46,7 +46,9 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
     public void closeWindow(com.google.protobuf.Empty request,
                             io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         logger.severe("Received close window request");
-        wb.getSelfUI().closeWindow();
+        wb.getSelfUI().closeWindow("Manager has closed the session");
+        responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
+        responseObserver.onCompleted();
     }
 
     @Override
@@ -56,6 +58,7 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
         CanvasShape shape = protoShape2Shape(requestShape);
 
         wb.acceptRemoteShape(shape);
+        wb.getTempShapes().remove(shape.getUsername());
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
         responseObserver.onCompleted();
     }
@@ -92,8 +95,8 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
         logger.severe("Received preview shape request: " + request.getShapeString());
         CanvasShape shape = protoShape2Shape(request);
         SwingUtilities.invokeLater(() -> {
-
-            wb.getSelfUI().drawCanvasShape(shape);
+//            wb.getSelfUI().drawCanvasShape(shape);
+            wb.getTempShapes().put(shape.getUsername(), shape);
             wb.getSelfUI().reDraw();
         });
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
