@@ -388,12 +388,12 @@ public class WhiteBoard implements IWhiteBoard {
                             setUsername(username).build(), new StreamObserver<Empty>() {
                         @Override
                         public void onNext(Empty empty) {
-                            System.out.println("peer synchronizeEditing success.");
+                            System.out.println(ent.getKey() + " synchronizeEditing success.");
                         }
 
                         @Override
                         public void onError(Throwable t) {
-                            System.out.println("peer synchronizeEditing failed." + t.getMessage());
+                            System.out.println(ent.getKey() + " synchronizeEditing failed." + t.getMessage());
                         }
 
                         @Override
@@ -457,7 +457,7 @@ public class WhiteBoard implements IWhiteBoard {
 
                             @Override
                             public void onError(Throwable t) {
-                                System.out.println("peer updateShapes failed." + t.getMessage());
+                                System.out.println(ent.getKey() + "peer updateShapes failed." + t.getMessage());
                             }
 
                             @Override
@@ -537,13 +537,15 @@ public class WhiteBoard implements IWhiteBoard {
                 if(res.getSuccess()) {
                     System.out.println(res.getMessage());
                 } else {
-                    onError(new Throwable(res.getMessage()));
+                    //怎么回调到UI，以阻止当此释放鼠标之后的上传？
+//                    getSelfUI().warningFromManager(res.getMessage());
+//                    onError(new Throwable(res.getMessage()));
                 }
             }
 
             @Override
             public void onError(Throwable t) {
-                System.out.println("Push shape failed.");
+                System.out.println(t.getMessage());
             }
 
             @Override
@@ -557,13 +559,16 @@ public class WhiteBoard implements IWhiteBoard {
 
     public void sbroadCastShape(Whiteboard._CanvasShape _canvasShape) {
         for(Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
+            if(ent.getKey().equals(_canvasShape.getUsername())) {
+                continue;
+            }
             WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
             if(stb != null) {
                 Context.current().fork().run(() -> {
                     stb.sPreviewShapes(_canvasShape, new StreamObserver<Empty>() {
                         @Override
                         public void onNext(Empty empty) {
-                            System.out.println(ent.getKey() + "peer sbroadCastShape success.");
+                            System.out.println("sbroadCastShape TO:  "+ ent.getKey() + " success.");
                         }
 
                         @Override

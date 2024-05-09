@@ -156,7 +156,7 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
         return new io.grpc.stub.StreamObserver<whiteboard.Whiteboard._CanvasShape>() {
             @Override
             public void onNext(Whiteboard._CanvasShape _canvasShape) {
-                logger.info("Received shape: " + _canvasShape.getShapeString());
+                logger.info(" Stream_IN Shape: " + _canvasShape.getShapeString() + "### PREVIEW ###");
                 CanvasShape shape = protoShape2Shape(_canvasShape);
                 //shape间的交叠冲突检测，委派wb处理
                 if(wb.checkConflictOk(shape)){
@@ -164,7 +164,7 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
                     wb.sbroadCastShape(_canvasShape);
                 }else{
                     //中止接收，发送失败消息
-                    responseObserver.onNext(Response.newBuilder().setSuccess(false).setMessage("Conflict with other shapes").build());
+                    responseObserver.onNext(Response.newBuilder().setSuccess(false).setMessage("Conflict with other editing").build());
                     responseObserver.onError(new Throwable("Conflict"));
                 }
 

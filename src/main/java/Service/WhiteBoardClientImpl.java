@@ -96,5 +96,7 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
             wb.getSelfUI().drawCanvasShape(shape);
             wb.getSelfUI().reDraw();
         });
+        responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
+        responseObserver.onCompleted();
     }
 }
