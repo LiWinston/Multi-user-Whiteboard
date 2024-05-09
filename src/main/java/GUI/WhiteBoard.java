@@ -19,7 +19,6 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
 
 import static Service.Utils.shape2ProtoShape;
 
@@ -529,10 +528,10 @@ public class WhiteBoard implements IWhiteBoard {
         }
     }
 
-    StreamObserver<Whiteboard._CanvasShape> previewTmpStream = null;
+    volatile StreamObserver<Whiteboard._CanvasShape> previewTmpStream = null;
     //推送本用户的临时预览图形
     // in ConcurrentHashMap<String, CanvasShape> tempShapes -- to Server
-    public Future<Boolean> sBeginPushShape() {
+    public SettableFuture<Boolean> sBeginPushShape() {
         //allows UI Sync function awaits Async stream response obtained from sPushShape
         SettableFuture<Boolean> futureOK = SettableFuture.create();
         StreamObserver<whiteboard.Whiteboard.Response> response = new StreamObserver<>() {

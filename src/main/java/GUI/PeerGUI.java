@@ -1,9 +1,13 @@
 package GUI;
 
 import WBSYS.CanvasShape;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.SettableFuture;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 
+import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
@@ -13,13 +17,12 @@ import java.awt.event.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static Service.Utils.shape2ProtoShape;
 import static WBSYS.parameters.chatMessageFormat;
 import static java.lang.System.err;
-import static java.util.Objects.requireNonNull;
 
 public class PeerGUI implements IClient, MouseListener, MouseMotionListener, ActionListener, WindowListener {
     private final String[] shapes = {"pen", "line", "circle", "oval", "rectangle", "eraser", "text"};
@@ -43,7 +46,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
     private ArrayList<Point2D> pointArrayList;
     private Graphics2D canvasGraphics;
     private boolean isFill = false;
-    Future<Boolean> futurePreviewAccept;
+    SettableFuture<Boolean> futurePreviewAccept;
 
 
     public PeerGUI(WhiteBoard whiteBoard, String username) {
@@ -261,48 +264,81 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        //futurePreviewAccept requiresnotnull
-        if(requireNonNull(futurePreviewAccept).isDone()){
-            //检查previewRspStream 有没有被拒绝 或接受
-            try {
-                if(futurePreviewAccept.get()){
-                    //如果被接受，就pushShape
-                    wb.reportUpdEditing("remove", username);
+        wb.previewTmpStream.onCompleted();
+        wb.previewTmpStream = null;
 
-                    x2 = e.getX();
-                    y2 = e.getY();
-
-                    int strokeInShape = Integer.parseInt(strokeCB.getSelectedItem().toString());
-
-                    CanvasShape canvasShape;
-                    if (currentShapeType.equals("pen") || currentShapeType.equals("eraser")) {
-                        Color tempColor = color;
-                        if (currentShapeType.equals("eraser")) {
-                            tempColor = Color.white;
-                        }
-                        canvasShape = new CanvasShape(currentShapeType, tempColor, username, pointArrayList, strokeInShape);
-                    } else if (currentShapeType.equals("text")) {
-                        canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
-                        String texts = JOptionPane.showInputDialog(peerFrame, "input your text", "text", JOptionPane.PLAIN_MESSAGE, null, null, null).toString();
-                        canvasShape.setText(texts);
-                        canvasShape.setStrokeInt(Integer.parseInt(strokeCB.getSelectedItem().toString()));
+        Futures.addCallback(futurePreviewAccept, new FutureCallback<Boolean>() {
+            @Override
+            public void onSuccess(@Nullable Boolean result) {
+                // 调用 SwingUtilities 确保 UI 更新在正确的线程执行
+                SwingUtilities.invokeLater(() -> {
+                    if (Boolean.TRUE.equals(result)) {
+                        System.out.println("Preview accepted");
+                        conductPushShape();
                     } else {
-                        //起终点可界定的图形
-                        canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
+                        System.out.println("Preview rejected");
+                        // 进行拒绝后的操作，如不 pushShape
+                        reDraw();
                     }
-
-                    canvasShape.setFill(isFill);
-                    wb.getCanvasShapeArrayList().add(canvasShape);
-                    wb.pushShape(canvasShape);
-                    reDraw();//让pen落实到画布上
-                }
-            } catch (InterruptedException ex) {
-                err.println(ex);
-            } catch (ExecutionException ex) {
-                err.println(ex);
+                });
             }
-            futurePreviewAccept = null;
-        }
+
+            private void conductPushShape() {
+                try {
+                    if(futurePreviewAccept.get()){
+                        System.out.println("preview accepted");
+                        //如果被接受，就pushShape
+                        wb.reportUpdEditing("remove", username);
+
+                        x2 = e.getX();
+                        y2 = e.getY();
+
+                        int strokeInShape = Integer.parseInt(strokeCB.getSelectedItem().toString());
+
+                        CanvasShape canvasShape;
+                        if (currentShapeType.equals("pen") || currentShapeType.equals("eraser")) {
+                            Color tempColor = color;
+                            if (currentShapeType.equals("eraser")) {
+                                tempColor = Color.white;
+                            }
+                            canvasShape = new CanvasShape(currentShapeType, tempColor, username, pointArrayList, strokeInShape);
+                        } else if (currentShapeType.equals("text")) {
+                            canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
+                            String texts = JOptionPane.showInputDialog(peerFrame, "input your text", "text", JOptionPane.PLAIN_MESSAGE, null, null, null).toString();
+                            canvasShape.setText(texts);
+                            canvasShape.setStrokeInt(Integer.parseInt(strokeCB.getSelectedItem().toString()));
+                        } else {
+                            //起终点可界定的图形
+                            canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
+                        }
+
+                        canvasShape.setFill(isFill);
+                        wb.getCanvasShapeArrayList().add(canvasShape);
+                        wb.pushShape(canvasShape);
+                        reDraw();//让pen落实到画布上
+                    }else{
+                        System.out.println("preview rejected");
+                        //如果被拒绝，就不pushShape
+                        reDraw();
+                    }
+                } catch (InterruptedException ex) {
+                    err.println(ex);
+                } catch (ExecutionException ex) {
+                    err.println(ex);
+                }
+                futurePreviewAccept = null;
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                // 处理错误
+                SwingUtilities.invokeLater(() -> {
+                    System.err.println("Error during preview: " + t.getMessage());
+                    // 可以在这里进行错误处理相关的 UI 更新
+                });
+            }
+        }, Executors.newSingleThreadExecutor());
+
     }
     @Override
     public void mouseEntered(MouseEvent e) {
