@@ -72,6 +72,9 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         chatTA.setAutoscrolls(true);
         sendTextField.setAutoscrolls(true);
         userTA.setAutoscrolls(true);
+        if(canvasGraphics == null){
+            canvasGraphics = (Graphics2D) canvasPanel.getGraphics();
+        }
 
         canvasPanel.addMouseListener(this);
         canvasPanel.addMouseMotionListener(this);
@@ -250,78 +253,83 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         });
     }
 
+    @SuppressWarnings("SynchronizeOnNonFinalField")
     public void drawCanvasShape(CanvasShape canvasShape) {
-        String shapeType = canvasShape.getShapeString();
-        int x1 = canvasShape.getX1();
-        int y1 = canvasShape.getY1();
-        int x2 = canvasShape.getX2();
-        int y2 = canvasShape.getY2();
-        Color shapeColor = canvasShape.getColor();
-        String username = canvasShape.getUsername();
-        int strokeInt = canvasShape.getStrokeInt();
-        Stroke stroke = new BasicStroke(strokeInt);
-        canvasGraphics = (Graphics2D) canvasPanel.getGraphics();
+        SwingUtilities.invokeLater(() -> {
+            Thread.ofVirtual().start(() -> {
 
-        synchronized (canvasGraphics){
-            canvasGraphics.setPaint(shapeColor);
-            switch (shapeType) {
-                case "line" -> {
-                    canvasGraphics.setStroke(stroke);
-                    canvasGraphics.drawLine(x1, y1, x2, y2);
-                }
-                case "circle", "oval", "rectangle" -> {
-                    canvasGraphics.setStroke(stroke);
-                    int height = Math.abs(y2 - y1);
-                    int width = Math.abs(x2 - x1);
-                    if (canvasShape.isFill()) {
-                        switch (shapeType) {
-                            case "circle":
-                                canvasGraphics.fillOval(Math.min(x1, x2), Math.min(y1, y2), Math.max(width, height), Math.max(width, height));
-                                break;
-                            case "oval":
-                                canvasGraphics.fillOval(Math.min(x1, x2), Math.min(y1, y2), width, height);
-                                break;
-                            case "rectangle":
-                                canvasGraphics.fillRect(Math.min(x1, x2), Math.min(y1, y2), width, height);
-                                break;
+                String shapeType = canvasShape.getShapeString();
+                int x1 = canvasShape.getX1();
+                int y1 = canvasShape.getY1();
+                int x2 = canvasShape.getX2();
+                int y2 = canvasShape.getY2();
+                Color shapeColor = canvasShape.getColor();
+                String username = canvasShape.getUsername();
+                int strokeInt = canvasShape.getStrokeInt();
+                Stroke stroke = new BasicStroke(strokeInt);
+//            canvasGraphics = (Graphics2D) canvasPanel.getGraphics();
+
+                canvasGraphics.setPaint(shapeColor);
+                switch (shapeType) {
+                    case "line" -> {
+                        canvasGraphics.setStroke(stroke);
+                        canvasGraphics.drawLine(x1, y1, x2, y2);
+                    }
+                    case "circle", "oval", "rectangle" -> {
+                        canvasGraphics.setStroke(stroke);
+                        int height = Math.abs(y2 - y1);
+                        int width = Math.abs(x2 - x1);
+                        if (canvasShape.isFill()) {
+                            switch (shapeType) {
+                                case "circle":
+                                    canvasGraphics.fillOval(Math.min(x1, x2), Math.min(y1, y2), Math.max(width, height), Math.max(width, height));
+                                    break;
+                                case "oval":
+                                    canvasGraphics.fillOval(Math.min(x1, x2), Math.min(y1, y2), width, height);
+                                    break;
+                                case "rectangle":
+                                    canvasGraphics.fillRect(Math.min(x1, x2), Math.min(y1, y2), width, height);
+                                    break;
+                            }
+                        } else {
+                            switch (shapeType) {
+                                case "circle":
+                                    canvasGraphics.drawOval(Math.min(x1, x2), Math.min(y1, y2), Math.max(width, height), Math.max(width, height));
+                                    break;
+                                case "oval":
+                                    canvasGraphics.drawOval(Math.min(x1, x2), Math.min(y1, y2), width, height);
+                                    break;
+                                case "rectangle":
+                                    canvasGraphics.drawRect(Math.min(x1, x2), Math.min(y1, y2), width, height);
+                                    break;
+                            }
                         }
-                    } else {
-                        switch (shapeType) {
-                            case "circle":
-                                canvasGraphics.drawOval(Math.min(x1, x2), Math.min(y1, y2), Math.max(width, height), Math.max(width, height));
-                                break;
-                            case "oval":
-                                canvasGraphics.drawOval(Math.min(x1, x2), Math.min(y1, y2), width, height);
-                                break;
-                            case "rectangle":
-                                canvasGraphics.drawRect(Math.min(x1, x2), Math.min(y1, y2), width, height);
-                                break;
+                    }
+                    case "text" -> {
+                        int size = canvasShape.getStrokeInt();
+                        canvasGraphics.setFont(new Font("Times New Roman", Font.PLAIN, size * 2 + 10));
+                        canvasGraphics.drawString(canvasShape.getText(), x1, y1);
+                    }
+                    case "pen", "eraser" -> {
+                        ArrayList<Point2D> points = canvasShape.getPoints();
+                        canvasGraphics.setStroke(stroke);
+                        if (points != null && points.size() > 1) {
+                            for (int i = 0; i < points.size() - 1; i++) {
+                                int x3 = (int) points.get(i).getX();
+                                int y3 = (int) points.get(i).getY();
+                                int x4 = (int) points.get(i + 1).getX();
+                                int y4 = (int) points.get(i + 1).getY();
+                                canvasGraphics.setPaint(shapeColor);
+                                canvasGraphics.drawLine(x3, y3, x4, y4);
+                            }
                         }
                     }
                 }
-                case "text" -> {
-                    int size = canvasShape.getStrokeInt();
-                    canvasGraphics.setFont(new Font("Times New Roman", Font.PLAIN, size * 2 + 10));
-                    canvasGraphics.drawString(canvasShape.getText(), x1, y1);
-                }
-                case "pen", "eraser" -> {
-                    ArrayList<Point2D> points = canvasShape.getPoints();
-                    canvasGraphics.setStroke(stroke);
-                    if (points != null && points.size() > 1) {
-                        for (int i = 0; i < points.size() - 1; i++) {
-                            int x3 = (int) points.get(i).getX();
-                            int y3 = (int) points.get(i).getY();
-                            int x4 = (int) points.get(i + 1).getX();
-                            int y4 = (int) points.get(i + 1).getY();
-                            canvasGraphics.setPaint(shapeColor);
-                            canvasGraphics.drawLine(x3, y3, x4, y4);
-                        }
-                    }
-                }
-            }
-        }
-        //restore to chosen
-        canvasGraphics.setStroke(new BasicStroke(Integer.parseInt(strokeCB.getSelectedItem().toString())));
+
+                //restore to chosen
+                canvasGraphics.setStroke(new BasicStroke(Integer.parseInt(strokeCB.getSelectedItem().toString())));
+            });
+        });
     }
 
     private void setShapeButtons() {
@@ -355,7 +363,9 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
     @Override
     public void mousePressed(MouseEvent e) {
-
+        if(canvasGraphics == null){
+            canvasGraphics = (Graphics2D) canvasPanel.getGraphics();
+        }
         wb.reportUpdEditing("add", username);
 
         x1 = e.getX();
@@ -488,7 +498,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         int y3 = e.getY();
         int x4 = x1;
         int y4 = y1;
-        canvasGraphics = (Graphics2D) canvasPanel.getGraphics();
+//        canvasGraphics = (Graphics2D) canvasPanel.getGraphics();
         Stroke tempStroke = new BasicStroke(Integer.parseInt(strokeCB.getSelectedItem().toString()));
         if (currentShapeType.equals("pen") || currentShapeType.equals("eraser")) {
             if (pointArrayList.size() > 0) {
@@ -739,6 +749,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 canvasPanel.setName("canvasPanel");
                 canvasPanel.setLayout(new GridLayoutManager(1, 1, new Insets(10, 10, 10, 10), -1, -1));
             }
+            canvasGraphics = (Graphics2D) canvasPanel.getGraphics();
             managerPanel.add(canvasPanel, new GridConstraints(2, 0, 2, 1,
                 GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL,
                 GridConstraints.SIZEPOLICY_FIXED,
@@ -980,6 +991,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 new Dimension(350, 100), new Dimension(350, 100), new Dimension(350, 100)));
         }
         // JFormDesigner - End of component initialization  //GEN-END:initComponents  @formatter:on
+
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables  @formatter:off
