@@ -184,7 +184,7 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
             @Override
             public void onCompleted() {
                 responseObserver.onNext(Response.newBuilder().setSuccess(isOk).build());
-                responseObserver.onCompleted();
+                responseObserver.onCompleted();//没有这句则绘制不落实 待调研onNext里的responseObserver onnext是否会自动调用onCompleted
             }
 
         };

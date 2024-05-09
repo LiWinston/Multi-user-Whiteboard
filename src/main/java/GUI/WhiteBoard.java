@@ -2,7 +2,7 @@ package GUI;
 
 
 import WBSYS.CanvasShape;
-import WBSYS.parameters;
+import WBSYS.Properties;
 import com.google.common.collect.ConcurrentHashMultiset;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.Empty;
@@ -98,7 +98,7 @@ public class WhiteBoard implements IWhiteBoard {
                         public void onCompleted() {
                         }
                     });
-            this.pushMessage(parameters.managerMessage(kickedClient + " have been removed"));
+            this.pushMessage(Properties.managerMessage(kickedClient + " have been removed"));
             this.SynchronizeUser("remove", username);
             userAgents.remove(username);
         } else {
@@ -111,7 +111,7 @@ public class WhiteBoard implements IWhiteBoard {
         userList.removeIf(s -> s.equals(username));
 //        userAgents.remove(username); 没用 本地改这个没意义
         this.SynchronizeUser("remove", username);
-        this.pushMessage(parameters.managerMessage(username + " has exited!\n"));
+        this.pushMessage(Properties.managerMessage(username + " has exited!\n"));
     }
 
 
@@ -486,7 +486,7 @@ public class WhiteBoard implements IWhiteBoard {
 
     public void acceptRemoteShape(CanvasShape canvasShape) {
         canvasShapeArrayList.add(canvasShape);
-        getSelfUI().updateShapes(canvasShape);
+//        getSelfUI().updateShapes(canvasShape);
     }
 
 

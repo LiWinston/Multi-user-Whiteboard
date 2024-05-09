@@ -1,6 +1,7 @@
 package GUI;
 
 import WBSYS.CanvasShape;
+import WBSYS.Properties;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
@@ -20,7 +21,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 import static Service.Utils.shape2ProtoShape;
-import static WBSYS.parameters.chatMessageFormat;
+import static WBSYS.Properties.chatMessageFormat;
 import static java.lang.System.err;
 
 public class PeerGUI implements IClient, MouseListener, MouseMotionListener, ActionListener, WindowListener {
@@ -255,7 +256,9 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
 
     @Override
     public void mousePressed(MouseEvent e) {
-
+        if(canvasGraphics == null){
+            canvasGraphics = (Graphics2D) canvasPanel.getGraphics();
+        }
         wb.reportUpdEditing("add", username);
 
         x1 = e.getX();
@@ -267,25 +270,36 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
         }
 
         if (currentShapeType.equals("text")) {
-            new Thread(() -> {  // 创建新线程以避免UI阻塞
+            if(Properties.RepeatTextPreviewSending){
+                new Thread(() -> {  // 创建新线程以避免UI阻塞
+                    CanvasShape tmp = new CanvasShape(currentShapeType, Color.GRAY, x1 - 5, x1 + 5, y1 - 5, y1 + 5, Integer.parseInt(strokeCB.getSelectedItem().toString()));
+                    tmp.setText("Other user is typing...");
+                    if (wb.previewTmpStream == null) {
+                        futurePreviewAccept = wb.sBeginPushShape();
+                    }
+                    for (int i = 0; i < 100; i++) {  // 循环发送10次
+                        if (wb.previewTmpStream != null) {
+                            wb.previewTmpStream.onNext(shape2ProtoShape(tmp));  // 发送消息
+                        }
+                        try {
+                            Thread.sleep(20);  // 等待200毫秒
+                        } catch (InterruptedException f) {
+                            Thread.currentThread().interrupt();
+                            System.err.println("Sending thread was interrupted.");
+                            break;
+                        }
+                    }
+                }).start();  // 启动线程
+            }else{
                 CanvasShape tmp = new CanvasShape(currentShapeType, Color.GRAY, x1 - 5, x1 + 5, y1 - 5, y1 + 5, Integer.parseInt(strokeCB.getSelectedItem().toString()));
                 tmp.setText("Other user is typing...");
                 if (wb.previewTmpStream == null) {
                     futurePreviewAccept = wb.sBeginPushShape();
                 }
-                for (int i = 0; i < 100; i++) {  // 循环发送10次
-                    if (wb.previewTmpStream != null) {
-                        wb.previewTmpStream.onNext(shape2ProtoShape(tmp));  // 发送消息
-                    }
-                    try {
-                        Thread.sleep(20);  // 等待200毫秒
-                    } catch (InterruptedException f) {
-                        Thread.currentThread().interrupt();
-                        System.err.println("Sending thread was interrupted.");
-                        break;
-                    }
+                if (wb.previewTmpStream != null) {
+                    wb.previewTmpStream.onNext(shape2ProtoShape(tmp));  // 发送消息
                 }
-            }).start();  // 启动线程
+            }
         }
     }
 
@@ -483,16 +497,18 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
 
     @Override
     public void reDraw() {
-        canvasPanel.repaint();
-        new Thread(() -> {
-            for (CanvasShape shape : wb.getTempShapes().values()) {
-                drawCanvasShape(shape);
-            }
+        SwingUtilities.invokeLater(() -> {
+            canvasPanel.repaint();
+            new Thread(() -> {
+                for (CanvasShape shape : wb.getTempShapes().values()) {
+                    drawCanvasShape(shape);
+                }
 //            AtomicReference<ArrayList<CanvasShape>> shapeArrayList = new AtomicReference<>(wb.getCanvasShapeArrayList());
-            for (CanvasShape shape : wb.getCanvasShapeArrayList()) {
-                drawCanvasShape(shape);
-            }
-        }).start();
+                for (CanvasShape shape : wb.getCanvasShapeArrayList()) {
+                    drawCanvasShape(shape);
+                }
+            }).start();
+        });
     }
 
 

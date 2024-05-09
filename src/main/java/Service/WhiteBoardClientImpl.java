@@ -56,9 +56,11 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
                              io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         logger.info("Received update shape request: " + requestShape.getShapeString());
         CanvasShape shape = protoShape2Shape(requestShape);
-
-        wb.acceptRemoteShape(shape);
         wb.getTempShapes().remove(shape.getUsername());
+        wb.acceptRemoteShape(shape);
+        //以多一次重绘的代价解决文字预览停驻问题
+        //关联改动：注释掉了acceptRemoteShape中的updateShapes
+        wb.getSelfUI().reDraw();
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
         responseObserver.onCompleted();
     }

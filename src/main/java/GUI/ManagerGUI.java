@@ -1,6 +1,7 @@
 package GUI;
 
 import WBSYS.CanvasShape;
+import WBSYS.Properties;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
@@ -21,7 +22,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 import static Service.Utils.shape2ProtoShape;
-import static WBSYS.parameters.chatMessageFormat;
+import static WBSYS.Properties.chatMessageFormat;
 import static java.lang.System.err;
 
 
@@ -377,25 +378,36 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         }
 
         if (currentShapeType.equals("text")) {
-            new Thread(() -> {  // 创建新线程以避免UI阻塞
+            if(Properties.RepeatTextPreviewSending){
+                new Thread(() -> {  // 创建新线程以避免UI阻塞
+                    CanvasShape tmp = new CanvasShape(currentShapeType, Color.GRAY, x1 - 5, x1 + 5, y1 - 5, y1 + 5, Integer.parseInt(strokeCB.getSelectedItem().toString()));
+                    tmp.setText("Other user is typing...");
+                    if (wb.previewTmpStream == null) {
+                        futurePreviewAccept = wb.sBeginPushShape();
+                    }
+                    for (int i = 0; i < 100; i++) {  // 循环发送10次
+                        if (wb.previewTmpStream != null) {
+                            wb.previewTmpStream.onNext(shape2ProtoShape(tmp));  // 发送消息
+                        }
+                        try {
+                            Thread.sleep(20);  // 等待200毫秒
+                        } catch (InterruptedException f) {
+                            Thread.currentThread().interrupt();
+                            System.err.println("Sending thread was interrupted.");
+                            break;
+                        }
+                    }
+                }).start();  // 启动线程
+            }else{
                 CanvasShape tmp = new CanvasShape(currentShapeType, Color.GRAY, x1 - 5, x1 + 5, y1 - 5, y1 + 5, Integer.parseInt(strokeCB.getSelectedItem().toString()));
                 tmp.setText("Other user is typing...");
                 if (wb.previewTmpStream == null) {
                     futurePreviewAccept = wb.sBeginPushShape();
                 }
-                for (int i = 0; i < 100; i++) {  // 循环发送10次
-                    if (wb.previewTmpStream != null) {
-                        wb.previewTmpStream.onNext(shape2ProtoShape(tmp));  // 发送消息
-                    }
-                    try {
-                        Thread.sleep(20);  // 等待200毫秒
-                    } catch (InterruptedException f) {
-                        Thread.currentThread().interrupt();
-                        System.err.println("Sending thread was interrupted.");
-                        break;
-                    }
+                if (wb.previewTmpStream != null) {
+                    wb.previewTmpStream.onNext(shape2ProtoShape(tmp));  // 发送消息
                 }
-            }).start();  // 启动线程
+            }
         }
     }
 
@@ -421,49 +433,51 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
             }
 
             private void conductPushShape() {
-                try {
-                    if(futurePreviewAccept.get()){
-                        System.out.println("preview accepted");
-                        //如果被接受，就pushShape
-                        wb.reportUpdEditing("remove", username);
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        if(futurePreviewAccept.get()){
+                            System.out.println("preview accepted");
+                            //如果被接受，就pushShape
+                            wb.reportUpdEditing("remove", username);
 
-                        x2 = e.getX();
-                        y2 = e.getY();
+                            x2 = e.getX();
+                            y2 = e.getY();
 
-                        int strokeInShape = Integer.parseInt(strokeCB.getSelectedItem().toString());
+                            int strokeInShape = Integer.parseInt(strokeCB.getSelectedItem().toString());
 
-                        CanvasShape canvasShape;
-                        if (currentShapeType.equals("pen") || currentShapeType.equals("eraser")) {
-                            Color tempColor = color;
-                            if (currentShapeType.equals("eraser")) {
-                                tempColor = Color.white;
+                            CanvasShape canvasShape;
+                            if (currentShapeType.equals("pen") || currentShapeType.equals("eraser")) {
+                                Color tempColor = color;
+                                if (currentShapeType.equals("eraser")) {
+                                    tempColor = Color.white;
+                                }
+                                canvasShape = new CanvasShape(currentShapeType, tempColor, username, pointArrayList, strokeInShape);
+                            } else if (currentShapeType.equals("text")) {
+                                canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
+                                String texts = JOptionPane.showInputDialog(managerFrame, "input your text", "text", JOptionPane.PLAIN_MESSAGE, null, null, null).toString();
+                                canvasShape.setText(texts);
+                                canvasShape.setStrokeInt(Integer.parseInt(strokeCB.getSelectedItem().toString()));
+                            } else {
+                                //起终点可界定的图形
+                                canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
                             }
-                            canvasShape = new CanvasShape(currentShapeType, tempColor, username, pointArrayList, strokeInShape);
-                        } else if (currentShapeType.equals("text")) {
-                            canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
-                            String texts = JOptionPane.showInputDialog(managerFrame, "input your text", "text", JOptionPane.PLAIN_MESSAGE, null, null, null).toString();
-                            canvasShape.setText(texts);
-                            canvasShape.setStrokeInt(Integer.parseInt(strokeCB.getSelectedItem().toString()));
-                        } else {
-                            //起终点可界定的图形
-                            canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
-                        }
 
-                        canvasShape.setFill(isFill);
-                        wb.getCanvasShapeArrayList().add(canvasShape);
-                        wb.pushShape(canvasShape);
-                        reDraw();//让pen落实到画布上
-                    }else{
-                        System.out.println("preview rejected");
-                        //如果被拒绝，就不pushShape
-                        reDraw();
+                            canvasShape.setFill(isFill);
+                            wb.getCanvasShapeArrayList().add(canvasShape);
+                            wb.pushShape(canvasShape);
+                            reDraw();//让pen落实到画布上
+                        }else{
+                            System.out.println("preview rejected");
+                            //如果被拒绝，就不pushShape
+                            reDraw();
+                        }
+                    } catch (InterruptedException ex) {
+                        err.println(ex);
+                    } catch (ExecutionException ex) {
+                        err.println(ex);
                     }
-                } catch (InterruptedException ex) {
-                    err.println(ex);
-                } catch (ExecutionException ex) {
-                    err.println(ex);
-                }
-                futurePreviewAccept = null;
+                    futurePreviewAccept = null;
+                });
             }
 
             @Override
@@ -543,6 +557,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 //        JOptionPane.showMessageDialog(managerFrame, message);
     }
 
+    //不带redraw
     @Override
     public void updateShapes(CanvasShape canvasShape) {
         new Thread() {
@@ -593,16 +608,18 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
     @Override
     public void reDraw() {
-        canvasPanel.repaint();
-        new Thread(() -> {
-            for (CanvasShape shape : wb.getTempShapes().values()) {
-                drawCanvasShape(shape);
-            }
+        SwingUtilities.invokeLater(() -> {
+            canvasPanel.repaint();
+            new Thread(() -> {
+                for (CanvasShape shape : wb.getTempShapes().values()) {
+                    drawCanvasShape(shape);
+                }
 //            AtomicReference<ArrayList<CanvasShape>> shapeArrayList = new AtomicReference<>(wb.getCanvasShapeArrayList());
-            for (CanvasShape shape : wb.getCanvasShapeArrayList()) {
-                drawCanvasShape(shape);
-            }
-        }).start();
+                for (CanvasShape shape : wb.getCanvasShapeArrayList()) {
+                    drawCanvasShape(shape);
+                }
+            }).start();
+        });
     }
 
 
