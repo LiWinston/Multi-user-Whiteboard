@@ -195,13 +195,13 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
     private void setStrokeCB() {
         strokeCB.addItem(1);
+        strokeCB.addItem(2);
         strokeCB.addItem(3);
         strokeCB.addItem(5);
         strokeCB.addItem(7);
         strokeCB.addItem(9);
         strokeCB.addItem(11);
-        strokeCB.addItem(15);
-        strokeCB.addItem(20);
+        strokeCB.addItem(26);
         strokeCB.addItem(25);
     }
 
