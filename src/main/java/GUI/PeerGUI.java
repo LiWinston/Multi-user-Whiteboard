@@ -18,7 +18,6 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static Service.Utils.shape2ProtoShape;
 import static WBSYS.parameters.chatMessageFormat;
@@ -478,9 +477,13 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
 
     @Override
     public void reDraw() {
+        canvasPanel.repaint();
         new Thread(() -> {
-            AtomicReference<ArrayList<CanvasShape>> shapeArrayList = new AtomicReference<>(wb.getCanvasShapeArrayList());
-            for (CanvasShape shape : shapeArrayList.get()) {
+            for (CanvasShape shape : wb.getTempShapes().values()) {
+                drawCanvasShape(shape);
+            }
+//            AtomicReference<ArrayList<CanvasShape>> shapeArrayList = new AtomicReference<>(wb.getCanvasShapeArrayList());
+            for (CanvasShape shape : wb.getCanvasShapeArrayList()) {
                 drawCanvasShape(shape);
             }
         }).start();
@@ -488,10 +491,11 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
 
 
     @Override
-    public void closeWindow() {
+    public void closeWindow(String message) {
         Thread.ofVirtual().start((() -> {
-            JOptionPane.showMessageDialog(peerFrame, "Your whiteboard is closing involuntarily");
+            JOptionPane.showMessageDialog(peerFrame, message.isEmpty() ? "Your whiteboard is closing involuntarily" : message);
             peerFrame.setVisible(false);
+            System.exit(0);
         }));
     }
 

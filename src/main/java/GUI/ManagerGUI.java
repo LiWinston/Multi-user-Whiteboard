@@ -583,7 +583,11 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
     @Override
     public void reDraw() {
+        canvasPanel.repaint();
         new Thread(() -> {
+            for (CanvasShape shape : wb.getTempShapes().values()) {
+                drawCanvasShape(shape);
+            }
 //            AtomicReference<ArrayList<CanvasShape>> shapeArrayList = new AtomicReference<>(wb.getCanvasShapeArrayList());
             for (CanvasShape shape : wb.getCanvasShapeArrayList()) {
                 drawCanvasShape(shape);
@@ -593,7 +597,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
 
     @Override
-    public void closeWindow() {
+    public void closeWindow(String message) {
 
     }
 
