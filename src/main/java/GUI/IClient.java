@@ -29,4 +29,5 @@ public interface IClient{
 
     void showEditing();
 
+    void drawCanvasShape(CanvasShape canvasShape);
 }

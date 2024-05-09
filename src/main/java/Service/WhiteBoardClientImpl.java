@@ -8,6 +8,7 @@ import io.grpc.stub.StreamObserver;
 import whiteboard.WhiteBoardClientServiceGrpc;
 import whiteboard.Whiteboard;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
@@ -91,5 +92,9 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
         logger.severe("Received preview shape request: " + request.getShapeString());
         CanvasShape shape = protoShape2Shape(request);
         wb.getTempShapes().put(shape.getUsername(), shape);
+        SwingUtilities.invokeLater(() -> {
+            wb.getSelfUI().drawCanvasShape(shape);
+            wb.getSelfUI().reDraw();
+        });
     }
 }

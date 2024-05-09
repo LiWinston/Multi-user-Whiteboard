@@ -133,7 +133,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
         });
     }
 
-    private void drawCanvasShape(CanvasShape canvasShape) {
+    public void drawCanvasShape(CanvasShape canvasShape) {
         String shapeType = canvasShape.getShapeString();
         int x1 = canvasShape.getX1();
         int y1 = canvasShape.getY1();
