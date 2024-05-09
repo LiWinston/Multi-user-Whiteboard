@@ -13,12 +13,14 @@ import whiteboard.WhiteBoardClientServiceGrpc;
 import whiteboard.WhiteBoardServiceGrpc;
 import whiteboard.Whiteboard;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 
 import static Service.Utils.shape2ProtoShape;
 
@@ -61,6 +63,7 @@ public class WhiteBoard implements IWhiteBoard {
         this.managerStub = managerStub;
     }
 
+    public CountDownLatch connectionErrorLatch = new CountDownLatch(5);
 
     //only manager, thus no need for specific type check
     public synchronized void removePeer(String username) {
@@ -346,11 +349,18 @@ public class WhiteBoard implements IWhiteBoard {
                 setUsername(username).build(), new StreamObserver<Empty>() {
             @Override
             public void onNext(Empty empty) {
+                if(connectionErrorLatch.getCount() == 1)
+                    connectionErrorLatch = new CountDownLatch(5);
                 System.out.println("manager synchronizeEditing success.");
             }
 
             @Override
             public void onError(Throwable t) {
+                connectionErrorLatch.countDown();
+                if (connectionErrorLatch.getCount() == 0) {
+                    JOptionPane.showMessageDialog(null, "Connection error, client will exit.");
+
+                }
                 System.out.println("manager synchronizeEditing failed." + t.getMessage());
             }
 

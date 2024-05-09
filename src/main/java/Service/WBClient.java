@@ -67,7 +67,7 @@ public class WBClient {
 
             @Override
             public void run() {
-
+                wb.peerExit(wb.getSelfUI().getUsername());
                 System.err.println("*** shutting down gRPC server since JVM is shutting down");
                 WBClient.this.stop();
                 System.err.println("*** server shut down");
@@ -167,7 +167,7 @@ public class WBClient {
                         } else {
                             logger.info(response.getMessage() + ", Please try again.");
                             if (null != wb.getSelfUI()) {
-                                wb.getSelfUI().closeWindow();
+                                wb.getSelfUI().closeWindow("Cannot connect to whiteboard");
                             };
                             clientDownLatch.countDown();
 //                            exit(0);

@@ -21,7 +21,7 @@ public interface IClient{
 
     void reDraw();
 
-    void closeWindow();
+    void closeWindow(String message);
 
     void exit();
 

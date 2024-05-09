@@ -91,6 +91,7 @@ public class WBServer {
 
     private void stop() {
         if (server != null) {
+            wb.managerClose();
             server.shutdown();
         }
     }
