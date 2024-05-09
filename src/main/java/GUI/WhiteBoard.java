@@ -4,6 +4,7 @@ package GUI;
 import WBSYS.CanvasShape;
 import WBSYS.parameters;
 import com.google.common.collect.ConcurrentHashMultiset;
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.Empty;
 import io.grpc.Context;
 import io.grpc.ManagedChannel;
@@ -18,6 +19,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 
 import static Service.Utils.shape2ProtoShape;
 
@@ -530,31 +532,37 @@ public class WhiteBoard implements IWhiteBoard {
     StreamObserver<Whiteboard._CanvasShape> previewTmpStream = null;
     //推送本用户的临时预览图形
     // in ConcurrentHashMap<String, CanvasShape> tempShapes -- to Server
-    public StreamObserver<whiteboard.Whiteboard.Response> sBeginPushShape() {
+    public Future<Boolean> sBeginPushShape() {
+        //allows UI Sync function awaits Async stream response obtained from sPushShape
+        SettableFuture<Boolean> futureOK = SettableFuture.create();
         StreamObserver<whiteboard.Whiteboard.Response> response = new StreamObserver<>() {
             @Override
             public void onNext(whiteboard.Whiteboard.Response res) {
                 if(res.getSuccess()) {
-                    System.out.println(res.getMessage());
+                    futureOK.set(true);
+                    futureOK.resultNow();
+                    System.out.println("set OK to true.");
                 } else {
-                    //怎么回调到UI，以阻止当此释放鼠标之后的上传？
-//                    getSelfUI().warningFromManager(res.getMessage());
-//                    onError(new Throwable(res.getMessage()));
+                    System.out.println(res.getMessage());
+                    futureOK.set(false);
+                    futureOK.resultNow();
                 }
             }
 
             @Override
             public void onError(Throwable t) {
+                futureOK.set(false);
                 System.out.println(t.getMessage());
             }
 
             @Override
             public void onCompleted() {
+                futureOK.set(true);
             }
         };
         previewTmpStream = managerStub.sPushShape(response);
 
-        return response;
+        return futureOK;
     }
 
     public void sbroadCastShape(Whiteboard._CanvasShape _canvasShape) {
@@ -568,7 +576,7 @@ public class WhiteBoard implements IWhiteBoard {
                     stb.sPreviewShapes(_canvasShape, new StreamObserver<Empty>() {
                         @Override
                         public void onNext(Empty empty) {
-                            System.out.println("sbroadCastShape TO:  "+ ent.getKey() + " success.");
+//                            System.out.println("sbroadCastShape TO:  "+ ent.getKey() + " success.");
                         }
 
                         @Override
@@ -618,8 +626,11 @@ public class WhiteBoard implements IWhiteBoard {
 
     private boolean overlapBoundingBox(CanvasShape shape1, CanvasShape shape2) {
         // 计算两个形状的边界框是否重叠
-        return shape1.getX1() < shape2.getX2() && shape1.getX2() > shape2.getX1() &&
-                shape1.getY1() < shape2.getY2() && shape1.getY2() > shape2.getY1();
+        Rectangle rect1 = shape1.toShape().getBounds();
+        Rectangle rect2 = shape2.toShape().getBounds();
+        return rect1.intersects(rect2);
+//        return shape1.getX1() < shape2.getX2() && shape1.getX2() > shape2.getX1() &&
+//                shape1.getY1() < shape2.getY2() && shape1.getY2() > shape2.getY1();
     }
 
     private boolean checkPointByPoint(CanvasShape newShape, CanvasShape existingShape) {

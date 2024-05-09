@@ -154,17 +154,23 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
             io.grpc.stub.StreamObserver<whiteboard.Whiteboard.Response> responseObserver) {
 
         return new io.grpc.stub.StreamObserver<whiteboard.Whiteboard._CanvasShape>() {
+            boolean isOk = true;
             @Override
             public void onNext(Whiteboard._CanvasShape _canvasShape) {
                 logger.info(" Stream_IN Shape: " + _canvasShape.getShapeString() + "### PREVIEW ###");
                 CanvasShape shape = protoShape2Shape(_canvasShape);
                 //shape间的交叠冲突检测，委派wb处理
-                if(wb.checkConflictOk(shape)){
+//                if(wb.checkConflictOk(shape)){
+                if(true){
                     wb.tempShapes.put(_canvasShape.getUsername(), shape);
                     wb.sbroadCastShape(_canvasShape);
                 }else{
                     //中止接收，发送失败消息
-                    responseObserver.onNext(Response.newBuilder().setSuccess(false).setMessage("Conflict with other editing").build());
+                    if(isOk) {
+                        responseObserver.onNext(Response.newBuilder().setSuccess(false).setMessage("Conflict with other editing").build());
+                    }
+                    isOk = false;
+
                     responseObserver.onError(new Throwable("Conflict"));
                 }
 
@@ -172,12 +178,12 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
 
             @Override
             public void onError(Throwable throwable) {
-                logger.severe(throwable.getMessage());
+                logger.severe("sPushShape中断：" + throwable.getMessage());
             }
 
             @Override
             public void onCompleted() {
-                responseObserver.onNext(Response.newBuilder().setSuccess(true).build());
+                responseObserver.onNext(Response.newBuilder().setSuccess(isOk).build());
                 responseObserver.onCompleted();
             }
 

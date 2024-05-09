@@ -4,8 +4,6 @@ import WBSYS.CanvasShape;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import io.grpc.ManagedChannel;
-import io.grpc.stub.StreamObserver;
-import whiteboard.Whiteboard;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -16,9 +14,13 @@ import java.awt.event.*;
 import java.awt.geom.Point2D;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import static Service.Utils.shape2ProtoShape;
 import static WBSYS.parameters.chatMessageFormat;
+import static java.lang.System.err;
+import static java.util.Objects.requireNonNull;
 
 
 public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, ActionListener, WindowListener {
@@ -37,7 +39,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     private ArrayList<Point2D> pointArrayList;
     private Graphics2D canvasGraphics;
     private boolean isFill = false;
-    StreamObserver<Whiteboard.Response> previewRspStream;
+    Future<Boolean> futurePreviewAccept;
 
     public ManagerGUI(WhiteBoard whiteBoard, String IpAddress, String port, String WBName, ManagedChannel channel) {
         initComponents();
@@ -365,41 +367,55 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if(previewRspStream != null){
+        wb.previewTmpStream.onCompleted();
+        wb.previewTmpStream = null;
+        if(requireNonNull(futurePreviewAccept).isDone()){
+            System.out.println("preview done");
             //检查previewRspStream 有没有被拒绝 或接受
-            //but这是异步 应该在回调里处理
-            previewRspStream.onCompleted();
-            previewRspStream = null;
-        }
-        wb.reportUpdEditing("remove", username);
+            try {
+                if(futurePreviewAccept.get()){
+                    System.out.println("preview accepted");
+                    //如果被接受，就pushShape
+                    wb.reportUpdEditing("remove", username);
 
-        x2 = e.getX();
-        y2 = e.getY();
+                    x2 = e.getX();
+                    y2 = e.getY();
 
-        int strokeInShape = Integer.parseInt(strokeCB.getSelectedItem().toString());
+                    int strokeInShape = Integer.parseInt(strokeCB.getSelectedItem().toString());
 
-        CanvasShape canvasShape;
-        if (currentShapeType.equals("pen") || currentShapeType.equals("eraser")) {
-            Color tempColor = color;
-            if (currentShapeType.equals("eraser")) {
-                tempColor = Color.white;
+                    CanvasShape canvasShape;
+                    if (currentShapeType.equals("pen") || currentShapeType.equals("eraser")) {
+                        Color tempColor = color;
+                        if (currentShapeType.equals("eraser")) {
+                            tempColor = Color.white;
+                        }
+                        canvasShape = new CanvasShape(currentShapeType, tempColor, username, pointArrayList, strokeInShape);
+                    } else if (currentShapeType.equals("text")) {
+                        canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
+                        String texts = JOptionPane.showInputDialog(managerFrame, "input your text", "text", JOptionPane.PLAIN_MESSAGE, null, null, null).toString();
+                        canvasShape.setText(texts);
+                        canvasShape.setStrokeInt(Integer.parseInt(strokeCB.getSelectedItem().toString()));
+                    } else {
+                        //起终点可界定的图形
+                        canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
+                    }
+
+                    canvasShape.setFill(isFill);
+                    wb.getCanvasShapeArrayList().add(canvasShape);
+                    wb.pushShape(canvasShape);
+                    reDraw();//让pen落实到画布上
+                }else{
+                    System.out.println("preview rejected");
+                    //如果被拒绝，就不pushShape
+                    reDraw();
+                }
+            } catch (InterruptedException ex) {
+                err.println(ex);
+            } catch (ExecutionException ex) {
+                err.println(ex);
             }
-            canvasShape = new CanvasShape(currentShapeType, tempColor, username, pointArrayList, strokeInShape);
-        } else if (currentShapeType.equals("text")) {
-            canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
-            String texts = JOptionPane.showInputDialog(managerFrame, "input your text", "text", JOptionPane.PLAIN_MESSAGE, null, null, null).toString();
-            canvasShape.setText(texts);
-            canvasShape.setStrokeInt(Integer.parseInt(strokeCB.getSelectedItem().toString()));
-        } else {
-            //起终点可界定的图形
-            canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
+            futurePreviewAccept = null;
         }
-
-        canvasShape.setFill(isFill);
-//        new AtomicReference<>(wb.getCanvasShapeArrayList()).get().add(canvasShape);
-        wb.getCanvasShapeArrayList().add(canvasShape);
-        wb.pushShape(canvasShape);
-        reDraw();//让pen落实到画布上
     }
 
     @Override
@@ -451,7 +467,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
 
         if(wb.previewTmpStream == null){
-            previewRspStream = wb.sBeginPushShape();
+            futurePreviewAccept = wb.sBeginPushShape();
         }else{
             wb.previewTmpStream.onNext(shape2ProtoShape(tmp));
         }

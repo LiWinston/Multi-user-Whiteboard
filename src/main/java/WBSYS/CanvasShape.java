@@ -160,10 +160,17 @@ public class CanvasShape implements Serializable {
             return new Ellipse2D.Double(x1, y1, x2 - x1, y2 - y1);
         } else if (shapeString.equals("text")) {
             return new Rectangle(x1, y1, x2 - x1, y2 - y1);
-        } else if (shapeString.equals("pen")) {
-            return new Path2D.Double();
-        } else if (shapeString.equals("eraser")) {
-            return new Path2D.Double();
+        } else if (shapeString.equals("pen") || shapeString.equals("eraser")) {
+            if (points.size() < 2) {
+                return new Rectangle(x1, y1, 1, 1);
+            }else {
+                Path2D path = new Path2D.Double();
+                path.moveTo(points.get(0).getX(), points.get(0).getY());
+                for (int i = 1; i < points.size(); i++) {
+                    path.lineTo(points.get(i).getX(), points.get(i).getY());
+                }
+                return path;
+            }
         } else {
             return new Rectangle(x1, y1, x2 - x1, y2 - y1);
         }
