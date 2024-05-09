@@ -314,7 +314,8 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 }
             }
         }
-
+        //restore to chosen
+        canvasGraphics.setStroke(new BasicStroke(Integer.parseInt(strokeCB.getSelectedItem().toString())));
     }
 
     private void setShapeButtons() {
@@ -362,7 +363,10 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
     @Override
     public void mouseReleased(MouseEvent e) {
-
+        if(previewRspStream != null){
+            previewRspStream.onCompleted();
+            previewRspStream = null;
+        }
         wb.reportUpdEditing("remove", username);
 
         x2 = e.getX();
@@ -434,11 +438,11 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
             tmp = new CanvasShape(currentShapeType, tempColor, username, pointArrayList, Integer.parseInt(strokeCB.getSelectedItem().toString()));
             drawCanvasShape(tmp);
-            wb.tempShapes.put(username, tmp);
+//            wb.tempShapes.put(username, tmp);
         }else{
             tmp = new CanvasShape(currentShapeType, color, x1, x3, y1, y3, Integer.parseInt(strokeCB.getSelectedItem().toString()));
             drawCanvasShape(tmp);
-            wb.tempShapes.put(username, tmp);
+//            wb.tempShapes.put(username, tmp);
         }
 
 

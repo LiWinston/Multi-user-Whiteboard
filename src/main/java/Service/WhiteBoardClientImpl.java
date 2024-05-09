@@ -91,8 +91,8 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
                                StreamObserver<Empty> responseObserver) {
         logger.severe("Received preview shape request: " + request.getShapeString());
         CanvasShape shape = protoShape2Shape(request);
-        wb.getTempShapes().put(shape.getUsername(), shape);
         SwingUtilities.invokeLater(() -> {
+
             wb.getSelfUI().drawCanvasShape(shape);
             wb.getSelfUI().reDraw();
         });

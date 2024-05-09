@@ -559,20 +559,22 @@ public class WhiteBoard implements IWhiteBoard {
         for(Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
             WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
             if(stb != null) {
-                stb.sPreviewShapes(_canvasShape, new StreamObserver<Empty>() {
-                    @Override
-                    public void onNext(Empty empty) {
-                        System.out.println("peer updateShapes success.");
-                    }
+                Context.current().fork().run(() -> {
+                    stb.sPreviewShapes(_canvasShape, new StreamObserver<Empty>() {
+                        @Override
+                        public void onNext(Empty empty) {
+                            System.out.println(ent.getKey() + "peer sbroadCastShape success.");
+                        }
 
-                    @Override
-                    public void onError(Throwable t) {
-                        System.out.println("peer updateShapes failed." + t.getMessage());
-                    }
+                        @Override
+                        public void onError(Throwable t) {
+                            System.out.println(ent.getKey() + "peer sbroadCastShape failed." + t.getMessage());
+                        }
 
-                    @Override
-                    public void onCompleted() {
-                    }
+                        @Override
+                        public void onCompleted() {
+                        }
+                    });
                 });
             } else {
                 System.out.println("Cannot get stub for " + ent.getKey());

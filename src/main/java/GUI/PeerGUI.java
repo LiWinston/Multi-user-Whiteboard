@@ -207,7 +207,8 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
                 }
             }
         }
-
+        //restore to chosen
+        canvasGraphics.setStroke(new BasicStroke(Integer.parseInt(strokeCB.getSelectedItem().toString())));
     }
 
     private void setShapeButtons() {
@@ -255,7 +256,10 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
 
     @Override
     public void mouseReleased(MouseEvent e) {
-
+        if(previewRspStream != null){
+            previewRspStream.onCompleted();
+            previewRspStream = null;
+        }
         wb.reportUpdEditing("remove", username);
 
         x2 = e.getX();
