@@ -17,8 +17,9 @@ import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static Service.Utils.shape2ProtoShape;
 
 
 public class WhiteBoard implements IWhiteBoard {
@@ -31,6 +32,11 @@ public class WhiteBoard implements IWhiteBoard {
     private WhiteBoardServiceGrpc.WhiteBoardServiceStub managerStub;
     private IClient selfUI;
     private ArrayList<CanvasShape> canvasShapeArrayList = new ArrayList<>();
+
+    public ConcurrentHashMap<String, CanvasShape> getTempShapes() {
+        return tempShapes;
+    }
+
     public ConcurrentHashMap<String, CanvasShape> tempShapes = new ConcurrentHashMap<>();
     private ArrayList<String> messageArrayList = new ArrayList<>();
 
@@ -416,23 +422,7 @@ public class WhiteBoard implements IWhiteBoard {
 
     public synchronized void pushShape(CanvasShape canvasShape) {
         Context.current().fork().run(() -> {
-            managerStub.pushShape(Whiteboard._CanvasShape.newBuilder().
-                    setShapeString(canvasShape.getShapeString()).
-                    setColor(String.valueOf(canvasShape.getColor().getRGB())).
-                    addX(canvasShape.getX1()).addX(canvasShape.getX2()).addX(canvasShape.getY1()).addX(canvasShape.getY2()).
-                    setText(canvasShape.getText() == null ? "" : canvasShape.getText()).
-                    setFill(canvasShape.isFill()).
-                    setUsername(canvasShape.getUsername()).
-                    addAllPoints(Optional.ofNullable(canvasShape.getPoints())
-                            .orElse(new ArrayList<>())
-                            .stream()
-                            .map(point -> Whiteboard.point.newBuilder()
-                                    .setX(point.getX())
-                                    .setY(point.getY())
-                                    .build())
-                            .toList()).
-                    setStrokeInt(canvasShape.getStrokeInt()).
-                    build(), new StreamObserver<Empty>() {
+            managerStub.pushShape(shape2ProtoShape(canvasShape), new StreamObserver<Empty>() {
                 @Override
                 public void onNext(Empty empty) {
                     System.out.println("manager synchronizeCanvas success.");
@@ -459,23 +449,7 @@ public class WhiteBoard implements IWhiteBoard {
                 WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
                 if (stb != null) {
                     Context.current().fork().run(() -> {
-                        stb.updateShapes(Whiteboard._CanvasShape.newBuilder().
-                                setShapeString(canvasShape.getShapeString()).
-                                setColor(String.valueOf(canvasShape.getColor().getRGB())).
-                                addX(canvasShape.getX1()).addX(canvasShape.getX2()).addX(canvasShape.getY1()).addX(canvasShape.getY2()).
-                                setText(canvasShape.getText() == null ? "" : canvasShape.getText()).
-                                setFill(canvasShape.isFill()).
-                                setUsername(canvasShape.getUsername()).
-                                addAllPoints(Optional.ofNullable(canvasShape.getPoints())
-                                        .orElse(new ArrayList<>())
-                                        .stream()
-                                        .map(point -> Whiteboard.point.newBuilder()
-                                                .setX(point.getX())
-                                                .setY(point.getY())
-                                                .build())
-                                        .toList()).
-                                setStrokeInt(canvasShape.getStrokeInt()).
-                                build(), new StreamObserver<Empty>() {
+                        stb.updateShapes(shape2ProtoShape(canvasShape), new StreamObserver<Empty>() {
                             @Override
                             public void onNext(Empty empty) {
                                 System.out.println("peer updateShapes success.");
@@ -552,6 +526,64 @@ public class WhiteBoard implements IWhiteBoard {
             }
         }
     }
+
+    StreamObserver<Whiteboard._CanvasShape> previewTmpStream = null;
+    //推送本用户的临时预览图形
+    // in ConcurrentHashMap<String, CanvasShape> tempShapes -- to Server
+    public StreamObserver<whiteboard.Whiteboard.Response> sBeginPushShape() {
+        StreamObserver<whiteboard.Whiteboard.Response> response = new StreamObserver<>() {
+            @Override
+            public void onNext(whiteboard.Whiteboard.Response res) {
+                if(res.getSuccess()) {
+                    System.out.println(res.getMessage());
+                } else {
+                    onError(new Throwable(res.getMessage()));
+                }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                System.out.println("Push shape failed.");
+            }
+
+            @Override
+            public void onCompleted() {
+            }
+        };
+        previewTmpStream = managerStub.sPushShape(response);
+
+        return response;
+    }
+
+    public void sbroadCastShape(Whiteboard._CanvasShape _canvasShape) {
+        for(Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
+            WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
+            if(stb != null) {
+                stb.sPreviewShapes(_canvasShape, new StreamObserver<Empty>() {
+                    @Override
+                    public void onNext(Empty empty) {
+                        System.out.println("peer updateShapes success.");
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        System.out.println("peer updateShapes failed." + t.getMessage());
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                    }
+                });
+            } else {
+                System.out.println("Cannot get stub for " + ent.getKey());
+                System.out.println("UserAgents: " + userAgents);
+            }
+        }
+    }
+
+//    public void sPreviewShapes(Whiteboard._CanvasShape prvShape) {
+//        getSelfUI().previewShape(prvShape);
+//    }
 
     @Override
     public boolean checkConflictOk(CanvasShape newShape) {

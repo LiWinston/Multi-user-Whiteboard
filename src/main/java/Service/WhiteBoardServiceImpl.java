@@ -13,7 +13,7 @@ import whiteboard.Whiteboard.Response;
 import java.awt.*;
 import java.util.logging.Logger;
 
-import static Service.Utils.protoPointsToArrayList;
+import static Service.Utils.protoShape2Shape;
 
 public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServiceImplBase {
     public WhiteBoard wb;
@@ -139,15 +139,7 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
     public synchronized void pushShape(Whiteboard._CanvasShape requestShape, StreamObserver<com.google.protobuf.Empty> responseObserver) {
         // 业务逻辑- 拆分出网络功能
         logger.severe("Received shape: " + requestShape.getShapeString());
-        CanvasShape shape;
-        if (requestShape.getShapeString().equals("pen") || requestShape.getShapeString().equals("eraser")) {
-            shape = new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getUsername(), protoPointsToArrayList(requestShape.getPointsList().stream().toList()), requestShape.getStrokeInt());
-        } else if (requestShape.getShapeString().equals("text")) {
-            shape = new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getX(0), requestShape.getX(1), requestShape.getX(2), requestShape.getX(3), requestShape.getText(), requestShape.getFill(), requestShape.getUsername(), requestShape.getStrokeInt());
-        } else {
-            shape = new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getX(0), requestShape.getX(1), requestShape.getX(2), requestShape.getX(3), requestShape.getStrokeInt());
-            shape.setUsername(requestShape.getUsername());
-        }
+        CanvasShape shape = protoShape2Shape(requestShape);
 
         new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getX(0), requestShape.getX(1), requestShape.getX(2), requestShape.getX(3), requestShape.getStrokeInt());
         shape.setFill(requestShape.getFill());
@@ -163,20 +155,13 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
 
         return new io.grpc.stub.StreamObserver<whiteboard.Whiteboard._CanvasShape>() {
             @Override
-            public void onNext(Whiteboard._CanvasShape canvasShape) {
-                logger.info("Received shape: " + canvasShape.getShapeString());
-                CanvasShape shape;
-                if (canvasShape.getShapeString().equals("pen") || canvasShape.getShapeString().equals("eraser")) {
-                    shape = new CanvasShape(canvasShape.getShapeString(), new Color(Integer.parseInt(canvasShape.getColor())), canvasShape.getUsername(), protoPointsToArrayList(canvasShape.getPointsList().stream().toList()), canvasShape.getStrokeInt());
-                } else if (canvasShape.getShapeString().equals("text")) {
-                    shape = new CanvasShape(canvasShape.getShapeString(), new Color(Integer.parseInt(canvasShape.getColor())), canvasShape.getX(0), canvasShape.getX(1), canvasShape.getX(2), canvasShape.getX(3), canvasShape.getText(), canvasShape.getFill(), canvasShape.getUsername(), canvasShape.getStrokeInt());
-                } else {
-                    shape = new CanvasShape(canvasShape.getShapeString(), new Color(Integer.parseInt(canvasShape.getColor())), canvasShape.getX(0), canvasShape.getX(1), canvasShape.getX(2), canvasShape.getX(3), canvasShape.getStrokeInt());
-                    shape.setUsername(canvasShape.getUsername());
-                }
+            public void onNext(Whiteboard._CanvasShape _canvasShape) {
+                logger.info("Received shape: " + _canvasShape.getShapeString());
+                CanvasShape shape = protoShape2Shape(_canvasShape);
+
                 //shape间的交叠冲突检测，委派wb处理
                 if(wb.checkConflictOk(shape)){
-                    wb.broadCastShape(shape);
+                    wb.sbroadCastShape(_canvasShape);
                 }else{
                     //中止接收，发送失败消息
                     responseObserver.onNext(Response.newBuilder().setSuccess(false).setMessage("Conflict with other shapes").build());
@@ -198,4 +183,5 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
 
         };
     }
+
 }

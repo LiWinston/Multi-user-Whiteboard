@@ -4,6 +4,8 @@ import WBSYS.CanvasShape;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import io.grpc.ManagedChannel;
+import io.grpc.stub.StreamObserver;
+import whiteboard.Whiteboard;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -15,6 +17,7 @@ import java.awt.geom.Point2D;
 import java.io.*;
 import java.util.ArrayList;
 
+import static Service.Utils.shape2ProtoShape;
 import static WBSYS.parameters.chatMessageFormat;
 
 
@@ -34,6 +37,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     private ArrayList<Point2D> pointArrayList;
     private Graphics2D canvasGraphics;
     private boolean isFill = false;
+    StreamObserver<Whiteboard.Response> previewRspStream;
 
     public ManagerGUI(WhiteBoard whiteBoard, String IpAddress, String port, String WBName, ManagedChannel channel) {
         initComponents();
@@ -400,9 +404,11 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
     }
 
+
     @Override
     public void mouseDragged(MouseEvent e) {
-        clearCanvas();
+        CanvasShape tmp;
+        canvasPanel.repaint();
         reDraw();
         int x3 = e.getX();
         int y3 = e.getY();
@@ -415,22 +421,31 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 x4 = (int) pointArrayList.get(pointArrayList.size() - 1).getX();
                 y4 = (int) pointArrayList.get(pointArrayList.size() - 1).getY();
             }
-            Color tempColor = color;
+            Color tempColor;
             if (currentShapeType.equals("eraser")) {
                 tempColor = Color.white;
+            }else {
+                tempColor = color;
             }
             canvasGraphics.setPaint(tempColor);
             canvasGraphics.setStroke(tempStroke);
             canvasGraphics.drawLine(x4, y4, x3, y3);
             pointArrayList.add(new Point(x3, y3));
 
-            CanvasShape tmp = new CanvasShape(currentShapeType, tempColor, username, pointArrayList, Integer.parseInt(strokeCB.getSelectedItem().toString()));
+            tmp = new CanvasShape(currentShapeType, tempColor, username, pointArrayList, Integer.parseInt(strokeCB.getSelectedItem().toString()));
             drawCanvasShape(tmp);
             wb.tempShapes.put(username, tmp);
         }else{
-            CanvasShape tmp = new CanvasShape(currentShapeType, color, x1, x3, y1, y3, Integer.parseInt(strokeCB.getSelectedItem().toString()));
+            tmp = new CanvasShape(currentShapeType, color, x1, x3, y1, y3, Integer.parseInt(strokeCB.getSelectedItem().toString()));
             drawCanvasShape(tmp);
             wb.tempShapes.put(username, tmp);
+        }
+
+
+        if(wb.previewTmpStream == null){
+            previewRspStream = wb.sBeginPushShape();
+        }else{
+            wb.previewTmpStream.onNext(shape2ProtoShape(tmp));
         }
     }
 
