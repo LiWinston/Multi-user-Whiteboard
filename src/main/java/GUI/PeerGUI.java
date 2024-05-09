@@ -3,6 +3,8 @@ package GUI;
 import WBSYS.CanvasShape;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import io.grpc.stub.StreamObserver;
+import whiteboard.Whiteboard;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -14,6 +16,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static Service.Utils.shape2ProtoShape;
 import static WBSYS.parameters.chatMessageFormat;
 
 public class PeerGUI implements IClient, MouseListener, MouseMotionListener, ActionListener, WindowListener {
@@ -38,6 +41,8 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
     private ArrayList<Point2D> pointArrayList;
     private Graphics2D canvasGraphics;
     private boolean isFill = false;
+    StreamObserver<Whiteboard.Response> previewRspStream;
+
 
     public PeerGUI(WhiteBoard whiteBoard, String username) {
 
@@ -256,7 +261,6 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
         x2 = e.getX();
         y2 = e.getY();
 
-
         int strokeInShape = Integer.parseInt(strokeCB.getSelectedItem().toString());
 
         CanvasShape canvasShape;
@@ -265,7 +269,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
             if (currentShapeType.equals("eraser")) {
                 tempColor = Color.white;
             }
-            canvasShape = new CanvasShape(currentShapeType, tempColor, username,pointArrayList, strokeInShape);
+            canvasShape = new CanvasShape(currentShapeType, tempColor, username, pointArrayList, strokeInShape);
         } else if (currentShapeType.equals("text")) {
             canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
             String texts = JOptionPane.showInputDialog(peerFrame, "input your text", "text", JOptionPane.PLAIN_MESSAGE, null, null, null).toString();
@@ -277,9 +281,10 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
         }
 
         canvasShape.setFill(isFill);
-        new AtomicReference<>(wb.getCanvasShapeArrayList()).get().add(canvasShape);
+//        new AtomicReference<>(wb.getCanvasShapeArrayList()).get().add(canvasShape);
+        wb.getCanvasShapeArrayList().add(canvasShape);
         wb.pushShape(canvasShape);
-
+        reDraw();//让pen落实到画布上
     }
 
     @Override
@@ -292,8 +297,12 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
 
     }
 
+
     @Override
     public void mouseDragged(MouseEvent e) {
+        CanvasShape tmp;
+        canvasPanel.repaint();
+        reDraw();
         int x3 = e.getX();
         int y3 = e.getY();
         int x4 = x1;
@@ -305,17 +314,32 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
                 x4 = (int) pointArrayList.get(pointArrayList.size() - 1).getX();
                 y4 = (int) pointArrayList.get(pointArrayList.size() - 1).getY();
             }
-            Color tempColor = color;
+            Color tempColor;
             if (currentShapeType.equals("eraser")) {
                 tempColor = Color.white;
+            }else {
+                tempColor = color;
             }
             canvasGraphics.setPaint(tempColor);
             canvasGraphics.setStroke(tempStroke);
             canvasGraphics.drawLine(x4, y4, x3, y3);
             pointArrayList.add(new Point(x3, y3));
-        }
-//        drawCanvasShape(new CanvasShape(currentShapeType, color, x4, x3, y4, y3, Integer.parseInt(strokeCB.getSelectedItem().toString())));
 
+            tmp = new CanvasShape(currentShapeType, tempColor, username, pointArrayList, Integer.parseInt(strokeCB.getSelectedItem().toString()));
+            drawCanvasShape(tmp);
+            wb.tempShapes.put(username, tmp);
+        }else{
+            tmp = new CanvasShape(currentShapeType, color, x1, x3, y1, y3, Integer.parseInt(strokeCB.getSelectedItem().toString()));
+            drawCanvasShape(tmp);
+            wb.tempShapes.put(username, tmp);
+        }
+
+
+        if(wb.previewTmpStream == null){
+            previewRspStream = wb.sBeginPushShape();
+        }else{
+            wb.previewTmpStream.onNext(shape2ProtoShape(tmp));
+        }
     }
 
     @Override
