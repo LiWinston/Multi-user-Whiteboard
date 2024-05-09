@@ -141,5 +141,7 @@ service WhiteBoardClientService {
   rpc updEditing(SynchronizeUserRequest) returns (google.protobuf.Empty);
   // 显示正在编辑的用户名
   rpc ShowEditing(google.protobuf.StringValue) returns (google.protobuf.Empty);
+
+  rpc sPreviewShapes(_CanvasShape) returns (google.protobuf.Empty);
 }
 

@@ -1,5 +1,6 @@
 package Service;
 
+import WBSYS.CanvasShape;
 import whiteboard.Whiteboard;
 
 import java.awt.*;
@@ -42,5 +43,18 @@ public class Utils {
                         .toList()).
                 setStrokeInt(canvasShape.getStrokeInt()).
                 build();
+    }
+
+    static CanvasShape protoShape2Shape(Whiteboard._CanvasShape _canvasShape) {
+        CanvasShape shape;
+        if (_canvasShape.getShapeString().equals("pen") || _canvasShape.getShapeString().equals("eraser")) {
+            shape = new CanvasShape(_canvasShape.getShapeString(), new Color(Integer.parseInt(_canvasShape.getColor())), _canvasShape.getUsername(), protoPointsToArrayList(_canvasShape.getPointsList().stream().toList()), _canvasShape.getStrokeInt());
+        } else if (_canvasShape.getShapeString().equals("text")) {
+            shape = new CanvasShape(_canvasShape.getShapeString(), new Color(Integer.parseInt(_canvasShape.getColor())), _canvasShape.getX(0), _canvasShape.getX(1), _canvasShape.getX(2), _canvasShape.getX(3), _canvasShape.getText(), _canvasShape.getFill(), _canvasShape.getUsername(), _canvasShape.getStrokeInt());
+        } else {
+            shape = new CanvasShape(_canvasShape.getShapeString(), new Color(Integer.parseInt(_canvasShape.getColor())), _canvasShape.getX(0), _canvasShape.getX(1), _canvasShape.getX(2), _canvasShape.getX(3), _canvasShape.getStrokeInt());
+            shape.setUsername(_canvasShape.getUsername());
+        }
+        return shape;
     }
 }

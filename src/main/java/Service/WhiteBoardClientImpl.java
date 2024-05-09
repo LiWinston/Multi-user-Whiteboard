@@ -3,13 +3,15 @@ package Service;
 import GUI.IWhiteBoard;
 import GUI.WhiteBoard;
 import WBSYS.CanvasShape;
+import com.google.protobuf.Empty;
+import io.grpc.stub.StreamObserver;
 import whiteboard.WhiteBoardClientServiceGrpc;
+import whiteboard.Whiteboard;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
-import static Service.Utils.protoPointsToArrayList;
+import static Service.Utils.protoShape2Shape;
 
 public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoardClientServiceImplBase {
     public IWhiteBoard wb;
@@ -50,15 +52,7 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
     public void updateShapes(whiteboard.Whiteboard._CanvasShape requestShape,
                              io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         logger.info("Received update shape request: " + requestShape.getShapeString());
-        CanvasShape shape;
-        if(requestShape.getShapeString().equals("pen") || requestShape.getShapeString().equals("eraser")){
-            shape = new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getUsername(), protoPointsToArrayList(requestShape.getPointsList().stream().toList()), requestShape.getStrokeInt());
-        } else if (requestShape.getShapeString().equals("text")) {
-            shape = new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getX(0), requestShape.getX(1), requestShape.getX(2), requestShape.getX(3), requestShape.getText(), requestShape.getFill(), requestShape.getUsername(), requestShape.getStrokeInt());
-        } else {
-            shape = new CanvasShape(requestShape.getShapeString(), new Color(Integer.parseInt(requestShape.getColor())), requestShape.getX(0), requestShape.getX(1), requestShape.getX(2), requestShape.getX(3), requestShape.getStrokeInt());
-            shape.setUsername(requestShape.getUsername());
-        }
+        CanvasShape shape = protoShape2Shape(requestShape);
 
         wb.acceptRemoteShape(shape);
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
@@ -89,5 +83,13 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
         wb.getSelfUI().clearCanvas();
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public void sPreviewShapes(Whiteboard._CanvasShape request,
+                               StreamObserver<Empty> responseObserver) {
+        logger.severe("Received preview shape request: " + request.getShapeString());
+        CanvasShape shape = protoShape2Shape(request);
+        wb.getTempShapes().put(shape.getUsername(), shape);
     }
 }

@@ -5,6 +5,7 @@ import io.grpc.ManagedChannel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public interface IWhiteBoard{
     IClient getSelfUI();
@@ -47,4 +48,6 @@ public interface IWhiteBoard{
     <E> List<E> getMessageArrayList();
 
     boolean checkConflictOk(CanvasShape shape);
+
+    <K, V> Map<K,V> getTempShapes();
 }
