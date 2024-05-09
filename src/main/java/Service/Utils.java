@@ -54,6 +54,7 @@ public class Utils {
         } else {
             shape = new CanvasShape(_canvasShape.getShapeString(), new Color(Integer.parseInt(_canvasShape.getColor())), _canvasShape.getX(0), _canvasShape.getX(1), _canvasShape.getX(2), _canvasShape.getX(3), _canvasShape.getStrokeInt());
             shape.setUsername(_canvasShape.getUsername());
+            shape.setFill(_canvasShape.getFill());
         }
         return shape;
     }
