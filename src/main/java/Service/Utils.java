@@ -6,6 +6,7 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class Utils {
     public static ArrayList<Point2D> protoPointsToArrayList(List<Whiteboard.point> list){
@@ -23,4 +24,23 @@ public class Utils {
                 .build();
     }
 
+    public static Whiteboard._CanvasShape shape2ProtoShape(WBSYS.CanvasShape canvasShape) {
+        return Whiteboard._CanvasShape.newBuilder().
+                setShapeString(canvasShape.getShapeString()).
+                setColor(String.valueOf(canvasShape.getColor().getRGB())).
+                addX(canvasShape.getX1()).addX(canvasShape.getX2()).addX(canvasShape.getY1()).addX(canvasShape.getY2()).
+                setText(canvasShape.getText() == null ? "" : canvasShape.getText()).
+                setFill(canvasShape.isFill()).
+                setUsername(canvasShape.getUsername()).
+                addAllPoints(Optional.ofNullable(canvasShape.getPoints())
+                        .orElse(new ArrayList<>())
+                        .stream()
+                        .map(point -> Whiteboard.point.newBuilder()
+                                .setX(point.getX())
+                                .setY(point.getY())
+                                .build())
+                        .toList()).
+                setStrokeInt(canvasShape.getStrokeInt()).
+                build();
+    }
 }
