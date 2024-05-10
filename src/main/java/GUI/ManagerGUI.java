@@ -478,8 +478,8 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
                             canvasShape.setFill(isFill);
                             wb.getCanvasShapeArrayList().add(canvasShape);
-                            wb.pushShape(canvasShape);
                             reDraw();//让pen落实到画布上
+                            wb.pushShape(canvasShape);
                         }else{
                             System.out.println("preview rejected");
                             //如果被拒绝，就不pushShape
@@ -539,17 +539,20 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
             }else {
                 tempColor = color;
             }
-            canvasGraphics.setPaint(tempColor);
-            canvasGraphics.setStroke(tempStroke);
-            canvasGraphics.drawLine(x4, y4, x3, y3);
+//            int finalX = x4, finalY = y4;
+//            SwingUtilities.invokeLater(() -> {
+//                canvasGraphics.setPaint(tempColor);
+//                canvasGraphics.setStroke(tempStroke);
+//                canvasGraphics.drawLine(finalX, finalY, x3, y3);
+//            });
             pointArrayList.add(new Point(x3, y3));
 
             tmp = new CanvasShape(currentShapeType, tempColor, username, pointArrayList, Integer.parseInt(strokeCB.getSelectedItem().toString()));
-            drawCanvasShape(tmp);
+//            SwingUtilities.invokeLater(() -> drawCanvasShape(tmp));
 //            wb.tempShapes.put(username, tmp);
         }else{
             tmp = new CanvasShape(currentShapeType, color, x1, x3, y1, y3, Integer.parseInt(strokeCB.getSelectedItem().toString()));
-            drawCanvasShape(tmp);
+            SwingUtilities.invokeLater(() -> drawCanvasShape(tmp));
 //            wb.tempShapes.put(username, tmp);
         }
 

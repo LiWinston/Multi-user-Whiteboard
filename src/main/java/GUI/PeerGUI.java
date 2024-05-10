@@ -417,17 +417,20 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
             }else {
                 tempColor = color;
             }
-            canvasGraphics.setPaint(tempColor);
-            canvasGraphics.setStroke(tempStroke);
-            canvasGraphics.drawLine(x4, y4, x3, y3);
+            int finalX = x4, finalY = y4;
+            SwingUtilities.invokeLater(() -> {
+                canvasGraphics.setPaint(tempColor);
+                canvasGraphics.setStroke(tempStroke);
+                canvasGraphics.drawLine(finalX, finalY, x3, y3);
+            });
             pointArrayList.add(new Point(x3, y3));
 
             tmp = new CanvasShape(currentShapeType, tempColor, username, pointArrayList, Integer.parseInt(strokeCB.getSelectedItem().toString()));
-            drawCanvasShape(tmp);
-            wb.tempShapes.put(username, tmp);
+            SwingUtilities.invokeLater(() -> drawCanvasShape(tmp));
+//            wb.tempShapes.put(username, tmp);
         }else{
             tmp = new CanvasShape(currentShapeType, color, x1, x3, y1, y3, Integer.parseInt(strokeCB.getSelectedItem().toString()));
-            drawCanvasShape(tmp);
+            SwingUtilities.invokeLater(() -> drawCanvasShape(tmp));
             wb.tempShapes.put(username, tmp);
         }
 
