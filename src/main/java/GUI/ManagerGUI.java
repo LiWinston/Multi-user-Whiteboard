@@ -258,6 +258,9 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     public void drawCanvasShape(CanvasShape canvasShape) {
         SwingUtilities.invokeLater(() -> {
             Thread.ofVirtual().start(() -> {
+                if(canvasGraphics == null){
+                    canvasGraphics = (Graphics2D) canvasPanel.getGraphics();
+                }
 
                 String shapeType = canvasShape.getShapeString();
                 int x1 = canvasShape.getX1();
@@ -268,7 +271,10 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 String username = canvasShape.getUsername();
                 int strokeInt = canvasShape.getStrokeInt();
                 Stroke stroke = new BasicStroke(strokeInt);
-//            canvasGraphics = (Graphics2D) canvasPanel.getGraphics();
+//            if(wb.previewTmpStream != null){
+//            wb.previewTmpStream.onCompleted();
+//            wb.previewTmpStream = null;
+//        }
 
                 canvasGraphics.setPaint(shapeColor);
                 switch (shapeType) {

@@ -148,6 +148,9 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
     public void drawCanvasShape(CanvasShape canvasShape) {
         SwingUtilities.invokeLater(() -> {
             Thread.ofVirtual().start(() -> {
+                if(canvasGraphics == null){
+                    canvasGraphics = (Graphics2D) canvasPanel.getGraphics();
+                }
 
                 String shapeType = canvasShape.getShapeString();
                 int x1 = canvasShape.getX1();
