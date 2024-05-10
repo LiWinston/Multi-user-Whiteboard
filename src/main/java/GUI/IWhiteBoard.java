@@ -6,6 +6,7 @@ import io.grpc.ManagedChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public interface IWhiteBoard{
     IClient getSelfUI();
@@ -25,7 +26,7 @@ public interface IWhiteBoard{
 
     void registerManager(String IpAddress, String port, String name, ManagedChannel channel);
 
-    ArrayList<CanvasShape> getCanvasShapeArrayList();
+    ConcurrentLinkedDeque<CanvasShape> getLocalShapeQ();
 
     void reportUpdEditing(String operation, String username);
 

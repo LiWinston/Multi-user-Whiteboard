@@ -358,7 +358,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
                         }
 
                         canvasShape.setFill(isFill);
-                        wb.getCanvasShapeArrayList().add(canvasShape);
+                        wb.getLocalShapeQ().add(canvasShape);
                         wb.pushShape(canvasShape);
                         reDraw();//让pen落实到画布上
                     }else{
@@ -512,7 +512,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
                     drawCanvasShape(shape);
                 }
 //            AtomicReference<ArrayList<CanvasShape>> shapeArrayList = new AtomicReference<>(wb.getCanvasShapeArrayList());
-                for (CanvasShape shape : wb.getCanvasShapeArrayList()) {
+                for (CanvasShape shape : wb.getLocalShapeQ()) {
                     drawCanvasShape(shape);
                 }
             }).start();
@@ -536,7 +536,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
 
     @Override
     public void clearCanvas() {
-        wb.getCanvasShapeArrayList().clear();
+        wb.getLocalShapeQ().clear();
         canvasPanel.repaint();
     }
 

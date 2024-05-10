@@ -22,6 +22,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CountDownLatch;
 
 import static Service.Utils.shape2ProtoShape;
@@ -39,7 +40,16 @@ public class WhiteBoard implements IWhiteBoard {
 
     private WhiteBoardSecuredServiceGrpc.WhiteBoardSecuredServiceStub managerSecuredStub;
     private IClient selfUI;
-    private ArrayList<CanvasShape> canvasShapeArrayList = new ArrayList<>();
+
+    private ConcurrentLinkedDeque<CanvasShape> localShapeQ = new ConcurrentLinkedDeque<>();
+
+    public ConcurrentLinkedDeque<CanvasShape> getLocalShapeQ() {
+        return localShapeQ;
+    }
+
+//    public synchronized void setCanvasShapeArrayList(ArrayList<CanvasShape> canvasShapeArrayList) {
+//        this.canvasShapeArrayList = canvasShapeArrayList;
+//    }
 
     public ConcurrentHashMap<String, CanvasShape> getTempShapes() {
         return tempShapes;
@@ -149,7 +159,7 @@ public class WhiteBoard implements IWhiteBoard {
                 System.out.println("UserAgents: " + userAgents);
             }
         }
-        this.canvasShapeArrayList = new ArrayList<>();
+        this.localShapeQ = new ConcurrentLinkedDeque<>();
     }
 
     //only manager, thus no need for specific type check
@@ -343,15 +353,6 @@ public class WhiteBoard implements IWhiteBoard {
     }
 
 
-    public ArrayList<CanvasShape> getCanvasShapeArrayList() {
-        return canvasShapeArrayList;
-    }
-
-    public synchronized void setCanvasShapeArrayList(ArrayList<CanvasShape> canvasShapeArrayList) {
-        this.canvasShapeArrayList = canvasShapeArrayList;
-    }
-
-
     public synchronized void reportUpdEditing(String operation, String username) {
         //peer用户自身更改完毕后仅向manager同步
         managerStub.reportUpdEditing(Whiteboard.SynchronizeUserRequest.newBuilder().setOperation(operation).
@@ -494,7 +495,7 @@ public class WhiteBoard implements IWhiteBoard {
     }
 
     public void acceptRemoteShape(CanvasShape canvasShape) {
-        canvasShapeArrayList.add(canvasShape);
+        localShapeQ.add(canvasShape);
 //        getSelfUI().updateShapes(canvasShape);
     }
 

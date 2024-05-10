@@ -136,7 +136,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                         try {
                             FileOutputStream fileOutputStream = new FileOutputStream(canvasFile);
                             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
-                            objectOutputStream.writeObject(wb.getCanvasShapeArrayList());
+                            objectOutputStream.writeObject(wb.getLocalShapeQ());
                             objectOutputStream.close();
                             fileOutputStream.close();
                             JOptionPane.showMessageDialog(managerFrame, "file saved.");
@@ -161,7 +161,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                         try {
                             FileOutputStream fileOutputStream = new FileOutputStream(canvasFile);
                             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
-                            objectOutputStream.writeObject(wb.getCanvasShapeArrayList());
+                            objectOutputStream.writeObject(wb.getLocalShapeQ());
                             objectOutputStream.close();
                             fileOutputStream.close();
                             JOptionPane.showMessageDialog(managerFrame, "file saved.");
@@ -478,7 +478,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                             }
 
                             canvasShape.setFill(isFill);
-                            wb.getCanvasShapeArrayList().add(canvasShape);
+                            wb.getLocalShapeQ().add(canvasShape);
                             reDraw();//让pen落实到画布上
                             wb.pushShape(canvasShape);
                         }else{
@@ -633,7 +633,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                     drawCanvasShape(shape);
                 }
 //            AtomicReference<ArrayList<CanvasShape>> shapeArrayList = new AtomicReference<>(wb.getCanvasShapeArrayList());
-                for (CanvasShape shape : wb.getCanvasShapeArrayList()) {
+                for (CanvasShape shape : wb.getLocalShapeQ()) {
                     drawCanvasShape(shape);
                 }
             }).start();
@@ -648,7 +648,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
     @Override
     public void clearCanvas() {
-        wb.getCanvasShapeArrayList().clear();
+        wb.getLocalShapeQ().clear();
         canvasPanel.repaint();
     }
 
