@@ -258,7 +258,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     @SuppressWarnings("SynchronizeOnNonFinalField")
     public void drawCanvasShape(CanvasShape canvasShape) {
         SwingUtilities.invokeLater(() -> {
-            Thread.ofVirtual().start(() -> {
+
                 if(canvasGraphics == null){
                     canvasGraphics = (Graphics2D) canvasPanel.getGraphics();
                 }
@@ -336,7 +336,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
                 //restore to chosen
                 canvasGraphics.setStroke(new BasicStroke(Integer.parseInt(strokeCB.getSelectedItem().toString())));
-            });
+
         });
     }
 
