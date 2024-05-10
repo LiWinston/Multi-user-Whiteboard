@@ -111,7 +111,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
         strokeCB.addItem(9);
         strokeCB.addItem(11);
         strokeCB.addItem(26);
-        strokeCB.addItem(25);
+        strokeCB.addItem(52);
     }
 
     private void setSendButton() {

@@ -207,7 +207,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         strokeCB.addItem(9);
         strokeCB.addItem(11);
         strokeCB.addItem(26);
-        strokeCB.addItem(25);
+        strokeCB.addItem(52);
     }
 
     private void setSendButton() {
