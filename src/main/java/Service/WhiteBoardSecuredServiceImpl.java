@@ -19,7 +19,9 @@ public class WhiteBoardSecuredServiceImpl extends WhiteBoardSecuredServiceGrpc.W
     public void forceClearTmp(whiteboard.Whiteboard.UserName request,
                               io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         logger.severe("Received force clear tmp request: " + request.getUsername());
-
+//        wb.forceClearTmp(request.getUsername());
+        responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
+        responseObserver.onCompleted();
     }
 
 
