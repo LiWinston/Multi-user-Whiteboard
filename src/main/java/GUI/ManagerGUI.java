@@ -652,6 +652,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     @Override
     public void clearCanvas() {
         wb.getLocalShapeQ().clear();
+        wb.getTempShapes().clear();
         canvasPanel.repaint();
     }
 

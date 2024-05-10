@@ -546,6 +546,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
     @Override
     public void clearCanvas() {
         wb.getLocalShapeQ().clear();
+        wb.getTempShapes().clear();
         canvasPanel.repaint();
     }
 
