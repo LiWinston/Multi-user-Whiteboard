@@ -4,7 +4,7 @@ import WBSYS.CanvasShape;
 import io.grpc.ManagedChannel;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Deque;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -46,7 +46,7 @@ public interface IWhiteBoard{
 
     void broadCastChatMessage(String message);
 
-    <E> List<E> getMessageArrayList();
+    <E> Deque<E> getMessageArrayList();
 
     boolean checkConflictOk(CanvasShape shape);
 

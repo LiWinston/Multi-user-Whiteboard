@@ -30,7 +30,7 @@ import static Service.Utils.shape2ProtoShape;
 
 public class WhiteBoard implements IWhiteBoard {
     //    private final ArrayList<IClient> clientUIList = new ArrayList<>();
-    private final ArrayList<String> userList = new ArrayList<>();
+    private final ConcurrentHashMultiset<String> userList = ConcurrentHashMultiset.create();
     private final ConcurrentHashMultiset<String> editingUser = ConcurrentHashMultiset.create();
     public ConcurrentHashMap<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> userAgents = new ConcurrentHashMap<>();
     boolean isManager = false;
@@ -56,7 +56,7 @@ public class WhiteBoard implements IWhiteBoard {
     }
 
     public ConcurrentHashMap<String, CanvasShape> tempShapes = new ConcurrentHashMap<>();
-    private ArrayList<String> messageArrayList = new ArrayList<>();
+    private ConcurrentLinkedDeque<String> messageArrayList = new ConcurrentLinkedDeque<>();
 
     public ConcurrentHashMultiset<String> getEditingUser() {
         return editingUser;
@@ -432,11 +432,11 @@ public class WhiteBoard implements IWhiteBoard {
 
     }
 
-    public ArrayList<String> getMessageArrayList() {
+    public ConcurrentLinkedDeque<String> getMessageArrayList() {
         return messageArrayList;
     }
 
-    public void setMessageArrayList(ArrayList<String> messageArrayList) {
+    public void setMessageArrayList(ConcurrentLinkedDeque<String> messageArrayList) {
         this.messageArrayList = messageArrayList;
     }
 
