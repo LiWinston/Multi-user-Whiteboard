@@ -349,9 +349,18 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
                             canvasShape = new CanvasShape(currentShapeType, tempColor, username, new ArrayList<>(pointQ), strokeInShape);
                         } else if (currentShapeType.equals("text")) {
                             canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
-                            String texts = JOptionPane.showInputDialog(peerFrame, "input your text", "text", JOptionPane.PLAIN_MESSAGE, null, null, null).toString();
-                            canvasShape.setText(texts);
-                            canvasShape.setStrokeInt(Integer.parseInt(strokeCB.getSelectedItem().toString()));
+                            try{
+                                String texts = JOptionPane.showInputDialog(peerFrame, "input your text", "text", JOptionPane.PLAIN_MESSAGE, null, null, null).toString();
+                                if (texts.isEmpty()) {
+                                    wb.requestForceClearTmp();
+                                    return;
+                                }
+                                canvasShape.setText(texts);
+                                canvasShape.setStrokeInt(Integer.parseInt(strokeCB.getSelectedItem().toString()));
+                            }catch (NullPointerException ex){
+                                wb.requestForceClearTmp();
+                                return;
+                            }
                         } else {
                             //起终点可界定的图形
                             canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);

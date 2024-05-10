@@ -462,16 +462,20 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                                 canvasShape = new CanvasShape(currentShapeType, tempColor, username, new ArrayList<>(pointQ), strokeInShape);
                             } else if (currentShapeType.equals("text")) {
                                 canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
-                                Object jin = JOptionPane.showInputDialog(managerFrame, "input your text", "text", JOptionPane.PLAIN_MESSAGE, null, null, null);
-                                String texts = jin.toString();
-
-                                if (jin == null || texts.isEmpty()) {
+                                try{
+                                    String texts = JOptionPane.showInputDialog(managerFrame, "input your text", "text", JOptionPane.PLAIN_MESSAGE, null, null, null).toString();
+                                    if (texts.isEmpty()) {
+                                        wb.requestForceClearTmp();
+                                        return;
+                                    }
+                                    canvasShape.setText(texts);
+                                    canvasShape.setStrokeInt(Integer.parseInt(strokeCB.getSelectedItem().toString()));
+                                }catch (NullPointerException ex){
                                     wb.requestForceClearTmp();
                                     return;
                                 }
 
-                                canvasShape.setText(texts);
-                                canvasShape.setStrokeInt(Integer.parseInt(strokeCB.getSelectedItem().toString()));
+
                             } else {
                                 //起终点可界定的图形
                                 canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
@@ -632,7 +636,6 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 for (CanvasShape shape : wb.getTempShapes().values()) {
                     drawCanvasShape(shape);
                 }
-//            AtomicReference<ArrayList<CanvasShape>> shapeArrayList = new AtomicReference<>(wb.getCanvasShapeArrayList());
                 for (CanvasShape shape : wb.getLocalShapeQ()) {
                     drawCanvasShape(shape);
                 }

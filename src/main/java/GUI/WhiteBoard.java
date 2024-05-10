@@ -32,7 +32,7 @@ public class WhiteBoard implements IWhiteBoard {
     //    private final ArrayList<IClient> clientUIList = new ArrayList<>();
     private final ConcurrentHashMultiset<String> userList = ConcurrentHashMultiset.create();
     private final ConcurrentHashMultiset<String> editingUser = ConcurrentHashMultiset.create();
-    public ConcurrentHashMap<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> userAgents = new ConcurrentHashMap<>();
+    public volatile ConcurrentHashMap<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> userAgents = new ConcurrentHashMap<>();
     boolean isManager = false;
     //仅管理员存吧还是
     private WhiteBoardServiceGrpc.WhiteBoardServiceStub managerStub;
@@ -41,7 +41,7 @@ public class WhiteBoard implements IWhiteBoard {
     private WhiteBoardSecuredServiceGrpc.WhiteBoardSecuredServiceStub managerSecuredStub;
     private IClient selfUI;
 
-    private ConcurrentLinkedDeque<CanvasShape> localShapeQ = new ConcurrentLinkedDeque<>();
+    public volatile ConcurrentLinkedDeque<CanvasShape> localShapeQ = new ConcurrentLinkedDeque<>();
 
     public ConcurrentLinkedDeque<CanvasShape> getLocalShapeQ() {
         return localShapeQ;
@@ -55,7 +55,7 @@ public class WhiteBoard implements IWhiteBoard {
         return tempShapes;
     }
 
-    public ConcurrentHashMap<String, CanvasShape> tempShapes = new ConcurrentHashMap<>();
+    public volatile ConcurrentHashMap<String, CanvasShape> tempShapes = new ConcurrentHashMap<>();
     private ConcurrentLinkedDeque<String> messageArrayList = new ConcurrentLinkedDeque<>();
 
     public ConcurrentHashMultiset<String> getEditingUser() {
@@ -92,6 +92,10 @@ public class WhiteBoard implements IWhiteBoard {
             return;
         }
         if (kickedClient != null) {
+            if(kickedClient.equals("Manager")){
+                JOptionPane.showMessageDialog(null, "Manager cannot be removed.");
+                return;
+            }
             userList.remove(kickedClient);
             userAgents.get(kickedClient).closeWindow(Empty.newBuilder().build(),
                     new StreamObserver<Empty>() {
@@ -645,21 +649,51 @@ public class WhiteBoard implements IWhiteBoard {
 
     @Override
     public void requestForceClearTmp() {
-        managerSecuredStub.forceClearTmp(UserName.newBuilder().setUsername(getSelfUI().getUsername()).build(), new StreamObserver<Empty>() {
-            @Override
-            public void onNext(Empty empty) {
-                System.out.println("clearTmpShapes success.");
-            }
+        Context.current().fork().run(() -> {
+            managerSecuredStub.forceClearTmp(UserName.newBuilder().setUsername(getSelfUI().getUsername()).build(), new StreamObserver<Empty>() {
+                @Override
+                public void onNext(Empty empty) {
+                    System.out.println("requestForceClearTmp success.");
+                }
 
-            @Override
-            public void onError(Throwable t) {
-                System.out.println("clearTmpShapes failed." + t.getMessage());
-            }
+                @Override
+                public void onError(Throwable t) {
+                    System.out.println("requestForceClearTmp failed." + t.getMessage());
+                }
 
-            @Override
-            public void onCompleted() {
-            }
+                @Override
+                public void onCompleted() {
+                }
+            });
         });
+    }
+
+    @Override
+    public void broadCastForceClearTmp(String username) {
+        for(Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
+            WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
+            if (stb != null) {
+                Context.current().fork().run(() -> {
+                    stb.forceClearTmp(UserName.newBuilder().setUsername(username).build(), new StreamObserver<Empty>() {
+                        @Override
+                        public void onNext(Empty empty) {
+                        }
+
+                        @Override
+                        public void onError(Throwable t) {
+                            System.out.println("peer clearTmpShapes failed." + t.getMessage());
+                        }
+
+                        @Override
+                        public void onCompleted() {
+                        }
+                    });
+                });
+            } else {
+                System.out.println("Cannot get stub for " + ent.getKey());
+                System.out.println("UserAgents: " + userAgents);
+            }
+        }
     }
 
     private boolean overlapBoundingBox(CanvasShape shape1, CanvasShape shape2) {

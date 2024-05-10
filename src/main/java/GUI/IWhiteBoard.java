@@ -53,4 +53,6 @@ public interface IWhiteBoard{
     <K, V> Map<K,V> getTempShapes();
 
     void requestForceClearTmp();
+
+    void broadCastForceClearTmp(String username);
 }

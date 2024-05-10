@@ -68,7 +68,7 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
     @Override
     public void updEditing(whiteboard.Whiteboard.SynchronizeUserRequest request,
                                    io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
-        logger.severe("Received synchronize editing request: " + request.getOperation() +" "+ request.getUsername());
+        logger.severe("Received synchronize editing BCast: " + request.getOperation() +" "+ request.getUsername());
         wb.updEditing(request.getOperation(), request.getUsername());
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
         responseObserver.onCompleted();
@@ -99,6 +99,18 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
         SwingUtilities.invokeLater(() -> {
 //            wb.getSelfUI().drawCanvasShape(shape);
             wb.getTempShapes().put(shape.getUsername(), shape);
+            wb.getSelfUI().reDraw();
+        });
+        responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void forceClearTmp(whiteboard.Whiteboard.UserName request,
+                              io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
+        logger.severe("Received force clear tmp BCast: " + request.getUsername());
+        wb.getTempShapes().remove(request.getUsername());
+        SwingUtilities.invokeLater(() -> {
             wb.getSelfUI().reDraw();
         });
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());

@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -30,7 +29,7 @@ public class WBClient {
     Server clientServer;
     private final ManagedChannel channel;
     private WhiteBoardServiceGrpc.WhiteBoardServiceStub stub;
-    WhiteBoardSecuredServiceGrpc.WhiteBoardSecuredServiceStub SecuredStub;
+    private WhiteBoardSecuredServiceGrpc.WhiteBoardSecuredServiceStub SecuredStub;
 
 
     public WBClient(WhiteBoard wb, String destHost,int destPort) {
@@ -42,15 +41,16 @@ public class WBClient {
                 .usePlaintext()
                 .build();
         stub = WhiteBoardServiceGrpc.newStub(channel);
-        SecuredStub = WhiteBoardSecuredServiceGrpc.newStub(channel).withCallCredentials(new CallCredentials() {
-            @Override
-            public void applyRequestMetadata(RequestInfo requestInfo, Executor executor, MetadataApplier metadataApplier) {
-                Metadata metadata = new Metadata();
-                metadata.put(Metadata.Key.of("token", Metadata.ASCII_STRING_MARSHALLER), "token");
-                metadataApplier.apply(metadata);
-            }
-        });
-
+        SecuredStub = WhiteBoardSecuredServiceGrpc.newStub(channel)
+//                .withCallCredentials(new CallCredentials() {
+//            @Override
+//            public void applyRequestMetadata(RequestInfo requestInfo, Executor executor, MetadataApplier metadataApplier) {
+//                Metadata metadata = new Metadata();
+//                metadata.put(Metadata.Key.of("token", Metadata.ASCII_STRING_MARSHALLER), "token");
+//                metadataApplier.apply(metadata);
+//            }
+//        })
+        ;
     }
     public static int findFreePort() throws IOException {
         try (ServerSocket socket = new ServerSocket(0)) {
@@ -154,15 +154,15 @@ public class WBClient {
                                             logger.info("Cannot get constructed stub, please check.");
                                             return;
                                         }else {
-                                            logger.info("Successfully get stub, channel is connected." + client.channel.toString());
+                                            logger.info("Successfully get stub, channel is connected." + client.channel);
                                             wb.setServerStub(ServerStub);
-                                            if(serverSecuredStub == null) {
-                                                logger.info("Cannot get constructed secured stub, please check.");
-                                                return;
-                                            }else{
-                                                wb.setManagerSecuredStub(serverSecuredStub);
-                                            }
-
+                                        }
+                                        if(serverSecuredStub == null) {
+                                            logger.info("Cannot get constructed secured stub, please check.");
+                                            return;
+                                        }else{
+                                            logger.info("Successfully get secured stub, channel is connected." + client.channel);
+                                            wb.setManagerSecuredStub(serverSecuredStub);
                                         }
                                         wb.registerPeer(username, selfIp, String.valueOf(selfPort), null);
 //

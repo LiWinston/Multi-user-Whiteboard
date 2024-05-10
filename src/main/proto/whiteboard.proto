@@ -151,5 +151,7 @@ service WhiteBoardClientService {
   rpc ShowEditing(google.protobuf.StringValue) returns (google.protobuf.Empty);
 
   rpc sPreviewShapes(_CanvasShape) returns (google.protobuf.Empty);
+
+  rpc forceClearTmp(UserName) returns (google.protobuf.Empty);
 }
 

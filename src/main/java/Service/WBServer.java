@@ -5,6 +5,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import whiteboard.WhiteBoardSecuredServiceGrpc;
 import whiteboard.WhiteBoardServiceGrpc;
 
 import java.io.IOException;
@@ -60,6 +61,7 @@ public class WBServer {
                     //public ManagerGUI(WhiteBoard whiteBoard, String IpAddress, String port, String WBName)
 //                    new ManagerGUI(wb, Ip, port, name);
                     wb.setServerStub(WhiteBoardServiceGrpc.newStub(channel));
+                    wb.setManagerSecuredStub(WhiteBoardSecuredServiceGrpc.newStub(channel));
                     logger.info("Manager GUI is created, welcome manager.");
                 } catch (IOException e) {
                     logger.severe("IOException: Server failed to start");
