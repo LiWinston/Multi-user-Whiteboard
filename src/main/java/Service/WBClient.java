@@ -5,6 +5,7 @@ import com.google.protobuf.StringValue;
 import io.grpc.*;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.LoggerFactory;
+import whiteboard.WhiteBoardSecuredServiceGrpc;
 import whiteboard.WhiteBoardServiceGrpc;
 import whiteboard.Whiteboard.Response;
 
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -28,6 +30,7 @@ public class WBClient {
     Server clientServer;
     private final ManagedChannel channel;
     private WhiteBoardServiceGrpc.WhiteBoardServiceStub stub;
+    WhiteBoardSecuredServiceGrpc.WhiteBoardSecuredServiceStub SecuredStub;
 
 
     public WBClient(WhiteBoard wb, String destHost,int destPort) {
@@ -39,6 +42,15 @@ public class WBClient {
                 .usePlaintext()
                 .build();
         stub = WhiteBoardServiceGrpc.newStub(channel);
+        SecuredStub = WhiteBoardSecuredServiceGrpc.newStub(channel).withCallCredentials(new CallCredentials() {
+            @Override
+            public void applyRequestMetadata(RequestInfo requestInfo, Executor executor, MetadataApplier metadataApplier) {
+                Metadata metadata = new Metadata();
+                metadata.put(Metadata.Key.of("token", Metadata.ASCII_STRING_MARSHALLER), "token");
+                metadataApplier.apply(metadata);
+            }
+        });
+
     }
     public static int findFreePort() throws IOException {
         try (ServerSocket socket = new ServerSocket(0)) {
@@ -105,6 +117,7 @@ public class WBClient {
                 WhiteBoard wb = new WhiteBoard();
                 WBClient client = new WBClient(wb, destIpAddress, Integer.parseInt(destPort));
                 WhiteBoardServiceGrpc.WhiteBoardServiceStub ServerStub = client.stub;
+                WhiteBoardSecuredServiceGrpc.WhiteBoardSecuredServiceStub serverSecuredStub = client.SecuredStub;
 
                 com.google.protobuf.StringValue checkPeerNameRequest = StringValue.newBuilder().setValue(username).build();
                 StreamObserver<Response> checkPeerNameResponseObserver = new StreamObserver<Response>() {
@@ -143,6 +156,13 @@ public class WBClient {
                                         }else {
                                             logger.info("Successfully get stub, channel is connected." + client.channel.toString());
                                             wb.setServerStub(ServerStub);
+                                            if(serverSecuredStub == null) {
+                                                logger.info("Cannot get constructed secured stub, please check.");
+                                                return;
+                                            }else{
+                                                wb.setManagerSecuredStub(serverSecuredStub);
+                                            }
+
                                         }
                                         wb.registerPeer(username, selfIp, String.valueOf(selfPort), null);
 //

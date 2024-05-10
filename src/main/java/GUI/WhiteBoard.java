@@ -10,6 +10,7 @@ import io.grpc.Context;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
 import whiteboard.WhiteBoardClientServiceGrpc;
+import whiteboard.WhiteBoardSecuredServiceGrpc;
 import whiteboard.WhiteBoardServiceGrpc;
 import whiteboard.Whiteboard;
 import whiteboard.Whiteboard.UserName;
@@ -34,6 +35,9 @@ public class WhiteBoard implements IWhiteBoard {
     boolean isManager = false;
     //仅管理员存吧还是
     private WhiteBoardServiceGrpc.WhiteBoardServiceStub managerStub;
+
+
+    private WhiteBoardSecuredServiceGrpc.WhiteBoardSecuredServiceStub managerSecuredStub;
     private IClient selfUI;
     private ArrayList<CanvasShape> canvasShapeArrayList = new ArrayList<>();
 
@@ -62,6 +66,10 @@ public class WhiteBoard implements IWhiteBoard {
 
     public void setServerStub(WhiteBoardServiceGrpc.WhiteBoardServiceStub managerStub) {
         this.managerStub = managerStub;
+    }
+
+    public void setManagerSecuredStub(WhiteBoardSecuredServiceGrpc.WhiteBoardSecuredServiceStub managerSecuredStub) {
+        this.managerSecuredStub = managerSecuredStub;
     }
 
     public CountDownLatch connectionErrorLatch = new CountDownLatch(5);
@@ -636,7 +644,7 @@ public class WhiteBoard implements IWhiteBoard {
 
     @Override
     public void requestForceClearTmp() {
-        managerStub.forceClearTmp(UserName.newBuilder().setUsername(getSelfUI().getUsername()).build(), new StreamObserver<Empty>() {
+        managerSecuredStub.forceClearTmp(UserName.newBuilder().setUsername(getSelfUI().getUsername()).build(), new StreamObserver<Empty>() {
             @Override
             public void onNext(Empty empty) {
                 System.out.println("clearTmpShapes success.");

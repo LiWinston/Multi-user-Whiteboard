@@ -58,7 +58,10 @@ message Response {
   bool success = 1;
   string message = 2;
 }
+service WhiteBoardSecuredService{
 
+  rpc forceClearTmp(UserName) returns (google.protobuf.Empty);
+}
 service WhiteBoardService {
   // 同步画布
   rpc pushShape(_CanvasShape) returns (google.protobuf.Empty);
@@ -107,10 +110,6 @@ service WhiteBoardService {
 
   // 管理员关闭
   rpc ManagerClose(google.protobuf.Empty) returns (google.protobuf.Empty);
-}
-
-service WhiteBoardSecuredService{
-  rpc forceClearTmp(UserName) returns (google.protobuf.Empty);
 }
 
 service WhiteBoardClientService {
