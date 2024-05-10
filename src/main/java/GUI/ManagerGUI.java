@@ -18,6 +18,7 @@ import java.awt.event.*;
 import java.awt.geom.Point2D;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
@@ -39,7 +40,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     private String currentShapeType = "pen";
     private Color color = Color.BLACK;
     private int x1, x2, y1, y2;
-    private ArrayList<Point2D> pointArrayList;
+    private ConcurrentLinkedDeque<Point2D> pointQ;
     private Graphics2D canvasGraphics;
     private boolean isFill = false;
     SettableFuture<Boolean> futurePreviewAccept;
@@ -377,10 +378,10 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
         x1 = e.getX();
         y1 = e.getY();
-        if(pointArrayList == null){
-            pointArrayList = new ArrayList<>();
+        if(pointQ == null){
+            pointQ = new ConcurrentLinkedDeque<>();
         }else{
-            pointArrayList.clear();
+            pointQ.clear();
         }
 
         if (currentShapeType.equals("text")) {
@@ -458,7 +459,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                                 if (currentShapeType.equals("eraser")) {
                                     tempColor = Color.white;
                                 }
-                                canvasShape = new CanvasShape(currentShapeType, tempColor, username, pointArrayList, strokeInShape);
+                                canvasShape = new CanvasShape(currentShapeType, tempColor, username, new ArrayList<>(pointQ), strokeInShape);
                             } else if (currentShapeType.equals("text")) {
                                 canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
                                 Object jin = JOptionPane.showInputDialog(managerFrame, "input your text", "text", JOptionPane.PLAIN_MESSAGE, null, null, null);
@@ -529,9 +530,9 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 //        canvasGraphics = (Graphics2D) canvasPanel.getGraphics();
         Stroke tempStroke = new BasicStroke(Integer.parseInt(strokeCB.getSelectedItem().toString()));
         if (currentShapeType.equals("pen") || currentShapeType.equals("eraser")) {
-            if (pointArrayList.size() > 0) {
-                x4 = (int) pointArrayList.get(pointArrayList.size() - 1).getX();
-                y4 = (int) pointArrayList.get(pointArrayList.size() - 1).getY();
+            if (!pointQ.isEmpty()) {
+                x4 = (int) pointQ.getLast().getX();
+                y4 = (int) pointQ.getLast().getX();
             }
             Color tempColor;
             if (currentShapeType.equals("eraser")) {
@@ -545,9 +546,9 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 //                canvasGraphics.setStroke(tempStroke);
 //                canvasGraphics.drawLine(finalX, finalY, x3, y3);
 //            });
-            pointArrayList.add(new Point(x3, y3));
+            pointQ.add(new Point(x3, y3));
 
-            tmp = new CanvasShape(currentShapeType, tempColor, username, pointArrayList, Integer.parseInt(strokeCB.getSelectedItem().toString()));
+            tmp = new CanvasShape(currentShapeType, tempColor, username, new ArrayList<>(pointQ), Integer.parseInt(strokeCB.getSelectedItem().toString()));
 //            SwingUtilities.invokeLater(() -> drawCanvasShape(tmp));
 //            wb.tempShapes.put(username, tmp);
         }else{
