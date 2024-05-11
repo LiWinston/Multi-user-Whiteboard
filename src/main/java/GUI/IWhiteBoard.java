@@ -39,7 +39,7 @@ public interface IWhiteBoard{
 
     void newFile();
 
-    void openFile(ArrayList<CanvasShape> newShapes);
+    void openFile(Collection<CanvasShape> newShapes);
 
     void managerClose();
 

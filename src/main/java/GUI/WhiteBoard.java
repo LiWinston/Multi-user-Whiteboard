@@ -19,7 +19,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -176,7 +175,7 @@ public class WhiteBoard implements IWhiteBoard {
     }
 
     //only manager, thus no need for specific type check
-    public synchronized void openFile(ArrayList<CanvasShape> newShapes) {
+    public synchronized void openFile(Collection<CanvasShape> newShapes) {
         for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
             WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
             if (stb != null) {
@@ -195,15 +194,35 @@ public class WhiteBoard implements IWhiteBoard {
                     public void onCompleted() {
                     }
                 });
+                stb.updateShapeList(shapes2ProtoShapes(newShapes), new StreamObserver<whiteboard.Whiteboard.Response>() {
+                    @Override
+                    public void onNext(whiteboard.Whiteboard.Response response) {
+                        if (response.getSuccess()) {
+                            System.out.println("updateShapeList success.");
+                        } else {
+                            System.out.println("updateShapeList failed.");
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        System.out.println("updateShapeList failed.");
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                    }
+                });
             } else {
                 System.out.println("Cannot get stub for " + ent.getKey());
                 System.out.println("UserAgents: " + userAgents);
             }
         }
 
-        for (CanvasShape canvasShape : newShapes) {
-            this.pushShape(canvasShape);
-        }
+
+//        for (CanvasShape canvasShape : newShapes) {
+//            this.pushShape(canvasShape);
+//        }
     }
 
     //only manager, thus no need for specific type check

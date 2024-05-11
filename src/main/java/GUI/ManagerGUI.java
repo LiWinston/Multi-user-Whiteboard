@@ -108,17 +108,38 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 if (JFileChooser.APPROVE_OPTION == jFileChooser.showOpenDialog(managerFrame)) {
                     canvasFile = jFileChooser.getSelectedFile();
                     if (canvasFile != null) {
-                        try {
-                            FileInputStream fileInputStream = new FileInputStream(canvasFile);
-                            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-                            ArrayList<CanvasShape> shapes = (ArrayList<CanvasShape>) objectInputStream.readObject();
-                            wb.openFile(shapes);
-                            objectInputStream.close();
-                            fileInputStream.close();
-                            JOptionPane.showMessageDialog(managerFrame, "open file successfully");
-                        } catch (ClassNotFoundException | IOException fileNotFoundException) {
-                            JOptionPane.showMessageDialog(managerFrame, "can not open this file, try a correct file.");
+
+                        try (FileInputStream fileInputStream = new FileInputStream(canvasFile);
+                             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
+
+                            Object readObject = objectInputStream.readObject();
+                            if (readObject instanceof ConcurrentLinkedDeque<?> deque) {
+                                if (!deque.isEmpty() && deque.peek() instanceof CanvasShape) {
+                                    @SuppressWarnings("unchecked")
+                                    ConcurrentLinkedDeque<CanvasShape> shapes = (ConcurrentLinkedDeque<CanvasShape>) deque;
+                                    wb.openFile(shapes);
+                                    JOptionPane.showMessageDialog(managerFrame, "Open file successfully.");
+                                } else {
+                                    JOptionPane.showMessageDialog(managerFrame, "The file does not contain valid shapes.");
+                                }
+                            } else {
+                                JOptionPane.showMessageDialog(managerFrame, "The file format is not supported.");
+                            }
+                        } catch (ClassNotFoundException | IOException ex) {
+                            JOptionPane.showMessageDialog(managerFrame, "Cannot open this file, try a correct file.");
                         }
+
+//                        try {
+//                            FileInputStream fileInputStream = new FileInputStream(canvasFile);
+//                            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+//                            ConcurrentLinkedDeque<CanvasShape> shapes = (ConcurrentLinkedDeque<CanvasShape>) objectInputStream.readObject();
+//                            wb.openFile(shapes);
+//                            objectInputStream.close();
+//                            fileInputStream.close();
+//                            JOptionPane.showMessageDialog(managerFrame, "open file successfully");
+//                        } catch (ClassNotFoundException | IOException fileNotFoundException) {
+//                            JOptionPane.showMessageDialog(managerFrame, "can not open this file, try a correct file.");
+//                        }
                     }
                 }
             }
