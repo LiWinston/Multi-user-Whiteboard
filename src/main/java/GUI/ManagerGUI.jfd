@@ -64,6 +64,8 @@ new FormModel {
 						"maximumSize": new java.awt.Dimension( 350, 460 )
 						"minimumSize": new java.awt.Dimension( 350, 460 )
 						"preferredSize": new java.awt.Dimension( 350, 460 )
+						"lineWrap": true
+						"wrapStyleWord": true
 					} )
 				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
 					"row": 1

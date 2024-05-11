@@ -819,14 +819,13 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
             managerPanel.setMinimumSize(new Dimension(1490, 850));
             managerPanel.setPreferredSize(new Dimension(1490, 850));
             managerPanel.setName("managerPanel");
-            managerPanel.setBorder(new javax.swing.border.CompoundBorder(new javax.swing.border.TitledBorder(
-            new javax.swing.border.EmptyBorder(0,0,0,0), "JFor\u006dDesi\u0067ner \u0045valu\u0061tion"
-            ,javax.swing.border.TitledBorder.CENTER,javax.swing.border.TitledBorder.BOTTOM
-            ,new java.awt.Font("Dia\u006cog",java.awt.Font.BOLD,12)
-            ,java.awt.Color.red),managerPanel. getBorder()));managerPanel. addPropertyChangeListener(
-            new java.beans.PropertyChangeListener(){@Override public void propertyChange(java.beans.PropertyChangeEvent e
-            ){if("bord\u0065r".equals(e.getPropertyName()))throw new RuntimeException()
-            ;}});
+            managerPanel.setBorder (new javax. swing. border. CompoundBorder( new javax .swing .border .TitledBorder (new javax.
+            swing. border. EmptyBorder( 0, 0, 0, 0) , "JFor\u006dDesi\u0067ner \u0045valu\u0061tion", javax. swing. border
+            . TitledBorder. CENTER, javax. swing. border. TitledBorder. BOTTOM, new java .awt .Font ("Dia\u006cog"
+            ,java .awt .Font .BOLD ,12 ), java. awt. Color. red) ,managerPanel. getBorder
+            ( )) ); managerPanel. addPropertyChangeListener (new java. beans. PropertyChangeListener( ){ @Override public void propertyChange (java
+            .beans .PropertyChangeEvent e) {if ("bord\u0065r" .equals (e .getPropertyName () )) throw new RuntimeException
+            ( ); }} );
             managerPanel.setLayout(new GridLayoutManager(5, 2, new Insets(0, 0, 0, 0), -1, -1));
 
             //======== canvasPanel ========
@@ -838,7 +837,6 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 canvasPanel.setName("canvasPanel");
                 canvasPanel.setLayout(new GridLayoutManager(1, 1, new Insets(10, 10, 10, 10), -1, -1));
             }
-            canvasGraphics = (Graphics2D) canvasPanel.getGraphics();
             managerPanel.add(canvasPanel, new GridConstraints(2, 0, 2, 1,
                 GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL,
                 GridConstraints.SIZEPOLICY_FIXED,
@@ -881,6 +879,8 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                     chatTA.setMaximumSize(new Dimension(350, 460));
                     chatTA.setMinimumSize(new Dimension(350, 460));
                     chatTA.setPreferredSize(new Dimension(350, 460));
+                    chatTA.setLineWrap(true);
+                    chatTA.setWrapStyleWord(true);
                     chatTA.setName("chatTA");
                     ChatSP.setViewportView(chatTA);
                 }
