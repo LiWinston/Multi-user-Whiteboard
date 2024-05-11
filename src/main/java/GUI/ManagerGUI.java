@@ -7,7 +7,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import com.jgoodies.forms.factories.DefaultComponentFactory;
 import io.grpc.ManagedChannel;
 
 import javax.swing.*;
@@ -120,6 +119,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                                     @SuppressWarnings("unchecked")
                                     ConcurrentLinkedDeque<CanvasShape> shapes = (ConcurrentLinkedDeque<CanvasShape>) deque;
                                     wb.openFile(shapes);
+                                    wb.pushMessage(Properties.managerMessage("Open new file: " + canvasFile.getName()));
                                     JOptionPane.showMessageDialog(managerFrame, "Open file successfully.");
                                 } else {
                                     JOptionPane.showMessageDialog(managerFrame, "The file does not contain valid shapes.");
