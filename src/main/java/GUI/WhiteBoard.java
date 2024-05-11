@@ -22,7 +22,10 @@ import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.CountDownLatch;
 
 import static Service.Utils.shape2ProtoShape;
 import static Service.Utils.shapes2ProtoShapes;
@@ -341,12 +344,15 @@ public class WhiteBoard implements IWhiteBoard {
                     @Override
                     public void onCompleted() {
                         System.out.println("C side registerPeer : grpc call 2 synchronizeUser completed");
-                        managerStub.pushMessage(Whiteboard.ChatMessage.newBuilder().setMessage(
+                        Context.current().fork().run(() -> {
+
+                            managerStub.pushMessage(Whiteboard.ChatMessage.newBuilder().setMessage(
                                 Properties.chatMessageFormat(username , " joined.")).build(),
                                 new StreamObserver<Empty>() {
-                            @Override public void onNext(Empty empty) { }
-                            @Override public void onError(Throwable t) { }
-                            @Override public void onCompleted() { }
+                                    @Override public void onNext(Empty empty) { }
+                                    @Override public void onError(Throwable t) { }
+                                    @Override public void onCompleted() { }
+                                });
                         });
                     }
                 });
