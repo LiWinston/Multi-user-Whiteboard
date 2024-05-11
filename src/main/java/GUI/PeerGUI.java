@@ -275,25 +275,25 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
 
         if (currentShapeType.equals("text")) {
             if(Properties.RepeatTextPreviewSending){
-                new Thread(() -> {  // 创建新线程以避免UI阻塞
-                    CanvasShape tmp = new CanvasShape(currentShapeType, Color.GRAY, x1 - 5, x1 + 5, y1 - 5, y1 + 5, Integer.parseInt(strokeCB.getSelectedItem().toString()));
-                    tmp.setText("Other user is typing...");
-                    if (wb.previewTmpStream == null) {
-                        futurePreviewAccept = wb.sBeginPushShape();
-                    }
-                    for (int i = 0; i < 100; i++) {  // 循环发送10次
-                        if (wb.previewTmpStream != null) {
-                            wb.previewTmpStream.onNext(shape2ProtoShape(tmp));  // 发送消息
-                        }
-                        try {
-                            Thread.sleep(20);  // 等待200毫秒
-                        } catch (InterruptedException f) {
-                            Thread.currentThread().interrupt();
-                            System.err.println("Sending thread was interrupted.");
-                            break;
-                        }
-                    }
-                }).start();  // 启动线程
+//                new Thread(() -> {  // 创建新线程以避免UI阻塞
+//                    CanvasShape tmp = new CanvasShape(currentShapeType, Color.GRAY, x1 - 5, x1 + 5, y1 - 5, y1 + 5, Integer.parseInt(strokeCB.getSelectedItem().toString()));
+//                    tmp.setText("Other user is typing...");
+//                    if (wb.previewTmpStream == null) {
+//                        futurePreviewAccept = wb.sBeginPushShape();
+//                    }
+//                    for (int i = 0; i < 100; i++) {  // 循环发送10次
+//                        if (wb.previewTmpStream != null) {
+//                            wb.previewTmpStream.onNext(shape2ProtoShape(tmp));  // 发送消息
+//                        }
+//                        try {
+//                            Thread.sleep(20);  // 等待200毫秒
+//                        } catch (InterruptedException f) {
+//                            Thread.currentThread().interrupt();
+//                            System.err.println("Sending thread was interrupted.");
+//                            break;
+//                        }
+//                    }
+//                }).start();  // 启动线程
             }else{
                 CanvasShape tmp = new CanvasShape(currentShapeType, Color.GRAY, x1 - 5, x1 + 5, y1 - 5, y1 + 5, Integer.parseInt(strokeCB.getSelectedItem().toString()));
                 tmp.setText("Other user is typing...");

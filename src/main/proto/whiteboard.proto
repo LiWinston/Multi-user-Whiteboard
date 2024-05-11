@@ -17,6 +17,10 @@ message _CanvasShape {
   int32 strokeInt = 8;
 }
 
+message _CanvasShapeList {
+  repeated _CanvasShape shapes = 1;
+}
+
 // 点
 message point {
   double x = 1;
@@ -116,8 +120,11 @@ service WhiteBoardClientService {
   // 从管理员处接收警告信息
   rpc WarningFromManager(ChatMessage) returns (google.protobuf.Empty);
 
-  // 更新画布形状
+  // 更新单一图形
   rpc UpdateShapes(_CanvasShape) returns (google.protobuf.Empty);
+
+  // 同步图形清单
+  rpc UpdateShapeList(_CanvasShapeList) returns (Response);
 
   // 更新聊天框
   rpc UpdateChatBox(ChatMessage) returns (google.protobuf.Empty);

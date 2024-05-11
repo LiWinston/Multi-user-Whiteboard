@@ -20,12 +20,15 @@ import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 
 import static Service.Utils.shape2ProtoShape;
+import static Service.Utils.shapes2ProtoShapes;
 
 
 public class WhiteBoard implements IWhiteBoard {
@@ -41,10 +44,15 @@ public class WhiteBoard implements IWhiteBoard {
     private WhiteBoardSecuredServiceGrpc.WhiteBoardSecuredServiceStub managerSecuredStub;
     private IClient selfUI;
 
+    public ConcurrentLinkedDeque<CanvasShape> getLocalShapeQ() {
+        System.out.println("Loc: " + localShapeQ.size());
+        return localShapeQ;
+    }
+
     public volatile ConcurrentLinkedDeque<CanvasShape> localShapeQ = new ConcurrentLinkedDeque<>();
 
-    public ConcurrentLinkedDeque<CanvasShape> getLocalShapeQ() {
-        return localShapeQ;
+    public void setLocalShapeQ(Collection<CanvasShape> itShapes) {
+        this.localShapeQ = new ConcurrentLinkedDeque<>(itShapes);
     }
 
 //    public synchronized void setCanvasShapeArrayList(ArrayList<CanvasShape> canvasShapeArrayList) {
@@ -52,6 +60,7 @@ public class WhiteBoard implements IWhiteBoard {
 //    }
 
     public ConcurrentHashMap<String, CanvasShape> getTempShapes() {
+        System.out.println("Tmp: " + tempShapes.size());
         return tempShapes;
     }
 
@@ -244,6 +253,21 @@ public class WhiteBoard implements IWhiteBoard {
         if (isManager) {
             //负责加入客户服务句柄 channel是用客户自己的ip port建立的
             userAgents.put(username, WhiteBoardClientServiceGrpc.newStub(inputChannel));
+            var sendOk = sendCanvasShapeListTo(username);
+            if (sendOk != null) {
+                sendOk.addListener(() -> {
+                    try {
+                        if (sendOk.get()) {
+                            System.out.println("sendCanvasShapeListTo success.");
+                        } else {
+                            System.out.println("sendCanvasShapeListTo failed.");
+//                            //指数回退的重传，已转移至grpc服务配置文件
+                        }
+                    } catch (InterruptedException | ExecutionException e) {
+                        throw new RuntimeException(e);
+                    }
+                }, Context.current().fixedContextExecutor(null));
+            }
         } else {
             PeerGUI peerGUI = new PeerGUI(this, username);
             peerGUI.Build();
@@ -498,7 +522,41 @@ public class WhiteBoard implements IWhiteBoard {
         }
     }
 
+    public SettableFuture<Boolean> sendCanvasShapeListTo(String username) {
+        if (!isManager) {
+            return null;
+        }
+        SettableFuture<Boolean> futureOK = SettableFuture.create();
+        Context.current().fork().run(() -> {
+            userAgents.get(username).updateShapeList(shapes2ProtoShapes(localShapeQ), new StreamObserver<whiteboard.Whiteboard.Response>() {
+                @Override
+                public void onNext(whiteboard.Whiteboard.Response response) {
+                    if (response.getSuccess()) {
+                        futureOK.set(true);
+                        futureOK.resultNow();
+                    } else {
+                        futureOK.set(false);
+                        futureOK.resultNow();
+                    }
+                    System.out.println(futureOK);
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                    System.out.println("peer updateShapeList failed." + t.getMessage());
+                }
+
+                @Override
+                public void onCompleted() {
+                }
+            });
+        });
+
+        return futureOK;
+    }
+
     public void acceptRemoteShape(CanvasShape canvasShape) {
+        tempShapes.remove(canvasShape.getUsername());
         localShapeQ.add(canvasShape);
 //        getSelfUI().updateShapes(canvasShape);
     }

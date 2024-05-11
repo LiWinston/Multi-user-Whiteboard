@@ -4,12 +4,15 @@ import WBSYS.CanvasShape;
 import io.grpc.ManagedChannel;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public interface IWhiteBoard{
     IClient getSelfUI();
+
+    public void setLocalShapeQ(Collection<CanvasShape> localShapeQ);
     void pushShape(CanvasShape canvasShape);
 
     void broadCastShape(CanvasShape canvasShape);

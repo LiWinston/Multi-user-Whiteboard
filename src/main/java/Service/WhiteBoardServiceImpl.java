@@ -52,9 +52,63 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
     public void registerPeer(Whiteboard.IP_Port ip_port,
                              io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         logger.severe("Received registerPeer request: " + ip_port.getIp() + " " + ip_port.getPort());
-        ManagedChannel channel = ManagedChannelBuilder.forAddress(ip_port.getIp(), Integer.parseInt(ip_port.getPort())).usePlaintext().build();
+
+        // 生成channel，有配置文件则使用配置文件
+        ManagedChannel channel = null;
+        channel = ManagedChannelBuilder.forAddress(ip_port.getIp(), Integer.parseInt(ip_port.getPort()))
+                .usePlaintext()
+                .build();
+//        String configFilePath = "grpc_service_config.json";
+//        File configFile = new File(configFilePath);
+//        String jsonConfig = null;
+//
+//        try {
+//            if (configFile.exists()) {
+//                jsonConfig = new String(Files.readAllBytes(configFile.toPath()));
+//            } else {
+//                InputStream inputStream = getClass().getClassLoader().getResourceAsStream(configFilePath);
+//                if (inputStream == null) {
+//                    throw new IOException("Configuration file not found in classpath");
+//                }
+//                byte[] bytes = inputStream.readAllBytes();
+//                jsonConfig = new String(bytes);
+//            }
+//
+//            JsonObject configObj = JsonParser.parseString(jsonConfig).getAsJsonObject();
+//            Type type = new TypeToken<Map<String, Object>>(){}.getType();
+//            Map<String, Object> grpcServiceConfig = new Gson().fromJson(configObj, type);
+//            logger.info("Using grpc_service_config.json: " + grpcServiceConfig);
+////            channel.shutdown().awaitTermination(5, java.util.concurrent.TimeUnit.SECONDS); // 关闭旧的 channel
+//            channel = ManagedChannelBuilder.forAddress(ip_port.getIp(), Integer.parseInt(ip_port.getPort()))
+//                    .defaultServiceConfig(grpcServiceConfig)
+//                    .usePlaintext()
+//                    .build();
+//        } catch (Exception e) {
+//            logger.severe("Failed to load grpc_service_config.json: " + e.getMessage());
+////            channel = ManagedChannelBuilder.forAddress(ip_port.getIp(), Integer.parseInt(ip_port.getPort()))
+////                    .usePlaintext()
+////                    .build();
+//        }
+
+
+//        String grpc_service_config = null;
+//        try {
+//            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("grpc_service_config.json");
+//            byte[] bytes = inputStream.readAllBytes();
+//            grpc_service_config = Arrays.toString(bytes);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//        if (grpc_service_config == null || grpc_service_config.isEmpty() || grpc_service_config.isBlank()) {
+//            logger.severe("grpc_service_config.json not found");
+//            channel = ManagedChannelBuilder.forAddress(ip_port.getIp(), Integer.parseInt(ip_port.getPort())).usePlaintext().build();
+//        }else{
+//            channel = ManagedChannelBuilder.forAddress(ip_port.getIp(), Integer.parseInt(ip_port.getPort())).
+//                    defaultServiceConfig(JsonParser.parseString(grpc_service_config).getAsJsonObject().asMap()).usePlaintext().build();
+//        }
         wb.registerPeer(ip_port.getUsername(), ip_port.getIp(), ip_port.getPort(), channel);
 
+        //新用户同步显示“当前编辑中”用户列表
         Context.current().fork().run(() -> {
             for (String editingUser : wb.getEditingUser()) {
                 wb.userAgents.get(ip_port.getUsername()).updEditing(

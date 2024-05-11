@@ -6,6 +6,7 @@ import whiteboard.Whiteboard;
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,5 +58,17 @@ public class Utils {
             shape.setFill(_canvasShape.getFill());
         }
         return shape;
+    }
+
+    public static Whiteboard._CanvasShapeList shapes2ProtoShapes(Iterable<CanvasShape> shapes) {
+        Whiteboard._CanvasShapeList.Builder builder = Whiteboard._CanvasShapeList.newBuilder();
+        for (CanvasShape shape : shapes) {
+            builder.addShapes(shape2ProtoShape(shape));
+        }
+        return builder.build();
+    }
+
+    public static Collection<CanvasShape> protoShapes2Shapes(Whiteboard._CanvasShapeList _shapes) {
+        return _shapes.getShapesList().stream().map(Utils::protoShape2Shape).toList();
     }
 }

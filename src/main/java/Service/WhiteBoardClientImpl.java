@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import static Service.Utils.protoShape2Shape;
+import static Service.Utils.protoShapes2Shapes;
 
 public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoardClientServiceImplBase {
     public IWhiteBoard wb;
@@ -110,10 +111,26 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
                               io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         logger.severe("Received force clear tmp BCast: " + request.getUsername());
         wb.getTempShapes().remove(request.getUsername());
+        logger.severe("删了 " + request.getUsername()+ " 的临时图形,现在还有" + wb.getTempShapes().size() + "个");
         SwingUtilities.invokeLater(() -> {
             wb.getSelfUI().reDraw();
         });
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void updateShapeList(whiteboard.Whiteboard._CanvasShapeList request,
+                                io.grpc.stub.StreamObserver<whiteboard.Whiteboard.Response> responseObserver) {
+        logger.severe("Received shape update list : " + request.getSerializedSize());
+        wb.getSelfUI().clearCanvas();
+        wb.setLocalShapeQ(protoShapes2Shapes(request));
+        wb.getSelfUI().reDraw();
+        if(wb.getLocalShapeQ().size() != request.getShapesCount()){
+            responseObserver.onNext(whiteboard.Whiteboard.Response.newBuilder().setSuccess(false).setMessage("Shape list size not match").build());
+        }else{
+            responseObserver.onNext(whiteboard.Whiteboard.Response.newBuilder().setSuccess(true).setMessage("Successfully upd shapelist").build());
+        }
         responseObserver.onCompleted();
     }
 }
