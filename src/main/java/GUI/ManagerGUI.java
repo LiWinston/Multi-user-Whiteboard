@@ -330,6 +330,10 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                                 canvasGraphics.setPaint(shapeColor);
                                 canvasGraphics.drawLine(x3, y3, x4, y4);
                             }
+                        } else if ((points != null && points.size() == 1)) {
+                            int x = (int) points.getFirst().getX();
+                            int y = (int) points.getFirst().getY();
+                            canvasGraphics.drawLine(x, y, x, y);
                         }
                     }
                 }
@@ -410,10 +414,20 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 tmp.setText("Other user is typing...");
                 if (wb.previewTmpStream == null) {
                     futurePreviewAccept = wb.sBeginPushShape();
-                }
-                if (wb.previewTmpStream != null) {
+                }else{
                     wb.previewTmpStream.onNext(shape2ProtoShape(tmp));  // 发送消息
                 }
+            }
+        }else{
+            if(currentShapeType.equals("pen") || currentShapeType.equals("eraser")){
+                pointQ.add(new Point(x1, y1));
+                Color tempColor = currentShapeType.equals("pen") ? color : Color.white;
+                CanvasShape tmp = new CanvasShape(currentShapeType, tempColor, username, new ArrayList<>(pointQ), Integer.parseInt(strokeCB.getSelectedItem().toString()));
+                drawCanvasShape(tmp);
+                if (wb.previewTmpStream == null) {
+                    futurePreviewAccept = wb.sBeginPushShape();
+                }
+                wb.previewTmpStream.onNext(shape2ProtoShape(tmp));
             }
         }
     }
