@@ -1,6 +1,7 @@
 package Service;
 
 import GUI.WhiteBoard;
+import WBSYS.Properties;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
@@ -62,7 +63,8 @@ public class WBServer {
 //                    new ManagerGUI(wb, Ip, port, name);
                     wb.setServerStub(WhiteBoardServiceGrpc.newStub(channel));
                     wb.setManagerSecuredStub(WhiteBoardSecuredServiceGrpc.newStub(channel));
-                    logger.info("Manager GUI is created, welcome manager.");
+                    wb.pushMessage(Properties.managerMessage("White Board Setup, you are allocated as manager."));
+                    logger.info("Manager GUI initialized, welcome message sent");
                 } catch (IOException e) {
                     logger.severe("IOException: Server failed to start");
                 }

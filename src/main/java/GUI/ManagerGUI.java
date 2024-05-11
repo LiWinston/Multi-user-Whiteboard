@@ -18,6 +18,7 @@ import java.awt.event.*;
 import java.awt.geom.Point2D;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -450,6 +451,19 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 }
                 wb.previewTmpStream.onNext(shape2ProtoShape(tmp));
             }
+
+            if (currentShapeType.equals("oval") || currentShapeType.equals("circle") || currentShapeType.equals("rectangle")) {
+                if (wb.previewTmpStream == null) {
+                    futurePreviewAccept = wb.sBeginPushShape();
+                }
+                int strokeInShape = Integer.parseInt(Objects.requireNonNull(strokeCB.getSelectedItem()).toString());
+                CanvasShape tmp = new CanvasShape(currentShapeType, color, x1, x1 + strokeInShape, y1, y1 + strokeInShape, strokeInShape);
+                drawCanvasShape(tmp);
+                if (wb.previewTmpStream == null) {
+                    futurePreviewAccept = wb.sBeginPushShape();
+                }
+                wb.previewTmpStream.onNext(shape2ProtoShape(tmp));
+            }
         }
     }
 
@@ -511,6 +525,9 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                                 }
                             } else {
                                 //起终点可界定的图形
+                                //若按下没动，设为笔触大小的相应形
+                                x2 = x2 == x1 ? x1 + strokeInShape : x2;
+                                y2 = y2 == y1 ? y1 + strokeInShape : y2;
                                 canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
                             }
 
