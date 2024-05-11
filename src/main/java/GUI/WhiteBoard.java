@@ -129,7 +129,7 @@ public class WhiteBoard implements IWhiteBoard {
                         public void onCompleted() {
                         }
                     });
-            this.pushMessage(Properties.managerMessage(kickedClient + " have been removed"));
+            this.pushMessage(Properties.managerMessage("Manager kicks " + kickedClient.trim() + "out"));
             this.SynchronizeUser("remove", username);
             userAgents.remove(username);
         } else {
@@ -142,7 +142,7 @@ public class WhiteBoard implements IWhiteBoard {
         userList.removeIf(s -> s.equals(username));
 //        userAgents.remove(username); 没用 本地改这个没意义
         this.SynchronizeUser("remove", username);
-        this.pushMessage(Properties.managerMessage(username + " has exited!\n"));
+        this.pushMessage(Properties.managerMessage(username + " exited.\n"));
     }
 
 
@@ -563,6 +563,7 @@ public class WhiteBoard implements IWhiteBoard {
                 @Override
                 public void onError(Throwable t) {
                     System.out.println("peer updateShapeList failed." + t.getMessage());
+                    futureOK.setException(t);
                 }
 
                 @Override
@@ -585,12 +586,12 @@ public class WhiteBoard implements IWhiteBoard {
         managerStub.pushMessage(Whiteboard.ChatMessage.newBuilder().setMessage(chatMessage).build(), new StreamObserver<Empty>() {
             @Override
             public void onNext(Empty empty) {
-                System.out.println("manager pushMessage success.");
+                System.out.println(getSelfUI().getUsername() + "pushMessage success.");
             }
 
             @Override
             public void onError(Throwable t) {
-                System.out.println("manager pushMessage failed." + t.getMessage());
+                System.out.println(getSelfUI().getUsername() + "pushMessage failed." + t.getMessage());
             }
 
             @Override
