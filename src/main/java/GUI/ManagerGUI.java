@@ -470,12 +470,10 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                                     }
                                     canvasShape.setText(texts);
                                     canvasShape.setStrokeInt(Integer.parseInt(strokeCB.getSelectedItem().toString()));
-                                }catch (NullPointerException ex){
+                                }catch (Exception ex){
                                     wb.requestForceClearTmp();
                                     return;
                                 }
-
-
                             } else {
                                 //起终点可界定的图形
                                 canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);

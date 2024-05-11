@@ -357,7 +357,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
                                 }
                                 canvasShape.setText(texts);
                                 canvasShape.setStrokeInt(Integer.parseInt(strokeCB.getSelectedItem().toString()));
-                            }catch (NullPointerException ex){
+                            }catch (Exception ex){
                                 wb.requestForceClearTmp();
                                 return;
                             }
