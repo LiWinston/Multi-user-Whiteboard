@@ -145,7 +145,7 @@ service WhiteBoardClientService {
   rpc ReDraw(google.protobuf.Empty) returns (google.protobuf.Empty);
 
   // 关闭窗口
-  rpc CloseWindow(google.protobuf.Empty) returns (google.protobuf.Empty);
+  rpc CloseWindow(google.protobuf.StringValue) returns (google.protobuf.Empty);
 
   // 客户端退出
   rpc Exit(google.protobuf.Empty) returns (google.protobuf.Empty);

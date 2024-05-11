@@ -5,28 +5,31 @@ import whiteboard.Whiteboard;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class Utils {
+
+    //构造点-protobuf点的缓存，加速编码
+    private static final HashMap<Point2D, Whiteboard.point> pointCache = new HashMap<>();
+
     public static ArrayList<Point2D> protoPointsToArrayList(List<Whiteboard.point> list){
-        ArrayList<Point2D> points = new ArrayList<>();
+        ArrayList<Point2D> points = new ArrayList<>(list.size());
         for (Whiteboard.point point : list) {
             points.add(new Point2D.Double(point.getX(), point.getY()));
         }
         return points;
     };
 
-    public static whiteboard.Whiteboard.point convertToPointProto(Point point) {
-        return whiteboard.Whiteboard.point.newBuilder()
-                .setX(point.getX())
-                .setY(point.getY())
-                .build();
+    public static whiteboard.Whiteboard.point convertToPointProto(Point2D point) {
+        return pointCache.computeIfAbsent(point, p -> whiteboard.Whiteboard.point.newBuilder()
+                .setX(p.getX())
+                .setY(p.getY())
+                .build());
     }
 
     public static Whiteboard._CanvasShape shape2ProtoShape(WBSYS.CanvasShape canvasShape) {
+        var points = canvasShape.getPoints();
         return Whiteboard._CanvasShape.newBuilder().
                 setShapeString(canvasShape.getShapeString()).
                 setColor(String.valueOf(canvasShape.getColor().getRGB())).
@@ -34,13 +37,9 @@ public class Utils {
                 setText(canvasShape.getText() == null ? "" : canvasShape.getText()).
                 setFill(canvasShape.isFill()).
                 setUsername(canvasShape.getUsername()).
-                addAllPoints(Optional.ofNullable(canvasShape.getPoints())
-                        .orElse(new ArrayList<>())
+                addAllPoints(points == null ? List.of() : points
                         .stream()
-                        .map(point -> Whiteboard.point.newBuilder()
-                                .setX(point.getX())
-                                .setY(point.getY())
-                                .build())
+                        .map(Utils::convertToPointProto)
                         .toList()).
                 setStrokeInt(canvasShape.getStrokeInt()).
                 build();

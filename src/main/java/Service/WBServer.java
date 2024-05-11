@@ -63,7 +63,7 @@ public class WBServer {
 //                    new ManagerGUI(wb, Ip, port, name);
                     wb.setServerStub(WhiteBoardServiceGrpc.newStub(channel));
                     wb.setManagerSecuredStub(WhiteBoardSecuredServiceGrpc.newStub(channel));
-                    wb.pushMessage(Properties.managerMessage("White Board Setup, you are allocated as manager."));
+                    wb.pushMessage(Properties.managerMessage("White Board Setup, Server IP: " + Ip + " Port: " + port + " Board Name: " + name));
                     logger.info("Manager GUI initialized, welcome message sent");
                 } catch (IOException e) {
                     logger.severe("IOException: Server failed to start");

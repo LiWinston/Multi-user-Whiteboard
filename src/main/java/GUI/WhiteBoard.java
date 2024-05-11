@@ -6,6 +6,7 @@ import WBSYS.Properties;
 import com.google.common.collect.ConcurrentHashMultiset;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.Empty;
+import com.google.protobuf.StringValue;
 import io.grpc.Context;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
@@ -102,7 +103,7 @@ public class WhiteBoard implements IWhiteBoard {
                 return;
             }
             userList.remove(kickedClient);
-            userAgents.get(kickedClient).closeWindow(Empty.newBuilder().build(),
+            userAgents.get(kickedClient).closeWindow(StringValue.newBuilder().setValue("You are kicked out by manager.").build(),
                     new StreamObserver<Empty>() {
                         @Override
                         public void onNext(Empty empty) {
@@ -126,7 +127,7 @@ public class WhiteBoard implements IWhiteBoard {
                         public void onCompleted() {
                         }
                     });
-            this.pushMessage(Properties.managerMessage("Manager kicks " + kickedClient.trim() + "out"));
+            this.pushMessage(Properties.managerMessage("Manager kicks " + kickedClient.trim() + " out"));
             this.SynchronizeUser("remove", username);
             userAgents.remove(username);
         } else {
@@ -139,7 +140,7 @@ public class WhiteBoard implements IWhiteBoard {
         userList.removeIf(s -> s.equals(username));
 //        userAgents.remove(username); 没用 本地改这个没意义
         this.SynchronizeUser("remove", username);
-        this.pushMessage(Properties.managerMessage(username + " exited.\n"));
+        this.pushMessage(Properties.managerMessage(username + " exited."));
     }
 
 
@@ -228,7 +229,9 @@ public class WhiteBoard implements IWhiteBoard {
             for (Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
                 WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub stb = ent.getValue();
                 if (stb != null) {
-                    stb.closeWindow(Empty.newBuilder().build(), new StreamObserver<Empty>() {
+                    stb.closeWindow(StringValue.newBuilder().
+                                    setValue("Manager exited, closing now.").build(),
+                            new StreamObserver<Empty>() {
                         @Override
                         public void onNext(Empty empty) {
                             System.out.println("Manager close success.");
@@ -338,6 +341,13 @@ public class WhiteBoard implements IWhiteBoard {
                     @Override
                     public void onCompleted() {
                         System.out.println("C side registerPeer : grpc call 2 synchronizeUser completed");
+                        managerStub.pushMessage(Whiteboard.ChatMessage.newBuilder().setMessage(
+                                Properties.chatMessageFormat(username , " joined.")).build(),
+                                new StreamObserver<Empty>() {
+                            @Override public void onNext(Empty empty) { }
+                            @Override public void onError(Throwable t) { }
+                            @Override public void onCompleted() { }
+                        });
                     }
                 });
             });
@@ -552,7 +562,7 @@ public class WhiteBoard implements IWhiteBoard {
                         futureOK.complete(false);
                         futureOK.resultNow();
                     }
-                    System.out.println(futureOK);
+//                    System.out.println(futureOK);
                 }
 
                 @Override
