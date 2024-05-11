@@ -21,10 +21,7 @@ import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 
 import static Service.Utils.shape2ProtoShape;
 import static Service.Utils.shapes2ProtoShapes;
@@ -274,18 +271,16 @@ public class WhiteBoard implements IWhiteBoard {
             userAgents.put(username, WhiteBoardClientServiceGrpc.newStub(inputChannel));
             var sendOk = sendCanvasShapeListTo(username);
             if (sendOk != null) {
-                sendOk.addListener(() -> {
-                    try {
-                        if (sendOk.get()) {
-                            System.out.println("sendCanvasShapeListTo success.");
-                        } else {
-                            System.out.println("sendCanvasShapeListTo failed.");
-//                            //指数回退的重传，已转移至grpc服务配置文件
-                        }
-                    } catch (InterruptedException | ExecutionException e) {
-                        throw new RuntimeException(e);
+                sendOk.thenAcceptAsync((Boolean ok) -> {
+                    if (ok) {
+                        System.out.println("Send canvas shape list to " + username + " success.");
+                    } else {
+                        System.out.println("Send canvas shape list to " + username + " failed.");
                     }
-                }, Context.current().fixedContextExecutor(null));
+                }).exceptionally((Throwable t) -> {
+                    System.out.println("Send canvas shape list to " + username + " returned exceptionally, FOR:/n" + t.getMessage());
+                    return null;
+                });
             }
         } else {
             PeerGUI peerGUI = new PeerGUI(this, username);
@@ -541,20 +536,20 @@ public class WhiteBoard implements IWhiteBoard {
         }
     }
 
-    public SettableFuture<Boolean> sendCanvasShapeListTo(String username) {
+    public CompletableFuture<Boolean> sendCanvasShapeListTo(String username) {
         if (!isManager) {
             return null;
         }
-        SettableFuture<Boolean> futureOK = SettableFuture.create();
+        CompletableFuture<Boolean> futureOK = new CompletableFuture<>();
         Context.current().fork().run(() -> {
             userAgents.get(username).updateShapeList(shapes2ProtoShapes(localShapeQ), new StreamObserver<whiteboard.Whiteboard.Response>() {
                 @Override
                 public void onNext(whiteboard.Whiteboard.Response response) {
                     if (response.getSuccess()) {
-                        futureOK.set(true);
+                        futureOK.complete(true);
                         futureOK.resultNow();
                     } else {
-                        futureOK.set(false);
+                        futureOK.complete(false);
                         futureOK.resultNow();
                     }
                     System.out.println(futureOK);
@@ -563,7 +558,7 @@ public class WhiteBoard implements IWhiteBoard {
                 @Override
                 public void onError(Throwable t) {
                     System.out.println("peer updateShapeList failed." + t.getMessage());
-                    futureOK.setException(t);
+                    futureOK.completeExceptionally(t);
                 }
 
                 @Override
