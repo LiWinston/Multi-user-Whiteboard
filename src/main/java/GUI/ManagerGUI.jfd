@@ -11,10 +11,11 @@ new FormModel {
 			"maximumSize": new java.awt.Dimension( 1490, 850 )
 			"minimumSize": new java.awt.Dimension( 1490, 850 )
 			"preferredSize": new java.awt.Dimension( 1490, 850 )
+			"background": new java.awt.Color( 255, 255, 255, 255 )
 			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
 				"$columnCount": 1
 				"$rowCount": 1
-				"margin": new java.awt.Insets( 10, 10, 10, 10 )
+				"margin": new java.awt.Insets( 1, 1, 1, 1 )
 			} ) {
 				name: "canvasPanel"
 				"background": new java.awt.Color( 255, 255, 255, 255 )
@@ -94,26 +95,47 @@ new FormModel {
 				add( new FormComponent( "javax.swing.JButton" ) {
 					name: "newFileButton"
 					"text": "newFile"
+					"font": &Font0 new java.awt.Font( "Droid Sans Mono", 1, 12 )
+					"cursor": &Cursor0 new java.awt.Cursor( 12 )
+					"preferredSize": new java.awt.Dimension( 61, 18 )
 				} )
 				add( new FormComponent( "javax.swing.JButton" ) {
 					name: "openButton"
 					"text": "open"
+					"font": #Font0
+					"cursor": #Cursor0
+					"preferredSize": new java.awt.Dimension( 61, 18 )
 				} )
 				add( new FormComponent( "javax.swing.JButton" ) {
 					name: "saveButton"
 					"text": "save"
+					"font": #Font0
+					"cursor": #Cursor0
+					"preferredSize": new java.awt.Dimension( 61, 18 )
 				} )
 				add( new FormComponent( "javax.swing.JButton" ) {
 					name: "saveAsButton"
 					"text": "saveAs"
+					"font": #Font0
+					"cursor": #Cursor0
+					"preferredSize": new java.awt.Dimension( 61, 18 )
 				} )
 				add( new FormComponent( "javax.swing.JButton" ) {
 					name: "closeButton"
 					"text": "close"
+					"font": #Font0
+					"cursor": #Cursor0
+					"preferredSize": new java.awt.Dimension( 61, 18 )
+				} )
+				add( new FormComponent( "com.jformdesigner.designer.wrapper.HSpacer" ) {
+					name: "hSpacer19"
+					"foreground": new java.awt.Color( 255, 255, 255, 255 )
+					"background": new java.awt.Color( 255, 255, 255, 255 )
 				} )
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "label1"
 					"text": "Host : "
+					"font": #Font0
 					auxiliary() {
 						"JavaCodeGenerator.variableLocal": true
 					}
@@ -125,6 +147,7 @@ new FormModel {
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "label2"
 					"text": "  Port : "
+					"font": #Font0
 					auxiliary() {
 						"JavaCodeGenerator.variableLocal": true
 					}
@@ -133,9 +156,15 @@ new FormModel {
 					name: "portLabel"
 					"text": ""
 				} )
+				add( new FormComponent( "com.jformdesigner.designer.wrapper.HSpacer" ) {
+					name: "hSpacer1"
+					"foreground": new java.awt.Color( 255, 255, 255, 255 )
+					"background": new java.awt.Color( 255, 255, 255, 255 )
+				} )
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "label3"
-					"text": " whiteboard name : "
+					"text": " "
+					"font": #Font0
 					auxiliary() {
 						"JavaCodeGenerator.variableLocal": true
 					}
@@ -158,58 +187,93 @@ new FormModel {
 				"margin": new java.awt.Insets( 5, 5, 5, 5 )
 				"border": new javax.swing.border.TitledBorder( #LineBorder0, "" )
 				"floatable": false
+				"maximumSize": new java.awt.Dimension( 802, 32 )
+				"minimumSize": new java.awt.Dimension( 802, 32 )
+				"preferredSize": new java.awt.Dimension( 794, 32 )
 				add( new FormComponent( "javax.swing.JButton" ) {
 					name: "colorButton"
 					"maximumSize": new java.awt.Dimension( 108, 40 )
 					"minimumSize": new java.awt.Dimension( 108, 40 )
 					"preferredSize": new java.awt.Dimension( 108, 40 )
 					"text": "choose Color"
+					"font": &Font1 new java.awt.Font( "Droid Sans Mono Dotted", 1, 12 )
 				} )
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "colorLabel"
-					"autoscrolls": false
 					"background": new java.awt.Color( 0, 0, 0, 255 )
 					"maximumSize": new java.awt.Dimension( 40, 40 )
 					"minimumSize": new java.awt.Dimension( 40, 40 )
 					"opaque": true
 					"preferredSize": new java.awt.Dimension( 40, 40 )
 					"text": ""
+					"font": #Font1
 				} )
 				add( new FormComponent( "javax.swing.JButton" ) {
 					name: "penButton"
 					"text": "pen"
+					"font": #Font1
+					"maximumSize": new java.awt.Dimension( 54, 30 )
+					"minimumSize": new java.awt.Dimension( 54, 27 )
+					"preferredSize": new java.awt.Dimension( 54, 30 )
 				} )
 				add( new FormComponent( "javax.swing.JButton" ) {
 					name: "lineButton"
 					"text": "line"
+					"font": #Font1
+					"preferredSize": new java.awt.Dimension( 54, 30 )
+					"maximumSize": new java.awt.Dimension( 54, 30 )
+					"minimumSize": new java.awt.Dimension( 54, 27 )
 				} )
 				add( new FormComponent( "javax.swing.JButton" ) {
 					name: "circleButton"
 					"text": "circle"
+					"font": #Font1
+					"preferredSize": new java.awt.Dimension( 54, 30 )
+					"maximumSize": new java.awt.Dimension( 54, 30 )
 				} )
 				add( new FormComponent( "javax.swing.JButton" ) {
 					name: "ovalButton"
 					"text": "oval"
+					"font": #Font1
+					"preferredSize": new java.awt.Dimension( 54, 30 )
+					"maximumSize": new java.awt.Dimension( 54, 30 )
+					"minimumSize": new java.awt.Dimension( 54, 27 )
 				} )
 				add( new FormComponent( "javax.swing.JButton" ) {
 					name: "rectButton"
 					"text": "rect"
+					"font": #Font1
+					"preferredSize": new java.awt.Dimension( 54, 30 )
+					"maximumSize": new java.awt.Dimension( 54, 30 )
+					"minimumSize": new java.awt.Dimension( 54, 27 )
 				} )
 				add( new FormComponent( "javax.swing.JButton" ) {
 					name: "earserButton"
 					"text": "earser"
+					"font": #Font1
+					"preferredSize": new java.awt.Dimension( 54, 30 )
+					"maximumSize": new java.awt.Dimension( 54, 30 )
 				} )
 				add( new FormComponent( "javax.swing.JButton" ) {
 					name: "textButton"
 					"text": "text"
+					"font": #Font1
+					"preferredSize": new java.awt.Dimension( 54, 30 )
+					"maximumSize": new java.awt.Dimension( 54, 30 )
+					"minimumSize": new java.awt.Dimension( 54, 27 )
 				} )
 				add( new FormComponent( "javax.swing.JButton" ) {
 					name: "fillButton"
 					"text": "Fill"
+					"font": #Font1
+					"preferredSize": new java.awt.Dimension( 54, 30 )
+					"maximumSize": new java.awt.Dimension( 54, 30 )
+					"minimumSize": new java.awt.Dimension( 54, 27 )
 				} )
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "label4"
 					"text": "Stroke"
+					"font": #Font1
 					auxiliary() {
 						"JavaCodeGenerator.variableLocal": true
 					}
@@ -219,23 +283,28 @@ new FormModel {
 					"maximumSize": new java.awt.Dimension( 78, 30 )
 					"minimumSize": new java.awt.Dimension( 78, 30 )
 					"toolTipText": "stroke"
+					"font": #Font1
 				} )
 				add( new FormComponent( "javax.swing.JButton" ) {
 					name: "kickButton"
 					"text": "kick"
+					"maximumSize": new java.awt.Dimension( 100, 28 )
+					"minimumSize": new java.awt.Dimension( 100, 28 )
+					"preferredSize": new java.awt.Dimension( 100, 28 )
 				} )
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "editingJLabel"
 					"text": ""
 				} )
 			}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
-				"row": 1
 				"fill": 3
 				"hSizePolicy": 0
 				"vSizePolicy": 0
-				"minimumSize": new java.awt.Dimension( 1130, 70 )
-				"preferredSize": new java.awt.Dimension( 1130, 70 )
-				"maximumSize": new java.awt.Dimension( 1130, 70 )
+				"minimumSize": new java.awt.Dimension( 1130, 48 )
+				"preferredSize": new java.awt.Dimension( 1130, 48 )
+				"maximumSize": new java.awt.Dimension( 1130, 50 )
+				"row": 1
+				"useParentLayout": false
 			} )
 			add( new FormComponent( "javax.swing.JButton" ) {
 				name: "SendButton"

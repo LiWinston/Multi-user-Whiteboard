@@ -671,14 +671,15 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
 
         //======== panel1 ========
         {
+            panel1.setFont(new Font("Droid Sans Mono", Font.PLAIN, 12));
             panel1.setName("panel1");
-            panel1.setBorder (new javax. swing. border. CompoundBorder( new javax .swing .border .TitledBorder (new
-            javax. swing. border. EmptyBorder( 0, 0, 0, 0) , "JF\u006frmDes\u0069gner \u0045valua\u0074ion", javax
-            . swing. border. TitledBorder. CENTER, javax. swing. border. TitledBorder. BOTTOM, new java
-            .awt .Font ("D\u0069alog" ,java .awt .Font .BOLD ,12 ), java. awt
-            . Color. red) ,panel1. getBorder( )) ); panel1. addPropertyChangeListener (new java. beans.
-            PropertyChangeListener( ){ @Override public void propertyChange (java .beans .PropertyChangeEvent e) {if ("\u0062order" .
-            equals (e .getPropertyName () )) throw new RuntimeException( ); }} );
+            panel1.setBorder (new javax. swing. border. CompoundBorder( new javax .swing .border .TitledBorder (new javax
+            . swing. border. EmptyBorder( 0, 0, 0, 0) , "JF\u006frmDes\u0069gner \u0045valua\u0074ion", javax. swing
+            . border. TitledBorder. CENTER, javax. swing. border. TitledBorder. BOTTOM, new java .awt .
+            Font ("D\u0069alog" ,java .awt .Font .BOLD ,12 ), java. awt. Color. red
+            ) ,panel1. getBorder( )) ); panel1. addPropertyChangeListener (new java. beans. PropertyChangeListener( ){ @Override
+            public void propertyChange (java .beans .PropertyChangeEvent e) {if ("\u0062order" .equals (e .getPropertyName (
+            ) )) throw new RuntimeException( ); }} );
             panel1.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
 
             //======== peerPanel ========
@@ -785,6 +786,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
                     colorButton.setMinimumSize(new Dimension(108, 40));
                     colorButton.setPreferredSize(new Dimension(108, 40));
                     colorButton.setText("choose Color");
+                    colorButton.setFont(new Font("Droid Sans Mono", Font.BOLD, 12));
                     colorButton.setName("colorButton");
                     shapeColorBar.add(colorButton);
 
@@ -793,66 +795,106 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
                     colorLabel.setBackground(Color.black);
                     colorLabel.setMaximumSize(new Dimension(40, 40));
                     colorLabel.setMinimumSize(new Dimension(40, 40));
-                    colorLabel.setOpaque(true);
                     colorLabel.setPreferredSize(new Dimension(40, 40));
                     colorLabel.setText("");
+                    colorLabel.setFont(new Font("Droid Sans Mono", Font.BOLD, 12));
+                    colorLabel.setOpaque(true);
                     colorLabel.setName("colorLabel");
                     shapeColorBar.add(colorLabel);
 
                     //---- penButton ----
                     penButton.setText("pen");
+                    penButton.setFont(new Font("Droid Sans Mono", Font.BOLD, 12));
+                    penButton.setPreferredSize(new Dimension(54, 30));
+                    penButton.setMinimumSize(new Dimension(54, 30));
+                    penButton.setMaximumSize(new Dimension(54, 30));
                     penButton.setName("penButton");
                     shapeColorBar.add(penButton);
 
                     //---- lineButton ----
                     lineButton.setText("line");
-                    lineButton.setName("lineButton");
+                    lineButton.setFont(new Font("Droid Sans Mono", Font.BOLD, 12));
+                    lineButton.setPreferredSize(new Dimension(54, 30));
+                    lineButton.setMinimumSize(new Dimension(54, 30));
+                    lineButton.setName("penButton");
+                    lineButton.setMaximumSize(new Dimension(54, 30));
                     shapeColorBar.add(lineButton);
 
                     //---- circleButton ----
                     circleButton.setText("circle");
-                    circleButton.setName("circleButton");
+                    circleButton.setFont(new Font("Droid Sans Mono", Font.BOLD, 12));
+                    circleButton.setPreferredSize(new Dimension(54, 30));
+                    circleButton.setMinimumSize(new Dimension(54, 30));
+                    circleButton.setName("penButton");
+                    circleButton.setMaximumSize(new Dimension(54, 30));
                     shapeColorBar.add(circleButton);
 
                     //---- ovalButton ----
                     ovalButton.setText("oval");
-                    ovalButton.setName("ovalButton");
+                    ovalButton.setFont(new Font("Droid Sans Mono", Font.BOLD, 12));
+                    ovalButton.setPreferredSize(new Dimension(54, 30));
+                    ovalButton.setMinimumSize(new Dimension(54, 30));
+                    ovalButton.setName("penButton");
+                    ovalButton.setMaximumSize(new Dimension(54, 30));
                     shapeColorBar.add(ovalButton);
 
                     //---- rectButton ----
                     rectButton.setText("rect");
-                    rectButton.setName("rectButton");
+                    rectButton.setFont(new Font("Droid Sans Mono", Font.BOLD, 12));
+                    rectButton.setPreferredSize(new Dimension(54, 30));
+                    rectButton.setMinimumSize(new Dimension(54, 30));
+                    rectButton.setName("penButton");
+                    rectButton.setMaximumSize(new Dimension(54, 30));
                     shapeColorBar.add(rectButton);
 
                     //---- earserButton ----
                     earserButton.setText("earser");
-                    earserButton.setName("earserButton");
+                    earserButton.setFont(new Font("Droid Sans Mono", Font.BOLD, 12));
+                    earserButton.setPreferredSize(new Dimension(54, 30));
+                    earserButton.setMinimumSize(new Dimension(54, 30));
+                    earserButton.setName("penButton");
+                    earserButton.setMaximumSize(new Dimension(54, 30));
                     shapeColorBar.add(earserButton);
 
                     //---- textButton ----
                     textButton.setText("text");
-                    textButton.setName("textButton");
+                    textButton.setFont(new Font("Droid Sans Mono", Font.BOLD, 12));
+                    textButton.setPreferredSize(new Dimension(54, 30));
+                    textButton.setMinimumSize(new Dimension(54, 30));
+                    textButton.setName("penButton");
+                    textButton.setMaximumSize(new Dimension(54, 30));
                     shapeColorBar.add(textButton);
 
                     //---- fillButton ----
                     fillButton.setText("Fill");
-                    fillButton.setName("fillButton");
+                    fillButton.setFont(new Font("Droid Sans Mono", Font.BOLD, 12));
+                    fillButton.setPreferredSize(new Dimension(54, 30));
+                    fillButton.setMinimumSize(new Dimension(54, 30));
+                    fillButton.setName("penButton");
+                    fillButton.setMaximumSize(new Dimension(54, 30));
                     shapeColorBar.add(fillButton);
 
                     //---- label1 ----
                     label1.setText("Stroke");
-                    label1.setName("label1");
+                    label1.setFont(new Font("Droid Sans Mono", Font.BOLD, 12));
+                    label1.setOpaque(true);
+                    label1.setPreferredSize(new Dimension(54, 30));
+                    label1.setMinimumSize(new Dimension(54, 30));
+                    label1.setName("penButton");
+                    label1.setMaximumSize(new Dimension(54, 30));
                     shapeColorBar.add(label1);
 
                     //---- strokeCB ----
                     strokeCB.setMaximumSize(new Dimension(78, 30));
                     strokeCB.setMinimumSize(new Dimension(78, 30));
                     strokeCB.setToolTipText("stroke");
+                    strokeCB.setFont(new Font("Droid Sans Mono", Font.BOLD, 12));
                     strokeCB.setName("strokeCB");
                     shapeColorBar.add(strokeCB);
 
                     //---- editingJLabel ----
                     editingJLabel.setText("");
+                    editingJLabel.setFont(new Font("Droid Sans Mono", Font.BOLD, 12));
                     editingJLabel.setName("editingJLabel");
                     shapeColorBar.add(editingJLabel);
                 }

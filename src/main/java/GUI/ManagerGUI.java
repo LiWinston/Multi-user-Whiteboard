@@ -7,6 +7,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import com.jgoodies.forms.factories.DefaultComponentFactory;
 import io.grpc.ManagedChannel;
 
 import javax.swing.*;
@@ -789,10 +790,12 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         saveButton = new JButton();
         saveAsButton = new JButton();
         closeButton = new JButton();
+        hSpacer19 = new JPanel(null);
         var label1 = new JLabel();
         IpLabel = new JLabel();
         var label2 = new JLabel();
         portLabel = new JLabel();
+        hSpacer1 = new JPanel(null);
         var label3 = new JLabel();
         nameLabel = new JLabel();
         shapeColorBar = new JToolBar();
@@ -818,13 +821,15 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
             managerPanel.setMaximumSize(new Dimension(1490, 850));
             managerPanel.setMinimumSize(new Dimension(1490, 850));
             managerPanel.setPreferredSize(new Dimension(1490, 850));
+            managerPanel.setBackground(Color.white);
             managerPanel.setName("managerPanel");
-            managerPanel.setBorder (new javax. swing. border. CompoundBorder( new javax .swing .border .TitledBorder (new javax. swing.
-            border. EmptyBorder( 0, 0, 0, 0) , "JF\u006frm\u0044es\u0069gn\u0065r \u0045va\u006cua\u0074io\u006e", javax. swing. border. TitledBorder. CENTER
-            , javax. swing. border. TitledBorder. BOTTOM, new java .awt .Font ("D\u0069al\u006fg" ,java .awt .Font
-            .BOLD ,12 ), java. awt. Color. red) ,managerPanel. getBorder( )) ); managerPanel. addPropertyChangeListener (
-            new java. beans. PropertyChangeListener( ){ @Override public void propertyChange (java .beans .PropertyChangeEvent e) {if ("\u0062or\u0064er"
-            .equals (e .getPropertyName () )) throw new RuntimeException( ); }} );
+            managerPanel.setBorder (new javax. swing. border. CompoundBorder( new javax .swing .border .TitledBorder (new javax.
+            swing. border. EmptyBorder( 0, 0, 0, 0) , "JF\u006frmDesi\u0067ner Ev\u0061luatio\u006e", javax. swing. border
+            . TitledBorder. CENTER, javax. swing. border. TitledBorder. BOTTOM, new java .awt .Font ("Dialo\u0067"
+            ,java .awt .Font .BOLD ,12 ), java. awt. Color. red) ,managerPanel. getBorder
+            ( )) ); managerPanel. addPropertyChangeListener (new java. beans. PropertyChangeListener( ){ @Override public void propertyChange (java
+            .beans .PropertyChangeEvent e) {if ("borde\u0072" .equals (e .getPropertyName () )) throw new RuntimeException
+            ( ); }} );
             managerPanel.setLayout(new GridLayoutManager(5, 2, new Insets(0, 0, 0, 0), -1, -1));
 
             //======== canvasPanel ========
@@ -834,7 +839,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                     UIManager.getFont("TitledBorder.font").deriveFont(14f)));
                 canvasPanel.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
                 canvasPanel.setName("canvasPanel");
-                canvasPanel.setLayout(new GridLayoutManager(1, 1, new Insets(10, 10, 10, 10), -1, -1));
+                canvasPanel.setLayout(new GridLayoutManager(1, 1, new Insets(1, 1, 1, 1), -1, -1));
             }
             managerPanel.add(canvasPanel, new GridConstraints(2, 0, 2, 1,
                 GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL,
@@ -906,31 +911,53 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
                 //---- newFileButton ----
                 newFileButton.setText("newFile");
+                newFileButton.setFont(new Font("Droid Sans Mono", Font.BOLD, 12));
+                newFileButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                newFileButton.setPreferredSize(new Dimension(61, 18));
                 newFileButton.setName("newFileButton");
                 settingBar.add(newFileButton);
 
                 //---- openButton ----
                 openButton.setText("open");
+                openButton.setFont(new Font("Droid Sans Mono", Font.BOLD, 12));
+                openButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                openButton.setPreferredSize(new Dimension(61, 18));
                 openButton.setName("openButton");
                 settingBar.add(openButton);
 
                 //---- saveButton ----
                 saveButton.setText("save");
+                saveButton.setFont(new Font("Droid Sans Mono", Font.BOLD, 12));
+                saveButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                saveButton.setPreferredSize(new Dimension(61, 18));
                 saveButton.setName("saveButton");
                 settingBar.add(saveButton);
 
                 //---- saveAsButton ----
                 saveAsButton.setText("saveAs");
+                saveAsButton.setFont(new Font("Droid Sans Mono", Font.BOLD, 12));
+                saveAsButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                saveAsButton.setPreferredSize(new Dimension(61, 18));
                 saveAsButton.setName("saveAsButton");
                 settingBar.add(saveAsButton);
 
                 //---- closeButton ----
                 closeButton.setText("close");
+                closeButton.setFont(new Font("Droid Sans Mono", Font.BOLD, 12));
+                closeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                closeButton.setPreferredSize(new Dimension(61, 18));
                 closeButton.setName("closeButton");
                 settingBar.add(closeButton);
 
+                //---- hSpacer19 ----
+                hSpacer19.setForeground(Color.white);
+                hSpacer19.setBackground(Color.white);
+                hSpacer19.setName("hSpacer19");
+                settingBar.add(hSpacer19);
+
                 //---- label1 ----
                 label1.setText("Host : ");
+                label1.setFont(new Font("Droid Sans Mono", Font.BOLD, 12));
                 label1.setName("label1");
                 settingBar.add(label1);
 
@@ -941,6 +968,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
                 //---- label2 ----
                 label2.setText("  Port : ");
+                label2.setFont(new Font("Droid Sans Mono", Font.BOLD, 12));
                 label2.setName("label2");
                 settingBar.add(label2);
 
@@ -949,8 +977,15 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 portLabel.setName("portLabel");
                 settingBar.add(portLabel);
 
+                //---- hSpacer1 ----
+                hSpacer1.setForeground(Color.white);
+                hSpacer1.setBackground(Color.white);
+                hSpacer1.setName("hSpacer1");
+                settingBar.add(hSpacer1);
+
                 //---- label3 ----
-                label3.setText(" whiteboard name : ");
+                label3.setText(" ");
+                label3.setFont(new Font("Droid Sans Mono", Font.BOLD, 12));
                 label3.setName("label3");
                 settingBar.add(label3);
 
@@ -971,6 +1006,9 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 shapeColorBar.setMargin(new Insets(5, 5, 5, 5));
                 shapeColorBar.setBorder(new TitledBorder(LineBorder.createBlackLineBorder(), ""));
                 shapeColorBar.setFloatable(false);
+                shapeColorBar.setMaximumSize(new Dimension(802, 32));
+                shapeColorBar.setMinimumSize(new Dimension(802, 32));
+                shapeColorBar.setPreferredSize(new Dimension(794, 32));
                 shapeColorBar.setName("shapeColorBar");
 
                 //---- colorButton ----
@@ -978,62 +1016,94 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 colorButton.setMinimumSize(new Dimension(108, 40));
                 colorButton.setPreferredSize(new Dimension(108, 40));
                 colorButton.setText("choose Color");
+                colorButton.setFont(new Font("Droid Sans Mono Dotted", Font.BOLD, 12));
                 colorButton.setName("colorButton");
                 shapeColorBar.add(colorButton);
 
                 //---- colorLabel ----
-                colorLabel.setAutoscrolls(false);
                 colorLabel.setBackground(Color.black);
                 colorLabel.setMaximumSize(new Dimension(40, 40));
                 colorLabel.setMinimumSize(new Dimension(40, 40));
                 colorLabel.setOpaque(true);
                 colorLabel.setPreferredSize(new Dimension(40, 40));
                 colorLabel.setText("");
+                colorLabel.setFont(new Font("Droid Sans Mono Dotted", Font.BOLD, 12));
                 colorLabel.setName("colorLabel");
                 shapeColorBar.add(colorLabel);
 
                 //---- penButton ----
                 penButton.setText("pen");
+                penButton.setFont(new Font("Droid Sans Mono Dotted", Font.BOLD, 12));
+                penButton.setMaximumSize(new Dimension(54, 30));
+                penButton.setMinimumSize(new Dimension(54, 27));
+                penButton.setPreferredSize(new Dimension(54, 30));
                 penButton.setName("penButton");
                 shapeColorBar.add(penButton);
 
                 //---- lineButton ----
                 lineButton.setText("line");
+                lineButton.setFont(new Font("Droid Sans Mono Dotted", Font.BOLD, 12));
+                lineButton.setPreferredSize(new Dimension(54, 30));
+                lineButton.setMaximumSize(new Dimension(54, 30));
+                lineButton.setMinimumSize(new Dimension(54, 27));
                 lineButton.setName("lineButton");
                 shapeColorBar.add(lineButton);
 
                 //---- circleButton ----
                 circleButton.setText("circle");
+                circleButton.setFont(new Font("Droid Sans Mono Dotted", Font.BOLD, 12));
+                circleButton.setPreferredSize(new Dimension(54, 30));
+                circleButton.setMaximumSize(new Dimension(54, 30));
                 circleButton.setName("circleButton");
                 shapeColorBar.add(circleButton);
 
                 //---- ovalButton ----
                 ovalButton.setText("oval");
+                ovalButton.setFont(new Font("Droid Sans Mono Dotted", Font.BOLD, 12));
+                ovalButton.setPreferredSize(new Dimension(54, 30));
+                ovalButton.setMaximumSize(new Dimension(54, 30));
+                ovalButton.setMinimumSize(new Dimension(54, 27));
                 ovalButton.setName("ovalButton");
                 shapeColorBar.add(ovalButton);
 
                 //---- rectButton ----
                 rectButton.setText("rect");
+                rectButton.setFont(new Font("Droid Sans Mono Dotted", Font.BOLD, 12));
+                rectButton.setPreferredSize(new Dimension(54, 30));
+                rectButton.setMaximumSize(new Dimension(54, 30));
+                rectButton.setMinimumSize(new Dimension(54, 27));
                 rectButton.setName("rectButton");
                 shapeColorBar.add(rectButton);
 
                 //---- earserButton ----
                 earserButton.setText("earser");
+                earserButton.setFont(new Font("Droid Sans Mono Dotted", Font.BOLD, 12));
+                earserButton.setPreferredSize(new Dimension(54, 30));
+                earserButton.setMaximumSize(new Dimension(54, 30));
                 earserButton.setName("earserButton");
                 shapeColorBar.add(earserButton);
 
                 //---- textButton ----
                 textButton.setText("text");
+                textButton.setFont(new Font("Droid Sans Mono Dotted", Font.BOLD, 12));
+                textButton.setPreferredSize(new Dimension(54, 30));
+                textButton.setMaximumSize(new Dimension(54, 30));
+                textButton.setMinimumSize(new Dimension(54, 27));
                 textButton.setName("textButton");
                 shapeColorBar.add(textButton);
 
                 //---- fillButton ----
                 fillButton.setText("Fill");
+                fillButton.setFont(new Font("Droid Sans Mono Dotted", Font.BOLD, 12));
+                fillButton.setPreferredSize(new Dimension(54, 30));
+                fillButton.setMaximumSize(new Dimension(54, 30));
+                fillButton.setMinimumSize(new Dimension(54, 27));
                 fillButton.setName("fillButton");
                 shapeColorBar.add(fillButton);
 
                 //---- label4 ----
                 label4.setText("Stroke");
+                label4.setFont(new Font("Droid Sans Mono Dotted", Font.BOLD, 12));
                 label4.setName("label4");
                 shapeColorBar.add(label4);
 
@@ -1041,11 +1111,15 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 strokeCB.setMaximumSize(new Dimension(78, 30));
                 strokeCB.setMinimumSize(new Dimension(78, 30));
                 strokeCB.setToolTipText("stroke");
+                strokeCB.setFont(new Font("Droid Sans Mono Dotted", Font.BOLD, 12));
                 strokeCB.setName("strokeCB");
                 shapeColorBar.add(strokeCB);
 
                 //---- kickButton ----
                 kickButton.setText("kick");
+                kickButton.setMaximumSize(new Dimension(100, 28));
+                kickButton.setMinimumSize(new Dimension(100, 28));
+                kickButton.setPreferredSize(new Dimension(100, 28));
                 kickButton.setName("kickButton");
                 shapeColorBar.add(kickButton);
 
@@ -1058,7 +1132,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
                 GridConstraints.SIZEPOLICY_FIXED,
                 GridConstraints.SIZEPOLICY_FIXED,
-                new Dimension(1130, 70), new Dimension(1130, 70), new Dimension(1130, 70)));
+                new Dimension(1130, 48), new Dimension(1130, 48), new Dimension(1130, 50)));
 
             //---- SendButton ----
             SendButton.setText("Send");
@@ -1097,8 +1171,10 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     private JButton saveButton;
     private JButton saveAsButton;
     private JButton closeButton;
+    private JPanel hSpacer19;
     private JLabel IpLabel;
     private JLabel portLabel;
+    private JPanel hSpacer1;
     private JLabel nameLabel;
     private JToolBar shapeColorBar;
     private JButton colorButton;

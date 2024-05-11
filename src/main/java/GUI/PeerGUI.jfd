@@ -8,6 +8,7 @@ new FormModel {
 			"$rowCount": 1
 		} ) {
 			name: "panel1"
+			"font": new java.awt.Font( "Droid Sans Mono", 0, 12 )
 			auxiliary() {
 				"JavaCodeGenerator.variableLocal": true
 			}
@@ -119,6 +120,7 @@ new FormModel {
 						"minimumSize": new java.awt.Dimension( 108, 40 )
 						"preferredSize": new java.awt.Dimension( 108, 40 )
 						"text": "choose Color"
+						"font": &Font0 new java.awt.Font( "Droid Sans Mono", 1, 12 )
 					} )
 					add( new FormComponent( "javax.swing.JLabel" ) {
 						name: "colorLabel"
@@ -126,45 +128,91 @@ new FormModel {
 						"background": new java.awt.Color( 0, 0, 0, 255 )
 						"maximumSize": new java.awt.Dimension( 40, 40 )
 						"minimumSize": new java.awt.Dimension( 40, 40 )
-						"opaque": true
 						"preferredSize": new java.awt.Dimension( 40, 40 )
 						"text": ""
+						"font": #Font0
+						"opaque": true
 					} )
 					add( new FormComponent( "javax.swing.JButton" ) {
 						name: "penButton"
 						"text": "pen"
+						"font": #Font0
+						"preferredSize": new java.awt.Dimension( 54, 30 )
+						"minimumSize": new java.awt.Dimension( 54, 30 )
+						"maximumSize": new java.awt.Dimension( 54, 30 )
 					} )
 					add( new FormComponent( "javax.swing.JButton" ) {
 						name: "lineButton"
 						"text": "line"
+						"font": #Font0
+						"preferredSize": new java.awt.Dimension( 54, 30 )
+						"minimumSize": new java.awt.Dimension( 54, 30 )
+						"name": "penButton"
+						"maximumSize": new java.awt.Dimension( 54, 30 )
 					} )
 					add( new FormComponent( "javax.swing.JButton" ) {
 						name: "circleButton"
 						"text": "circle"
+						"font": #Font0
+						"preferredSize": new java.awt.Dimension( 54, 30 )
+						"minimumSize": new java.awt.Dimension( 54, 30 )
+						"name": "penButton"
+						"maximumSize": new java.awt.Dimension( 54, 30 )
 					} )
 					add( new FormComponent( "javax.swing.JButton" ) {
 						name: "ovalButton"
 						"text": "oval"
+						"font": #Font0
+						"preferredSize": new java.awt.Dimension( 54, 30 )
+						"minimumSize": new java.awt.Dimension( 54, 30 )
+						"name": "penButton"
+						"maximumSize": new java.awt.Dimension( 54, 30 )
 					} )
 					add( new FormComponent( "javax.swing.JButton" ) {
 						name: "rectButton"
 						"text": "rect"
+						"font": #Font0
+						"preferredSize": new java.awt.Dimension( 54, 30 )
+						"minimumSize": new java.awt.Dimension( 54, 30 )
+						"name": "penButton"
+						"maximumSize": new java.awt.Dimension( 54, 30 )
 					} )
 					add( new FormComponent( "javax.swing.JButton" ) {
 						name: "earserButton"
 						"text": "earser"
+						"font": #Font0
+						"preferredSize": new java.awt.Dimension( 54, 30 )
+						"minimumSize": new java.awt.Dimension( 54, 30 )
+						"name": "penButton"
+						"maximumSize": new java.awt.Dimension( 54, 30 )
 					} )
 					add( new FormComponent( "javax.swing.JButton" ) {
 						name: "textButton"
 						"text": "text"
+						"font": #Font0
+						"preferredSize": new java.awt.Dimension( 54, 30 )
+						"minimumSize": new java.awt.Dimension( 54, 30 )
+						"name": "penButton"
+						"maximumSize": new java.awt.Dimension( 54, 30 )
 					} )
 					add( new FormComponent( "javax.swing.JButton" ) {
 						name: "fillButton"
 						"text": "Fill"
+						"font": #Font0
+						"preferredSize": new java.awt.Dimension( 54, 30 )
+						"minimumSize": new java.awt.Dimension( 54, 30 )
+						"name": "penButton"
+						"maximumSize": new java.awt.Dimension( 54, 30 )
 					} )
 					add( new FormComponent( "javax.swing.JLabel" ) {
 						name: "label1"
 						"text": "Stroke"
+						"font": #Font0
+						"opaque": true
+						"preferredSize": new java.awt.Dimension( 54, 30 )
+						"minimumSize": new java.awt.Dimension( 54, 30 )
+						"name": "penButton"
+						"maximumSize": new java.awt.Dimension( 54, 30 )
 						auxiliary() {
 							"JavaCodeGenerator.variableLocal": true
 						}
@@ -174,10 +222,12 @@ new FormModel {
 						"maximumSize": new java.awt.Dimension( 78, 30 )
 						"minimumSize": new java.awt.Dimension( 78, 30 )
 						"toolTipText": "stroke"
+						"font": #Font0
 					} )
 					add( new FormComponent( "javax.swing.JLabel" ) {
 						name: "editingJLabel"
 						"text": ""
+						"font": #Font0
 					} )
 				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
 					"row": 1
