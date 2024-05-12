@@ -265,11 +265,11 @@ public class WhiteBoard implements IWhiteBoard {
         isManager = true;
         managerGUI = new ManagerGUI(this, IpAddress, port, name, channel);
         userList.add("Manager");
+        String jwtToken = "Manager";
+        callCredentials = new JwtCredential(jwtToken);
         setSelfUI(managerGUI);
         userAgents.put("Manager", WhiteBoardClientServiceGrpc.newStub(channel));
         SynchronizeUser("add", "Manager");
-        String jwtToken = "Manager";
-        callCredentials = new JwtCredential(jwtToken);
     }
 
 

@@ -99,9 +99,6 @@ service WhiteBoardService {
   // 同步编辑状态
   rpc reportUpdEditing(SynchronizeUserRequest) returns (google.protobuf.Empty);
 
-  // 删除用户
-  rpc RemovePeer(google.protobuf.StringValue) returns (google.protobuf.Empty);
-
   // 用户退出
   rpc PeerExit(google.protobuf.StringValue) returns (google.protobuf.Empty);
 
