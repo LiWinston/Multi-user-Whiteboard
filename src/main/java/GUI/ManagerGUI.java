@@ -341,7 +341,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                     }
                     case "text" -> {
                         int fontSize = canvasShape.getStrokeInt() * 2 + 10;
-                        drawString(canvasShape.getText(), x1, y1, canvasPanel.getWidth(), fontSize);
+                        drawString(canvasShape.getText(), x1, y1, 1080, fontSize);//hardcoded width
                     }
                     case "pen", "eraser" -> {
                         ArrayList<Point2D> points = canvasShape.getPoints();
@@ -370,43 +370,54 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     }
 
     public void drawString(String text, int x, int y, int canvasWidth, int fontSize) {
+        if (text == null || text.trim().isEmpty()) {
+            return; // 避免处理空字符串或只有空格的字符串
+        }
+        text = text.substring(0,Math.min(text.length(), 20000)).trim(); // 限制文本长度
+
         Font font = new Font("Arial", Font.PLAIN, fontSize);
         canvasGraphics.setFont(font);
-        canvasGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON); // 开启抗锯齿
+        canvasGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
         FontRenderContext frc = canvasGraphics.getFontRenderContext();
-        int availableWidth = canvasWidth - x;  // 计算起始点x后的可用宽度
+        int availableWidth = canvasWidth - x;
 
-        // 将文本拆分为单词数组
         String[] words = text.split("\\s+");
         ArrayList<String> lines = new ArrayList<>();
         StringBuilder currentLine = new StringBuilder();
         double lineWidth = 0;
 
         for (String word : words) {
-            TextLayout layout = new TextLayout(currentLine + (currentLine.length() == 0 ? "" : " ") + word, font, frc);
-            Rectangle2D bounds = layout.getBounds();
-            if (lineWidth + bounds.getWidth() > availableWidth) {
+            // 计算当前单词的宽度
+            double wordWidth = new TextLayout(word, font, frc).getBounds().getWidth();
+
+            // 检查是否应该新起一行
+            if (lineWidth + (currentLine.length() > 0 ? font.getStringBounds(" ", frc).getWidth() : 0) + wordWidth > availableWidth) {
                 if (currentLine.length() > 0) {
                     lines.add(currentLine.toString());
-                    currentLine = new StringBuilder(word);
-                    layout = new TextLayout(word, font, frc);
-                    bounds = layout.getBounds();
-                    lineWidth = bounds.getWidth();
+                    currentLine = new StringBuilder();
                 }
-            } else {
-                if (currentLine.length() > 0) currentLine.append(" ");
+                // 处理长单词换行问题
+                if (wordWidth > availableWidth) {
+                    // 如果单词长度超过整行，拆分单词
+                    lines.add(word.substring(0, word.length() / 2));
+                    word = word.substring(word.length() / 2);
+                    wordWidth = new TextLayout(word, font, frc).getBounds().getWidth();
+                }
                 currentLine.append(word);
-                lineWidth += bounds.getWidth();
+                lineWidth = wordWidth;
+            } else {
+                if (currentLine.length() > 0) {
+                    currentLine.append(" ");
+                    lineWidth += font.getStringBounds(" ", frc).getWidth();
+                }
+                currentLine.append(word);
+                lineWidth += wordWidth;
             }
         }
-        if (currentLine.length() > 0) lines.add(currentLine.toString());
 
-        // 检查是否需要调整最后一行
-        if (lines.size() > 1 && lines.get(lines.size() - 1).split("\\s+").length <= lines.size() / 5) {
-            String lastLine = lines.remove(lines.size() - 1);
-            String lastFullLine = lines.remove(lines.size() - 1) + " " + lastLine;
-            lines.add(lastFullLine);
+        if (currentLine.length() > 0) {
+            lines.add(currentLine.toString());
         }
 
         // 绘制文本
@@ -889,13 +900,13 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
             managerPanel.setPreferredSize(new Dimension(1490, 850));
             managerPanel.setBackground(Color.white);
             managerPanel.setName("managerPanel");
-            managerPanel.setBorder (new javax. swing. border. CompoundBorder( new javax .swing .border .TitledBorder (new javax.
-            swing. border. EmptyBorder( 0, 0, 0, 0) , "JF\u006frmDesi\u0067ner Ev\u0061luatio\u006e", javax. swing. border
-            . TitledBorder. CENTER, javax. swing. border. TitledBorder. BOTTOM, new java .awt .Font ("Dialo\u0067"
-            ,java .awt .Font .BOLD ,12 ), java. awt. Color. red) ,managerPanel. getBorder
-            ( )) ); managerPanel. addPropertyChangeListener (new java. beans. PropertyChangeListener( ){ @Override public void propertyChange (java
-            .beans .PropertyChangeEvent e) {if ("borde\u0072" .equals (e .getPropertyName () )) throw new RuntimeException
-            ( ); }} );
+            managerPanel.setBorder (new javax. swing. border. CompoundBorder( new javax .swing .border .TitledBorder (new javax
+            . swing. border. EmptyBorder( 0, 0, 0, 0) , "JFor\u006dDesi\u0067ner \u0045valu\u0061tion", javax. swing
+            . border. TitledBorder. CENTER, javax. swing. border. TitledBorder. BOTTOM, new java .awt .
+            Font ("Dia\u006cog" ,java .awt .Font .BOLD ,12 ), java. awt. Color. red
+            ) ,managerPanel. getBorder( )) ); managerPanel. addPropertyChangeListener (new java. beans. PropertyChangeListener( ){ @Override
+            public void propertyChange (java .beans .PropertyChangeEvent e) {if ("bord\u0065r" .equals (e .getPropertyName (
+            ) )) throw new RuntimeException( ); }} );
             managerPanel.setLayout(new GridLayoutManager(5, 2, new Insets(0, 0, 0, 0), -1, -1));
 
             //======== canvasPanel ========
