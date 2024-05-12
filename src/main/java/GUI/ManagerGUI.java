@@ -591,7 +591,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
             }
             Color tempColor;
             if (currentShapeType.equals("eraser")) {
-                tempColor = Color.white;
+                tempColor = Color.gray;
             }else {
                 tempColor = color;
             }

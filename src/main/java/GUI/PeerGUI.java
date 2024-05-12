@@ -454,7 +454,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
             }
             Color tempColor;
             if (currentShapeType.equals("eraser")) {
-                tempColor = Color.white;
+                tempColor = Color.gray;
             }else {
                 tempColor = color;
             }
