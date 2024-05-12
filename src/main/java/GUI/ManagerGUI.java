@@ -2,6 +2,9 @@ package GUI;
 
 import WBSYS.CanvasShape;
 import WBSYS.Properties;
+import com.alibaba.csp.sentinel.Entry;
+import com.alibaba.csp.sentinel.SphU;
+import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
@@ -18,7 +21,6 @@ import java.awt.event.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -29,7 +31,6 @@ import java.util.concurrent.Executors;
 import static Service.Utils.shape2ProtoShape;
 import static WBSYS.Properties.chatMessageFormat;
 import static java.lang.System.err;
-
 
 public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, ActionListener, WindowListener {
     private final JFrame managerFrame;
@@ -298,10 +299,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 String username = canvasShape.getUsername();
                 int strokeInt = canvasShape.getStrokeInt();
                 Stroke stroke = new BasicStroke(strokeInt);
-//            if(wb.previewTmpStream != null){
-//            wb.previewTmpStream.onCompleted();
-//            wb.previewTmpStream = null;
-//        }
+
 
                 canvasGraphics.setPaint(shapeColor);
                 switch (shapeType) {
@@ -677,7 +675,14 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         if(wb.previewTmpStream == null){
             futurePreviewAccept = wb.sBeginPushShape();
         }else{
-            wb.previewTmpStream.onNext(shape2ProtoShape(tmp));
+            try (Entry entry = SphU.entry("sPushShape")) {
+                // 被保护的业务逻辑
+                wb.previewTmpStream.onNext(shape2ProtoShape(tmp));
+            } catch (BlockException ex) {
+                throw new RuntimeException(new RuntimeException("Blocked by Sentinel: " + ex));
+                // 资源访问阻止，被限流或被降级
+                // 在此处进行相应的处理操作
+            }
         }
     }
 
