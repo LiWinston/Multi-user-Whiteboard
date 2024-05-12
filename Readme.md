@@ -43,3 +43,13 @@ Develop a whiteboard that can be shared between multiple users over the network.
 - Consideration of Java RMI, remote objects/interfaces.
 - Choice of file or database for storage.
 - Use of technology of choice, ensuring the selected technology can achieve the goal. If uncertain, stick to familiar technologies.
+
+
+Jar JVM settings
+-Xmx65535m
+-Dsun.java2d.opengl=true
+-Dsun.java2d.ddscale=true
+-Dawt.nativeDoubleBuffering=true
+-Dsun.java2d.trace=[log[,timestamp]],[count],[out:<filename>],[help],[verbose]
+-Dsun.java2d.ddoffscreen=false
+-Dsun.java2d.d3dtexbpp=16
