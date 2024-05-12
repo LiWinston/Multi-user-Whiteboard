@@ -31,7 +31,7 @@ public class JwtCredential extends CallCredentials {
 
   private final String subject;
 
-  JwtCredential(String subject) {
+  public JwtCredential(String subject) {
     this.subject = subject;
   }
 
@@ -43,7 +43,7 @@ public class JwtCredential extends CallCredentials {
     final String jwt =
         Jwts.builder()
             .setSubject(subject)
-            .signWith(SignatureAlgorithm.HS256, Constants.JWT_SIGNING_KEY)
+            .signWith(SignatureAlgorithm.HS256, Constants.JWT_KEY)
             .compact();
 
     executor.execute(() -> {

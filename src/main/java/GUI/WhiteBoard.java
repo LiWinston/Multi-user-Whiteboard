@@ -1,6 +1,7 @@
 package GUI;
 
 
+import Service.JwtCredential;
 import WBSYS.CanvasShape;
 import WBSYS.Properties;
 import com.google.common.collect.ConcurrentHashMultiset;
@@ -267,6 +268,8 @@ public class WhiteBoard implements IWhiteBoard {
         setSelfUI(managerGUI);
         userAgents.put("Manager", WhiteBoardClientServiceGrpc.newStub(channel));
         SynchronizeUser("add", "Manager");
+        String jwtToken = "Manager";
+        callCredentials = new JwtCredential(jwtToken);
     }
 
 
@@ -313,8 +316,13 @@ public class WhiteBoard implements IWhiteBoard {
             Context.current().fork().run(() -> {
                 managerStub.registerPeer(finalIpp, new StreamObserver<>() {
                     @Override
-                    public void onNext(Empty empty) {
-                        System.out.println("C side registerPeer : grpc call success.");
+                    public void onNext(Whiteboard.Response response) {
+                        if (response.getSuccess()) {
+                            String token = response.getMessage();
+                            callCredentials = new JwtCredential(token);
+                        } else {
+                            System.out.println("C side registerPeer : grpc call 1 registerPeer failed.");
+                        }
                     }
 
                     @Override
@@ -740,7 +748,9 @@ public class WhiteBoard implements IWhiteBoard {
     @Override
     public void requestForceClearTmp() {
         Context.current().fork().run(() -> {
-            managerSecuredStub.forceClearTmp(UserName.newBuilder().setUsername(getSelfUI().getUsername()).build(), new StreamObserver<Empty>() {
+            managerSecuredStub
+                    .withCallCredentials(callCredentials)
+                    .forceClearTmp(UserName.newBuilder().setUsername(getSelfUI().getUsername()).build(), new StreamObserver<Empty>() {
                 @Override
                 public void onNext(Empty empty) {
                     System.out.println("requestForceClearTmp success.");

@@ -62,6 +62,8 @@ message Response {
   bool success = 1;
   string message = 2;
 }
+
+
 service WhiteBoardSecuredService{
 
   rpc forceClearTmp(UserName) returns (google.protobuf.Empty);
@@ -83,7 +85,7 @@ service WhiteBoardService {
   rpc GetApprove(google.protobuf.StringValue) returns (Response);
 
   // 注册用户
-  rpc RegisterPeer(IP_Port) returns (google.protobuf.Empty);
+  rpc RegisterPeer(IP_Port) returns (Response);
 
   // 注册管理员
   rpc RegisterManager(UserRegistration) returns (google.protobuf.Empty);

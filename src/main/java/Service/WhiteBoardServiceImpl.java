@@ -50,7 +50,7 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
 
     @Override
     public void registerPeer(Whiteboard.IP_Port ip_port,
-                             io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
+                             io.grpc.stub.StreamObserver<Response> responseObserver) {
         logger.severe("Received registerPeer request: " + ip_port.getIp() + " " + ip_port.getPort());
 
         // 生成channel，有配置文件则使用配置文件
@@ -115,23 +115,20 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
                         Whiteboard.SynchronizeUserRequest.newBuilder().setOperation("add").setUsername(editingUser).build(),
                         new StreamObserver<com.google.protobuf.Empty>() {
                             @Override
-                            public void onNext(com.google.protobuf.Empty value) {
-                            }
-
+                            public void onNext(com.google.protobuf.Empty value) {}
                             @Override
-                            public void onError(Throwable t) {
-                            }
-
+                            public void onError(Throwable t) {logger.severe(t.getMessage());}
                             @Override
-                            public void onCompleted() {
-                            }
+                            public void onCompleted() {}
                         });
             }
         });
 
 
         System.out.println("registerPeer generated channel" + channel);
-        responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
+//        String jwtToken = Jwts.builder().setSubject(ip_port.getUsername()).signWith(Constants.JWT_KEY).compact();
+        String jwtToken = ip_port.getUsername();
+        responseObserver.onNext(Response.newBuilder().setSuccess(true).setMessage(jwtToken).build());
         responseObserver.onCompleted();
     }
 

@@ -16,7 +16,7 @@ import io.jsonwebtoken.Jwts;
 //服务端加的拦截器，用于验证客户端的token
 public class JwtServerInterceptor implements ServerInterceptor {
 
-    private JwtParser parser = (JwtParser) Jwts.parser().setSigningKey(Constants.JWT_SIGNING_KEY);
+    private JwtParser parser = Jwts.parser().setSigningKey(Constants.JWT_KEY).build();
 
     @Override
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> serverCall,
@@ -42,9 +42,11 @@ public class JwtServerInterceptor implements ServerInterceptor {
                 // set client id into current context
                 Context ctx = Context.current()
                         .withValue(Constants.CLIENT_ID_CONTEXT_KEY, claims.getBody().getSubject());
+                System.out.println("通过拦截器：JwtServerInterceptor: " + claims.getBody().getSubject());
                 return Contexts.interceptCall(ctx, serverCall, metadata, serverCallHandler);
             }
         }
+        System.out.println("拦截：JwtServerInterceptor: status" + status);
 
         serverCall.close(status, new Metadata());
         return new ServerCall.Listener<ReqT>() {
