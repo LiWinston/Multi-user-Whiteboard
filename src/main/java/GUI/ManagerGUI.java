@@ -15,7 +15,10 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.font.FontRenderContext;
+import java.awt.font.TextLayout;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -337,9 +340,8 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                         }
                     }
                     case "text" -> {
-                        int size = canvasShape.getStrokeInt();
-                        canvasGraphics.setFont(new Font("Times New Roman", Font.PLAIN, size * 2 + 10));
-                        canvasGraphics.drawString(canvasShape.getText(), x1, y1);
+                        int fontSize = canvasShape.getStrokeInt() * 2 + 10;
+                        drawString(canvasShape.getText(), x1, y1, canvasPanel.getWidth(), fontSize);
                     }
                     case "pen", "eraser" -> {
                         ArrayList<Point2D> points = canvasShape.getPoints();
@@ -366,6 +368,56 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
         });
     }
+
+    public void drawString(String text, int x, int y, int canvasWidth, int fontSize) {
+        Font font = new Font("Arial", Font.PLAIN, fontSize);
+        canvasGraphics.setFont(font);
+        canvasGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON); // 开启抗锯齿
+
+        FontRenderContext frc = canvasGraphics.getFontRenderContext();
+        int availableWidth = canvasWidth - x;  // 计算起始点x后的可用宽度
+
+        // 将文本拆分为单词数组
+        String[] words = text.split("\\s+");
+        ArrayList<String> lines = new ArrayList<>();
+        StringBuilder currentLine = new StringBuilder();
+        double lineWidth = 0;
+
+        for (String word : words) {
+            TextLayout layout = new TextLayout(currentLine + (currentLine.length() == 0 ? "" : " ") + word, font, frc);
+            Rectangle2D bounds = layout.getBounds();
+            if (lineWidth + bounds.getWidth() > availableWidth) {
+                if (currentLine.length() > 0) {
+                    lines.add(currentLine.toString());
+                    currentLine = new StringBuilder(word);
+                    layout = new TextLayout(word, font, frc);
+                    bounds = layout.getBounds();
+                    lineWidth = bounds.getWidth();
+                }
+            } else {
+                if (currentLine.length() > 0) currentLine.append(" ");
+                currentLine.append(word);
+                lineWidth += bounds.getWidth();
+            }
+        }
+        if (currentLine.length() > 0) lines.add(currentLine.toString());
+
+        // 检查是否需要调整最后一行
+        if (lines.size() > 1 && lines.get(lines.size() - 1).split("\\s+").length <= lines.size() / 5) {
+            String lastLine = lines.remove(lines.size() - 1);
+            String lastFullLine = lines.remove(lines.size() - 1) + " " + lastLine;
+            lines.add(lastFullLine);
+        }
+
+        // 绘制文本
+        int lineHeight = canvasGraphics.getFontMetrics().getHeight();
+        int currentY = y;
+        for (String line : lines) {
+            canvasGraphics.drawString(line, x, currentY);
+            currentY += lineHeight;
+        }
+    }
+
 
     private void setShapeButtons() {
         JButton[] buttons = {penButton, lineButton, circleButton, ovalButton, rectButton, earserButton, textButton};
