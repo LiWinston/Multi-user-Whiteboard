@@ -8,6 +8,7 @@ import whiteboard.WhiteBoardServiceGrpc;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import static WBSYS.Properties.isValidPort;
@@ -78,7 +79,10 @@ public class WBServer {
                 addService(ServerInterceptors.intercept(
                         new WhiteBoardSecuredServiceImpl(wb, logger),
                         new JwtServerInterceptor())).
-                build().start();
+                keepAliveTime(15, TimeUnit.MINUTES).
+                permitKeepAliveWithoutCalls(true).
+                maxConnectionAgeGrace(3, TimeUnit.SECONDS). // 允许3s的宽限期完成正在进行的RPC
+        build().start();
         logger.info("grpc Server started, listening on " + port);
 
         Runtime.getRuntime().addShutdownHook(new Thread() {

@@ -67,6 +67,9 @@ public class WBClient {
         }
         clientServer = ServerBuilder.forPort(selfPort).
                 addService(new WhiteBoardClientImpl(wb, logger)).
+                keepAliveTime(15, TimeUnit.MINUTES).
+                permitKeepAliveWithoutCalls(true).
+                maxConnectionAgeGrace(3, TimeUnit.SECONDS). // 允许3s的宽限期完成正在进行的RPC
                 build().start();
         logger.info("grpc Server started, listening on " + selfPort);
 
