@@ -24,10 +24,7 @@ import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.*;
 
 import static Service.Utils.shape2ProtoShape;
 import static Service.Utils.shapes2ProtoShapes;
@@ -311,6 +308,7 @@ public class WhiteBoard implements IWhiteBoard {
                 e.printStackTrace();
             }
 
+            CompletableFuture<Boolean> callCredentialsGot = new CompletableFuture<>();
 
             Whiteboard.IP_Port finalIpp = ipp;
             Context.current().fork().run(() -> {
@@ -320,13 +318,16 @@ public class WhiteBoard implements IWhiteBoard {
                         if (response.getSuccess()) {
                             String token = response.getMessage();
                             callCredentials = new JwtCredential(token);
+                            callCredentialsGot.complete(true);
                         } else {
+                            callCredentialsGot.complete(false);
                             System.out.println("C side registerPeer : grpc call 1 registerPeer failed.");
                         }
                     }
 
                     @Override
                     public void onError(Throwable t) {
+                        callCredentialsGot.complete(false);
                         System.out.println("C side registerPeer : grpc call failed." + t.getMessage());
                     }
 
@@ -336,36 +337,52 @@ public class WhiteBoard implements IWhiteBoard {
                     }
                 });
             });
-            //已经包含wb.addUser(request.getUsername());
-            Context.current().fork().run(() -> {
-                managerStub.synchronizeUser(Whiteboard.SynchronizeUserRequest.newBuilder().setOperation("add").
-                        setUsername(username).build(), new StreamObserver<Whiteboard.UserList>() {
-                    @Override
-                    public void onNext(Whiteboard.UserList userList) {
-                        System.out.println("Register peer success.");
-                    }
 
-                    @Override
-                    public void onError(Throwable t) {
-                        System.out.println("Register peer failed.");
-                    }
+            //等待callCredentials的返回
+            callCredentialsGot.thenAcceptAsync((Boolean ok) -> {
+                if (ok) {
 
-                    @Override
-                    public void onCompleted() {
-                        System.out.println("C side registerPeer : grpc call 2 synchronizeUser completed");
-                        Context.current().fork().run(() -> {
+                    Context.current().fork().run(() -> {
+                        //已经包含wb.addUser(request.getUsername());
+                        managerSecuredStub.
+                                withCallCredentials(callCredentials).
+                                synchronizeUser(Whiteboard.SynchronizeUserRequest.newBuilder().setOperation("add").
+                                        setUsername(username).build(), new StreamObserver<Whiteboard.UserList>() {
+                                    @Override
+                                    public void onNext(Whiteboard.UserList userList) {
+                                        System.out.println("Register peer success.");
+                                    }
 
-                            managerStub.pushMessage(Whiteboard.ChatMessage.newBuilder().setMessage(
-                                Properties.chatMessageFormat(username , " joined.")).build(),
-                                new StreamObserver<Empty>() {
-                                    @Override public void onNext(Empty empty) { }
-                                    @Override public void onError(Throwable t) { }
-                                    @Override public void onCompleted() { }
+                                    @Override
+                                    public void onError(Throwable t) {
+                                        System.out.println("Register peer failed.");
+                                    }
+
+                                    @Override
+                                    public void onCompleted() {
+                                        System.out.println("C side registerPeer : grpc call 2 synchronizeUser completed");
+                                        Context.current().fork().run(() -> {
+
+                                            managerStub.pushMessage(Whiteboard.ChatMessage.newBuilder().setMessage(
+                                                            Properties.chatMessageFormat(username , " joined.")).build(),
+                                                    new StreamObserver<Empty>() {
+                                                        @Override public void onNext(Empty empty) { }
+                                                        @Override public void onError(Throwable t) { }
+                                                        @Override public void onCompleted() { }
+                                                    });
+                                        });
+                                    }
                                 });
-                        });
-                    }
-                });
+                    });
+                    System.out.println("Register peer success.");
+                } else {
+                    System.out.println("Register peer failed.");
+                }
+            }).exceptionally((Throwable t) -> {
+                System.out.println("Register peer returned exceptionally, FOR:/n" + t.getMessage());
+                return null;
             });
+
         }
     }
 
@@ -400,7 +417,9 @@ public class WhiteBoard implements IWhiteBoard {
                 }
             }
         } else {
-            managerStub.synchronizeUser(Whiteboard.SynchronizeUserRequest.newBuilder().setOperation(operation).
+            managerSecuredStub.
+                    withCallCredentials(callCredentials).
+                    synchronizeUser(Whiteboard.SynchronizeUserRequest.newBuilder().setOperation(operation).
                     setUsername(username).build(), new StreamObserver<Whiteboard.UserList>() {
                 @Override
                 public void onNext(Whiteboard.UserList userList) {

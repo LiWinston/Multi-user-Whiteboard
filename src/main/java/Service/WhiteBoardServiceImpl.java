@@ -132,39 +132,6 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
         responseObserver.onCompleted();
     }
 
-    @Override
-    public void synchronizeUser(whiteboard.Whiteboard.SynchronizeUserRequest request,
-                                io.grpc.stub.StreamObserver<whiteboard.Whiteboard.UserList> responseObserver) {
-        logger.severe("Received synchronizeUser request: " + request.getOperation() + " " + request.getUsername());
-        if (request.getOperation().equals("add")) {
-            wb.addUser(request.getUsername());
-        } else if (request.getOperation().equals("remove")) {
-            wb.removeUser(request.getUsername());
-        }
-        var responseList = whiteboard.Whiteboard.UserList.newBuilder().addAllUsernames(wb.userAgents.keySet()).build();
-        Context.current().fork().run(() -> {
-            for (var me : wb.userAgents.entrySet()) {
-                me.getValue().updatePeerList(responseList, new StreamObserver<Response>() {
-                    @Override
-                    public void onNext(Response value) {
-                        logger.info(value.getMessage());
-                    }
-
-                    @Override
-                    public void onError(Throwable t) {
-                        logger.severe(me + t.getMessage());
-                    }
-
-                    @Override
-                    public void onCompleted() {
-                    }
-                });
-            }
-        });
-        responseObserver.onNext(responseList);
-        responseObserver.onCompleted();
-    }
-
 
     @Override
     public void pushMessage(whiteboard.Whiteboard.ChatMessage request,

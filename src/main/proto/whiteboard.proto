@@ -65,6 +65,8 @@ message Response {
 
 
 service WhiteBoardSecuredService{
+  // 同步用户信息
+  rpc SynchronizeUser(SynchronizeUserRequest) returns (UserList);
 
   rpc forceClearTmp(UserName) returns (google.protobuf.Empty);
 }
@@ -74,9 +76,6 @@ service WhiteBoardService {
 
   // 同步消息
   rpc pushMessage(ChatMessage) returns (google.protobuf.Empty);
-
-  // 同步用户信息
-  rpc SynchronizeUser(SynchronizeUserRequest) returns (UserList);
 
   // 检查用户名
   rpc CheckPeerName(google.protobuf.StringValue) returns (Response);
