@@ -4,7 +4,6 @@ import WBSYS.CanvasShape;
 import WBSYS.Properties;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.SettableFuture;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 
@@ -18,6 +17,7 @@ import java.awt.event.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -48,7 +48,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
     private ConcurrentLinkedDeque<Point2D> pointQ;
     private Graphics2D canvasGraphics;
     private boolean isFill = false;
-    SettableFuture<Boolean> futurePreviewAccept;
+    CompletableFuture<Boolean> futurePreviewAccept;
 
 
     public PeerGUI(WhiteBoard whiteBoard, String username) {

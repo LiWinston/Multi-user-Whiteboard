@@ -2,9 +2,6 @@ package GUI;
 
 import WBSYS.CanvasShape;
 import WBSYS.Properties;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.SettableFuture;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import io.grpc.ManagedChannel;
@@ -19,13 +16,11 @@ import java.awt.geom.Point2D;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 
 import static Service.Utils.shape2ProtoShape;
 import static WBSYS.Properties.chatMessageFormat;
-import static java.lang.System.err;
 
 
 public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, ActionListener, WindowListener {
@@ -44,7 +39,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     private ConcurrentLinkedDeque<Point2D> pointQ;
     private Graphics2D canvasGraphics;
     private boolean isFill = false;
-    SettableFuture<Boolean> futurePreviewAccept;
+    CompletableFuture<Boolean> futurePreviewAccept;
 
     public ManagerGUI(WhiteBoard whiteBoard, String IpAddress, String port, String WBName, ManagedChannel channel) {
         initComponents();
@@ -474,6 +469,19 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
             wb.previewTmpStream.onCompleted();
             wb.previewTmpStream = null;
         }
+
+        //重构色图tableFuture为CompletableFuture，回调体改为链式调用
+        futurePreviewAccept.thenAcceptAsync(result -> {
+            if (Boolean.TRUE.equals(result)) {
+                System.out.println("Preview accepted");
+                conductPushShape();
+            } else {
+                System.out.println("Preview rejected");
+                // 进行拒绝后的操作，如不 pushShape
+                reDraw();
+            }
+        });
+
         Futures.addCallback(futurePreviewAccept, new FutureCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {

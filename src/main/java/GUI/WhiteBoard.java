@@ -5,7 +5,6 @@ import Service.JwtCredential;
 import WBSYS.CanvasShape;
 import WBSYS.Properties;
 import com.google.common.collect.ConcurrentHashMultiset;
-import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import io.grpc.CallCredentials;
@@ -24,7 +23,10 @@ import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.CountDownLatch;
 
 import static Service.Utils.shape2ProtoShape;
 import static Service.Utils.shapes2ProtoShapes;
@@ -672,32 +674,32 @@ public class WhiteBoard implements IWhiteBoard {
     volatile StreamObserver<Whiteboard._CanvasShape> previewTmpStream = null;
     //推送本用户的临时预览图形
     // in ConcurrentHashMap<String, CanvasShape> tempShapes -- to Server
-    public SettableFuture<Boolean> sBeginPushShape() {
+    public CompletableFuture<Boolean> sBeginPushShape() {
         //allows UI Sync function awaits Async stream response obtained from sPushShape
-        SettableFuture<Boolean> futureOK = SettableFuture.create();
+        CompletableFuture<Boolean> futureOK = new CompletableFuture<>();
         StreamObserver<whiteboard.Whiteboard.Response> response = new StreamObserver<>() {
             @Override
             public void onNext(whiteboard.Whiteboard.Response res) {
                 if(res.getSuccess()) {
-                    futureOK.set(true);
-                    futureOK.resultNow();
+                    futureOK.complete(true);
+//                    futureOK.resultNow();
                     System.out.println("set OK to true.");
                 } else {
                     System.out.println(res.getMessage());
-                    futureOK.set(false);
-                    futureOK.resultNow();
+                    futureOK.complete(false);
+//                    futureOK.resultNow();
                 }
             }
 
             @Override
             public void onError(Throwable t) {
-                futureOK.set(false);
+                futureOK.complete(false);
                 System.out.println(t.getMessage());
             }
 
             @Override
             public void onCompleted() {
-                futureOK.set(true);
+//                futureOK.complete(true);
             }
         };
         previewTmpStream = managerStub.sPushShape(response);
