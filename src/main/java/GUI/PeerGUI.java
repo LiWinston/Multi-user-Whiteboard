@@ -48,7 +48,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
     private ConcurrentLinkedDeque<Point2D> pointQ;
     private Graphics2D canvasGraphics;
     private boolean isFill = false;
-    SettableFuture<Boolean> futurePreviewAccept;
+    volatile SettableFuture<Boolean> futurePreviewAccept;
 
 
     public PeerGUI(WhiteBoard whiteBoard, String username) {
@@ -351,6 +351,8 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
                     } else {
                         System.out.println("Preview rejected");
                         // 进行拒绝后的操作，如不 pushShape
+                        //且请求删除临时图形
+                        wb.requestForceClearTmp();
                         reDraw();
                     }
                 });
@@ -458,12 +460,12 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
             }else {
                 tempColor = color;
             }
-            int finalX = x4, finalY = y4;
-            SwingUtilities.invokeLater(() -> {
-                canvasGraphics.setPaint(tempColor);
-                canvasGraphics.setStroke(tempStroke);
-                canvasGraphics.drawLine(finalX, finalY, x3, y3);
-            });
+//            int finalX = x4, finalY = y4;
+//            SwingUtilities.invokeLater(() -> {
+//                canvasGraphics.setPaint(tempColor);
+//                canvasGraphics.setStroke(tempStroke);
+//                canvasGraphics.drawLine(finalX, finalY, x3, y3);
+//            });
             pointQ.add(new Point(x3, y3));
 
             tmp = new CanvasShape(currentShapeType, tempColor, username, new ArrayList<>(pointQ), Integer.parseInt(strokeCB.getSelectedItem().toString()));
@@ -622,6 +624,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
 
     @Override
     public void windowIconified(WindowEvent e) {
+        loseFocus();
         reDraw();
     }
 
@@ -637,7 +640,23 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
 
     @Override
     public void windowDeactivated(WindowEvent e) {
+        loseFocus();
         reDraw();
+    }
+    public void loseFocus() {
+        if(wb.previewTmpStream != null) {
+            wb.previewTmpStream.onCompleted();
+            wb.previewTmpStream = null;
+        }
+        if(futurePreviewAccept != null){
+            futurePreviewAccept.cancel(false);
+            futurePreviewAccept = null;
+        }
+        if(wb.getTempShapes().containsKey(username)){
+//            JOptionPane.showMessageDialog(peerFrame, "Lose focus, your preview will be canceled on your next action.");
+            wb.requestForceClearTmp();
+        }
+
     }
 
     private void initComponents() {

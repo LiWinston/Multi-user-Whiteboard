@@ -44,7 +44,7 @@ public class WhiteBoard implements IWhiteBoard {
     private IClient selfUI;
 
     public ConcurrentLinkedDeque<CanvasShape> getLocalShapeQ() {
-        System.out.println("Loc: " + localShapeQ.size());
+        System.out.println("Loc " + localShapeQ.size());
         return localShapeQ;
     }
 
@@ -59,7 +59,7 @@ public class WhiteBoard implements IWhiteBoard {
 //    }
 
     public ConcurrentHashMap<String, CanvasShape> getTempShapes() {
-        System.out.println("Tmp: " + tempShapes.size());
+        System.out.println("Tmp " + tempShapes.size());
         return tempShapes;
     }
 
@@ -680,12 +680,12 @@ public class WhiteBoard implements IWhiteBoard {
             public void onNext(whiteboard.Whiteboard.Response res) {
                 if(res.getSuccess()) {
                     futureOK.set(true);
-                    futureOK.resultNow();
+//                    futureOK.resultNow();
                     System.out.println("set OK to true.");
                 } else {
                     System.out.println(res.getMessage());
                     futureOK.set(false);
-                    futureOK.resultNow();
+//                    futureOK.resultNow();
                 }
             }
 
@@ -697,7 +697,8 @@ public class WhiteBoard implements IWhiteBoard {
 
             @Override
             public void onCompleted() {
-                futureOK.set(true);
+                requestForceClearTmp();
+//                futureOK.set(true);
             }
         };
         previewTmpStream = managerStub.sPushShape(response);

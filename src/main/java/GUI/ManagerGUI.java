@@ -44,7 +44,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     private ConcurrentLinkedDeque<Point2D> pointQ;
     private Graphics2D canvasGraphics;
     private boolean isFill = false;
-    SettableFuture<Boolean> futurePreviewAccept;
+    volatile SettableFuture<Boolean> futurePreviewAccept;
 
     public ManagerGUI(WhiteBoard whiteBoard, String IpAddress, String port, String WBName, ManagedChannel channel) {
         initComponents();
@@ -491,72 +491,70 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
             }
 
             private void conductPushShape() {
-                SwingUtilities.invokeLater(() -> {
-                    try {
-                        if(futurePreviewAccept.get()){
-                            System.out.println("preview accepted");
-                            //如果被接受，就pushShape
-                            wb.reportUpdEditing("remove", username);
+                try {
+                    if(futurePreviewAccept.get()){
+                        System.out.println("preview accepted");
+                        //如果被接受，就pushShape
+                        wb.reportUpdEditing("remove", username);
 
-                            x2 = e.getX();
-                            y2 = e.getY();
+                        x2 = e.getX();
+                        y2 = e.getY();
 
-                            int strokeInShape = Integer.parseInt(strokeCB.getSelectedItem().toString());
+                        int strokeInShape = Integer.parseInt(strokeCB.getSelectedItem().toString());
 
-                            CanvasShape canvasShape;
-                            if (currentShapeType.equals("pen") || currentShapeType.equals("eraser")) {
-                                Color tempColor = color;
-                                if (currentShapeType.equals("eraser")) {
-                                    tempColor = Color.white;
-                                }
-                                canvasShape = new CanvasShape(currentShapeType, tempColor, username, new ArrayList<>(pointQ), strokeInShape);
-                            } else if (currentShapeType.equals("text")) {
-                                canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
-                                try{
-                                    String texts = JOptionPane.showInputDialog(managerFrame, "input your text", "text", JOptionPane.PLAIN_MESSAGE, null, null, null).toString();
-                                    if (texts.isEmpty()) {
-                                        wb.requestForceClearTmp();
-                                        return;
-                                    }
-                                    canvasShape.setText(texts);
-                                    canvasShape.setStrokeInt(Integer.parseInt(strokeCB.getSelectedItem().toString()));
-                                }catch (Exception ex){
+                        CanvasShape canvasShape;
+                        if (currentShapeType.equals("pen") || currentShapeType.equals("eraser")) {
+                            Color tempColor = color;
+                            if (currentShapeType.equals("eraser")) {
+                                tempColor = Color.white;
+                            }
+                            canvasShape = new CanvasShape(currentShapeType, tempColor, username, new ArrayList<>(pointQ), strokeInShape);
+                        } else if (currentShapeType.equals("text")) {
+                            canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
+                            try{
+                                String texts = JOptionPane.showInputDialog(managerFrame, "input your text", "text", JOptionPane.PLAIN_MESSAGE, null, null, null).toString();
+                                if (texts.isEmpty()) {
                                     wb.requestForceClearTmp();
                                     return;
                                 }
-                            } else {
-                                //起终点可界定的图形
-                                //若按下没动，设为笔触大小的相应形
-                                x2 = x2 == x1 ? x1 + strokeInShape : x2;
-                                y2 = y2 == y1 ? y1 + strokeInShape : y2;
-                                canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
+                                canvasShape.setText(texts);
+                                canvasShape.setStrokeInt(Integer.parseInt(strokeCB.getSelectedItem().toString()));
+                            }catch (Exception ex){
+                                wb.requestForceClearTmp();
+                                return;
                             }
-
-                            canvasShape.setFill(isFill);
-                            wb.getLocalShapeQ().add(canvasShape);
-                            reDraw();//让pen落实到画布上
-                            wb.pushShape(canvasShape);
-                        }else{
-                            System.out.println("preview rejected");
-                            //如果被拒绝，就不pushShape
-                            reDraw();
+                        } else {
+                            //起终点可界定的图形
+                            //若按下没动，设为笔触大小的相应形
+                            x2 = x2 == x1 ? x1 + strokeInShape : x2;
+                            y2 = y2 == y1 ? y1 + strokeInShape : y2;
+                            canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
                         }
-                    } catch (InterruptedException ex) {
-                        err.println(ex);
-                    } catch (ExecutionException ex) {
-                        err.println(ex);
+
+                        canvasShape.setFill(isFill);
+                        wb.getLocalShapeQ().add(canvasShape);
+                        reDraw();//让pen落实到画布上
+                        wb.pushShape(canvasShape);
+                    }else{
+                        System.out.println("preview rejected");
+                        wb.requestForceClearTmp();
+                        //如果被拒绝，就不pushShape
+                        //且请求删除临时图形
+                        reDraw();
                     }
-                    futurePreviewAccept = null;
-                });
+                } catch (InterruptedException ex) {
+                    err.println(ex);
+                } catch (ExecutionException ex) {
+                    err.println(ex);
+                }
+                futurePreviewAccept = null;
             }
 
             @Override
             public void onFailure(Throwable t) {
                 // 处理错误
-                SwingUtilities.invokeLater(() -> {
-                    System.err.println("Error during preview: " + t.getMessage());
-                    // 可以在这里进行错误处理相关的 UI 更新
-                });
+                System.err.println("Error during preview: " + t.getMessage());
+                // 可以在这里进行错误处理相关的 UI 更新
             }
         }, Executors.newSingleThreadExecutor());
     }
@@ -755,7 +753,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
     @Override
     public void windowIconified(WindowEvent e) {
-
+        loseFocus();
         reDraw();
     }
 
@@ -771,7 +769,23 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
     @Override
     public void windowDeactivated(WindowEvent e) {
+        loseFocus();
         reDraw();
+    }
+
+    public void loseFocus() {
+        if (wb.previewTmpStream != null) {
+            wb.previewTmpStream.onCompleted();
+            wb.previewTmpStream = null;
+        }
+        if (futurePreviewAccept != null) {
+            futurePreviewAccept.cancel(false);
+            futurePreviewAccept = null;
+        }
+        if (wb.getTempShapes().containsKey(username)) {
+//            JOptionPane.showMessageDialog(managerFrame, "Lose focus, your preview will be canceled on your next action.");
+            wb.requestForceClearTmp();
+        }
     }
 
     private void initComponents() {
