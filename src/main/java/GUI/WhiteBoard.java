@@ -7,6 +7,7 @@ import com.google.common.collect.ConcurrentHashMultiset;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
+import io.grpc.CallCredentials;
 import io.grpc.Context;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
@@ -39,9 +40,9 @@ public class WhiteBoard implements IWhiteBoard {
     boolean isManager = false;
     //仅管理员存吧还是
     private WhiteBoardServiceGrpc.WhiteBoardServiceStub managerStub;
-
-
     private WhiteBoardSecuredServiceGrpc.WhiteBoardSecuredServiceStub managerSecuredStub;
+    private CallCredentials callCredentials;
+
     private IClient selfUI;
 
     public ConcurrentLinkedDeque<CanvasShape> getLocalShapeQ() {

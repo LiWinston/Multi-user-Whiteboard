@@ -40,18 +40,13 @@ public class WBClient {
 //                .keepAliveWithoutCalls(true)  // 即使没有调用也发送心跳
                 .usePlaintext()
                 .build();
+        var securedChannel = Grpc.newChannelBuilderForAddress(destHost, destPort, InsecureChannelCredentials.create())
+                .build();
         stub = WhiteBoardServiceGrpc.newStub(channel);
-        SecuredStub = WhiteBoardSecuredServiceGrpc.newStub(channel)
-//                .withCallCredentials(new CallCredentials() {
-//            @Override
-//            public void applyRequestMetadata(RequestInfo requestInfo, Executor executor, MetadataApplier metadataApplier) {
-//                Metadata metadata = new Metadata();
-//                metadata.put(Metadata.Key.of("token", Metadata.ASCII_STRING_MARSHALLER), "token");
-//                metadataApplier.apply(metadata);
-//            }
-//        })
-        ;
+        SecuredStub = WhiteBoardSecuredServiceGrpc.newStub(securedChannel);
     }
+
+
     public static int findFreePort() throws IOException {
         try (ServerSocket socket = new ServerSocket(0)) {
             return socket.getLocalPort();  // Automatically finds a free port

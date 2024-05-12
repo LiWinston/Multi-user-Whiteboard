@@ -2,10 +2,7 @@ package Service;
 
 import GUI.WhiteBoard;
 import WBSYS.Properties;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import io.grpc.Server;
-import io.grpc.ServerBuilder;
+import io.grpc.*;
 import whiteboard.WhiteBoardSecuredServiceGrpc;
 import whiteboard.WhiteBoardServiceGrpc;
 
@@ -78,7 +75,9 @@ public class WBServer {
         server = ServerBuilder.forPort(Integer.parseInt(port)).
                 addService(new WhiteBoardServiceImpl(wb, logger)).
                 addService(new WhiteBoardClientImpl(wb, logger)).
-                addService(new WhiteBoardSecuredServiceImpl(wb, logger)).
+                addService(ServerInterceptors.intercept(
+                        new WhiteBoardSecuredServiceImpl(wb, logger),
+                        new JwtServerInterceptor())).
                 build().start();
         logger.info("grpc Server started, listening on " + port);
 
