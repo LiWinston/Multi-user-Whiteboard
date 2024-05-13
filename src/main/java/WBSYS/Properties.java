@@ -6,8 +6,11 @@ import java.util.Date;
 
 public class Properties {
     public final static boolean RepeatTextPreviewSending = false;
-
+    public final static int defaultRCMD = 3000;
+    public final static int defaultDDL = 9999;
+    public final static Boolean defaultShowAll = false;
     public final static String WELLCOME_MESSAGE = "Welcoming for client is Join:";
+
 
     public static boolean isValidPort(String portNum) {
         try {

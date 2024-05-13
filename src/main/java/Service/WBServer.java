@@ -9,6 +9,7 @@ import io.grpc.*;
 import whiteboard.WhiteBoardSecuredServiceGrpc;
 import whiteboard.WhiteBoardServiceGrpc;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -23,9 +24,10 @@ import static WBSYS.Properties.isValidPort;
 public class WBServer {
     private static final String DEFAULT_WHITEBOARD_NAME = "unnamed whiteboard";
     private static final Logger logger = Logger.getLogger(WBServer.class.getName());
-    private static String port;
-    private static int command_issue_rate;
-    private static boolean showAll;
+    public static String port;
+    public static int command_issue_rate;
+    public static boolean showAll;
+    public static int DDL;
     private final WhiteBoard wb;
     private Server server;
 
@@ -51,11 +53,11 @@ public class WBServer {
                 }
                 System.out.println("Server init info: " + IpAddress + " " + port + " " + name);
                 Map<String, String> extraParams = parseArguments(args, freeargStartIndex);
-                command_issue_rate = Integer.parseInt(extraParams.getOrDefault("RCMD", "2000"));  // 从额外参数中获取命令发行率，或使用默认值
-                showAll = Boolean.parseBoolean(extraParams.getOrDefault("SHOWALL", "false"));  // 从额外参数中获取是否显示所有请求，或使用默认值
+                command_issue_rate = Integer.parseInt(extraParams.getOrDefault("RCMD", String.valueOf(Properties.defaultRCMD)));  // 从额外参数中获取命令发行率，或使用默认值
+                showAll = Boolean.parseBoolean(extraParams.getOrDefault("SHOWALL", String.valueOf(Properties.defaultShowAll)));  // 从额外参数中获取是否显示所有请求，或使用默认值
                 System.out.println("Server init RCMD: " + command_issue_rate);
                 System.out.println("Server init showAll: " + showAll);
-                int DDL = Integer.parseInt(extraParams.getOrDefault("DDL", "3"));  // 从额外参数中获取DDL，或使用默认值
+                DDL = Integer.parseInt(extraParams.getOrDefault("DDL", String.valueOf(Properties.defaultDDL)));  // 从额外参数中获取DDL，或使用默认值
                 System.out.println("Server init DDL: " + DDL);
                 try {
                     InetAddress inetAddress = InetAddress.getByName(IpAddress);
@@ -81,6 +83,9 @@ public class WBServer {
                     //public ManagerGUI(WhiteBoard whiteBoard, String IpAddress, String port, String WBName)
 //                    new ManagerGUI(wb, Ip, port, name);
                     wb.setServerStub(WhiteBoardServiceGrpc.newStub(channel));
+                    showConfigChanges();
+
+
                     wb.setManagerSecuredStub(WhiteBoardSecuredServiceGrpc.newStub(channel));
                     wb.pushMessage(Properties.managerMessage("White Board Setup, Server IP: " + Ip + " Port: " + port + " Board Name: " + name));
                     logger.info("Manager GUI initialized, welcome message sent");
@@ -90,6 +95,39 @@ public class WBServer {
             }
         } else {
             showUsage(1);
+        }
+    }
+
+    private static void showConfigChanges() {
+        StringBuilder message = new StringBuilder("<html><body>");
+
+        if (command_issue_rate != Properties.defaultRCMD) {
+            message.append("<p>Server broadcast rate limit: <span style='color: red;'><strong>")
+                    .append(command_issue_rate)
+                    .append("</strong></span></p>")
+                    .append("<p style='color: gray;'>Low limit increase lag, high limit allows more bandwidth consumption.</p>");
+        }
+
+        if (showAll != Properties.defaultShowAll) {
+            message.append("<p>Server Broadcast All Preview?: <span style='color: red;'><strong>")
+                    .append(showAll)
+                    .append("</strong></span><br>")
+                    .append("<span style='color: gray;'>False means whether some frames are abandoned,<br>")
+                    .append("while true means all frames are transmitted, but the delay is longer.</span></p>");
+        }
+
+        if (DDL != Properties.defaultDDL) {
+            message.append("<p>Server Side DDL: <span style='color: red;'><strong>")
+                    .append(DDL)
+                    .append(" seconds</strong></span>.<br>")
+                    .append("<span style='color: gray;'>This is the deadline for each preview broadcasting gRPC call.</span></p>");
+        }
+
+        message.append("</body></html>");
+
+        // 仅在有配置更改时显示消息
+        if (!message.toString().equals("<html><body></body></html>")) {
+            SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, message.toString()));
         }
     }
 
