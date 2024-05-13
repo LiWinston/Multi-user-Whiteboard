@@ -32,6 +32,7 @@ import static Service.Utils.shapes2ProtoShapes;
 
 
 public class WhiteBoard implements IWhiteBoard {
+    public int DDL = 0;
     //    private final ArrayList<IClient> clientUIList = new ArrayList<>();
     private final ConcurrentHashMultiset<String> userList = ConcurrentHashMultiset.create();
     private final ConcurrentHashMultiset<String> editingUser = ConcurrentHashMultiset.create();
@@ -69,6 +70,11 @@ public class WhiteBoard implements IWhiteBoard {
 
     public ConcurrentHashMultiset<String> getEditingUser() {
         return editingUser;
+    }
+
+    @Override
+    public void setDDL(int d) {
+        this.DDL = d;
     }
 
     public IClient getSelfUI() {
@@ -277,6 +283,24 @@ public class WhiteBoard implements IWhiteBoard {
         if (isManager) {
             //负责加入客户服务句柄 channel是用客户自己的ip port建立的
             userAgents.put(username, WhiteBoardClientServiceGrpc.newStub(inputChannel));
+
+            Context.current().fork().run(() -> {
+                userAgents.get(username).withDeadlineAfter(2,TimeUnit.SECONDS).syncDDL(Whiteboard.DDLS.newBuilder().setDDLS(DDL + 2).build(), new StreamObserver<>() {
+                    @Override
+                    public void onNext(Empty empty) {
+                        System.out.println("peer syncDDL = DDL + 2 success.");
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        System.out.println("peer syncDDL failed." + t.getMessage());
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                    }
+                });
+            });
             var sendOk = sendCanvasShapeListTo(username);
             if (sendOk != null) {
                 sendOk.thenAcceptAsync((Boolean ok) -> {
@@ -290,6 +314,7 @@ public class WhiteBoard implements IWhiteBoard {
                     return null;
                 });
             }
+
         } else {
             PeerGUI peerGUI = new PeerGUI(this, username);
             peerGUI.Build();
@@ -702,7 +727,7 @@ public class WhiteBoard implements IWhiteBoard {
 //                futureOK.set(true);
             }
         };
-        previewTmpStream = managerStub.sPushShape(response);
+        previewTmpStream = managerStub.withDeadlineAfter(DDL, TimeUnit.SECONDS).sPushShape(response);
 
         return futureOK;
     }

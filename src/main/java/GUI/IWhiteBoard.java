@@ -3,13 +3,13 @@ package GUI;
 import WBSYS.CanvasShape;
 import io.grpc.ManagedChannel;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public interface IWhiteBoard{
+    public void setDDL(int d);
     IClient getSelfUI();
 
     public void setLocalShapeQ(Collection<CanvasShape> localShapeQ);

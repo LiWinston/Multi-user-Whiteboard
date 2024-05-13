@@ -41,15 +41,27 @@ public class WBServer {
             } else {
                 port = args[1];
                 String IpAddress = args[0];
-                String name = args.length > 2 && !args[2].startsWith("-") ? args[2] : DEFAULT_WHITEBOARD_NAME;
-
-                Map<String, String> extraParams = parseArguments(args, 3);  // 从第四个参数开始解析额外的参数
+//                String name = args.length > 2 && !args[2].startsWith("-") ? args[2] : DEFAULT_WHITEBOARD_NAME;
+                String name;int freeargStartIndex = 2;
+                if(args.length > 2 && !args[2].startsWith("-")) {
+                    name = args[2];
+                    freeargStartIndex = 3;
+                } else {
+                    name = DEFAULT_WHITEBOARD_NAME;
+                }
+                System.out.println("Server init info: " + IpAddress + " " + port + " " + name);
+                Map<String, String> extraParams = parseArguments(args, freeargStartIndex);
                 command_issue_rate = Integer.parseInt(extraParams.getOrDefault("RCMD", "2000"));  // 从额外参数中获取命令发行率，或使用默认值
                 showAll = Boolean.parseBoolean(extraParams.getOrDefault("SHOWALL", "false"));  // 从额外参数中获取是否显示所有请求，或使用默认值
+                System.out.println("Server init RCMD: " + command_issue_rate);
+                System.out.println("Server init showAll: " + showAll);
+                int DDL = Integer.parseInt(extraParams.getOrDefault("DDL", "3"));  // 从额外参数中获取DDL，或使用默认值
+                System.out.println("Server init DDL: " + DDL);
                 try {
                     InetAddress inetAddress = InetAddress.getByName(IpAddress);
                     String Ip = inetAddress.getHostAddress();
                     WhiteBoard wb = new WhiteBoard();
+                    wb.DDL = DDL;
                     final WBServer server = new WBServer(wb);
 
                     // 开启新线程启动服务器

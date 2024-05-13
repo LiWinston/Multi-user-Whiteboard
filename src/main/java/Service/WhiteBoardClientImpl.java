@@ -26,6 +26,15 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
     }
 
     @Override
+    public void syncDDL(whiteboard.Whiteboard.DDLS request,
+                        io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
+        logger.severe("Received DDL sync request: " + request.getDDLS());
+        wb.setDDL(request.getDDLS());
+        responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
     public void updatePeerList(whiteboard.Whiteboard.UserList request,
                                io.grpc.stub.StreamObserver<whiteboard.Whiteboard.Response> responseObserver) {
         logger.severe("Received peer list update list: " + request.getUsernamesList());

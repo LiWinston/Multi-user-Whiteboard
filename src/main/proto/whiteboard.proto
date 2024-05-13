@@ -62,6 +62,9 @@ message Response {
   bool success = 1;
   string message = 2;
 }
+message DDLS {
+  int32 DDLS = 1;
+}
 
 
 service WhiteBoardSecuredService{
@@ -115,6 +118,7 @@ service WhiteBoardService {
 }
 
 service WhiteBoardClientService {
+  rpc SyncDDL(DDLS) returns (google.protobuf.Empty);
   // 从管理员处接收警告信息
   rpc WarningFromManager(ChatMessage) returns (google.protobuf.Empty);
 
