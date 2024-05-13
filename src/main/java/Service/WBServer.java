@@ -151,7 +151,7 @@ public class WBServer {
         rule1.setCount(command_issue_rate);                // 平均每秒最多允许调用次数
         rule1.setGrade(RuleConstant.FLOW_GRADE_QPS); // 基于 QPS 的控制
         rule1.setControlBehavior(showAll ? RuleConstant.CONTROL_BEHAVIOR_RATE_LIMITER : RuleConstant.CONTROL_BEHAVIOR_DEFAULT);
-        rule1.setMaxQueueingTimeMs(2500); // 排队等待时间
+//        rule1.setMaxQueueingTimeMs(2500); // 排队等待时间
         rules.add(rule1);
         FlowRuleManager.loadRules(rules);
     }
