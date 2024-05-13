@@ -4,9 +4,6 @@ import GUI.WhiteBoard;
 import WBSYS.CanvasShape;
 import com.alibaba.csp.sentinel.adapter.grpc.SentinelGrpcClientInterceptor;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
-import com.alibaba.csp.sentinel.slots.block.RuleConstant;
-import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
-import com.alibaba.csp.sentinel.slots.block.flow.FlowRuleManager;
 import io.grpc.Context;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -16,7 +13,6 @@ import whiteboard.Whiteboard;
 import whiteboard.Whiteboard.Response;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import static Service.Utils.protoShape2Shape;
@@ -54,24 +50,13 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
         responseObserver.onCompleted();
     }
 
-    private static void initFlowQpsRule() {
-        ArrayList<FlowRule> rules = new ArrayList<>();
-        FlowRule rule1 = new FlowRule();
-        rule1.setResource("sPushShape");  // 资源名，需要与 `SphU.entry` 中使用的资源名一致
-        rule1.setCount(9);                // 平均每秒最多9次调用
-        rule1.setGrade(RuleConstant.FLOW_GRADE_QPS); // 基于 QPS 的控制
-        rule1.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_RATE_LIMITER); // 匀速排队
-        rule1.setMaxQueueingTimeMs(700); // 排队等待时间
-        rules.add(rule1);
-        FlowRuleManager.loadRules(rules);
-    }
 
 
     @Override
     public void registerPeer(Whiteboard.IP_Port ip_port,
                              io.grpc.stub.StreamObserver<Response> responseObserver) {
         logger.severe("Received registerPeer request: " + ip_port.getIp() + " " + ip_port.getPort());
-        initFlowQpsRule();
+//        initServerInvokingClientStubFlowQpsRule();
         // 生成channel，有配置文件则使用配置文件
         ManagedChannel channel = null;
         channel = ManagedChannelBuilder.forAddress(ip_port.getIp(), Integer.parseInt(ip_port.getPort()))

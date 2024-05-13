@@ -2,12 +2,18 @@ package Service;
 
 import GUI.WhiteBoard;
 import WBSYS.Properties;
+import com.alibaba.csp.sentinel.slots.block.RuleConstant;
+import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
+import com.alibaba.csp.sentinel.slots.block.flow.FlowRuleManager;
 import io.grpc.*;
 import whiteboard.WhiteBoardSecuredServiceGrpc;
 import whiteboard.WhiteBoardServiceGrpc;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -18,6 +24,7 @@ public class WBServer {
     private static final String DEFAULT_WHITEBOARD_NAME = "unnamed whiteboard";
     private static final Logger logger = Logger.getLogger(WBServer.class.getName());
     private static String port;
+    private static int command_issue_rate;
     private final WhiteBoard wb;
     private Server server;
 
@@ -26,17 +33,18 @@ public class WBServer {
     }
 
     public static void main(String[] args) {
-        if (args.length == 3 || args.length == 4) {
+        if (args.length >= 2) {
 
             if (!isValidPort(args[1])) {
-                System.out.println("Expected args : <serverIPAddress> <serverPort> boardname");
-                System.out.println("valid port range : 1024-65535");
+                showUsage(2);
             } else {
                 port = args[1];
-                String name = (args.length == 3) ? args[2] : DEFAULT_WHITEBOARD_NAME;
                 String IpAddress = args[0];
+                String name = args.length > 2 && !args[2].startsWith("-") ? args[2] : DEFAULT_WHITEBOARD_NAME;
 
-
+                Map<String, String> extraParams = parseArguments(args, 3);  // 从第四个参数开始解析额外的参数
+                command_issue_rate = Integer.parseInt(extraParams.getOrDefault("RCMD", "2000"));  // 从额外参数中获取命令发行率，或使用默认值
+                
                 try {
                     InetAddress inetAddress = InetAddress.getByName(IpAddress);
                     String Ip = inetAddress.getHostAddress();
@@ -68,11 +76,34 @@ public class WBServer {
                 }
             }
         } else {
-            System.out.println("Expected args : <serverIPAddress> <serverPort> boardname");
+            showUsage(1);
+        }
+    }
+
+    private static Map<String, String> parseArguments(String[] args, int startIndex) {
+        Map<String, String> params = new HashMap<>();
+        for (int i = startIndex; i < args.length; i += 2) {
+            if (i + 1 < args.length && args[i].startsWith("-")) {
+                params.put(args[i].substring(1), args[i + 1]);
+            }
+        }
+        return params;
+    }
+
+    private static void showUsage(int i) {
+        switch (i) {
+            case 1:
+                System.out.println("Expected args : <serverIPAddress> <serverPort> boardname");
+                break;
+            case 2:
+                System.out.println("Expected args : <serverIPAddress> <serverPort> boardname");
+                System.out.println("valid port range : 1024-65535");
+                break;
         }
     }
 
     public void start() throws IOException {
+        initServerInvokingClientStubFlowQpsRule();
         server = ServerBuilder.forPort(Integer.parseInt(port)).
                 addService(new WhiteBoardServiceImpl(wb, logger)).
                 addService(new WhiteBoardClientImpl(wb, logger)).
@@ -108,5 +139,19 @@ public class WBServer {
         if (server != null) {
             server.awaitTermination();
         }
+    }
+
+
+    static void initServerInvokingClientStubFlowQpsRule() {
+        ArrayList<FlowRule> rules = new ArrayList<>();
+        FlowRule rule1 = new FlowRule();
+        rule1.setResource("sPushShape");  // 资源名，需要与 `SphU.entry` 中使用的资源名一致
+        rule1.setCount(command_issue_rate);                // 平均每秒最多9次调用
+        rule1.setGrade(RuleConstant.FLOW_GRADE_QPS); // 基于 QPS 的控制
+        rule1.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_RATE_LIMITER); // 限流策略
+//        rule1.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_DEFAULT); // 限流策略：直接拒绝
+//        rule1.setMaxQueueingTimeMs(700); // 排队等待时间
+        rules.add(rule1);
+        FlowRuleManager.loadRules(rules);
     }
 }
