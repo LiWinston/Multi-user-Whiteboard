@@ -25,7 +25,7 @@ public class WBServer {
     private static final String DEFAULT_WHITEBOARD_NAME = "unnamed whiteboard";
     private static final Logger logger = Logger.getLogger(WBServer.class.getName());
     public static String port;
-    public static int command_issue_rate;
+    public static int RCMD;
     public static boolean showAll;
     public static int DDL;
     private final WhiteBoard wb;
@@ -53,9 +53,9 @@ public class WBServer {
                 }
                 System.out.println("Server init info: " + IpAddress + " " + port + " " + name);
                 Map<String, String> extraParams = parseArguments(args, freeargStartIndex);
-                command_issue_rate = Integer.parseInt(extraParams.getOrDefault("RCMD", String.valueOf(Properties.defaultRCMD)));  // 从额外参数中获取命令发行率，或使用默认值
+                RCMD = Integer.parseInt(extraParams.getOrDefault("RCMD", String.valueOf(Properties.defaultRCMD)));  // 从额外参数中获取命令发行率，或使用默认值
                 showAll = Boolean.parseBoolean(extraParams.getOrDefault("SHOWALL", String.valueOf(Properties.defaultShowAll)));  // 从额外参数中获取是否显示所有请求，或使用默认值
-                System.out.println("Server init RCMD: " + command_issue_rate);
+                System.out.println("Server init RCMD: " + RCMD);
                 System.out.println("Server init showAll: " + showAll);
                 DDL = Integer.parseInt(extraParams.getOrDefault("DDL", String.valueOf(Properties.defaultDDL)));  // 从额外参数中获取DDL，或使用默认值
                 System.out.println("Server init DDL: " + DDL);
@@ -101,9 +101,9 @@ public class WBServer {
     private static void showConfigChanges() {
         StringBuilder message = new StringBuilder("<html><body>");
 
-        if (command_issue_rate != Properties.defaultRCMD) {
+        if (RCMD != Properties.defaultRCMD) {
             message.append("<p>Server broadcast rate limit: <span style='color: red;'><strong>")
-                    .append(command_issue_rate)
+                    .append(RCMD)
                     .append("</strong></span></p>")
                     .append("<p style='color: gray;'>Low limit increase lag, high limit allows more bandwidth consumption.</p>");
         }
@@ -198,7 +198,7 @@ public class WBServer {
         FlowRule rule1 = new FlowRule();
 //        rule1.setWarmUpPeriodSec(0);
         rule1.setResource("sbroadCastShape");  // 资源名，需要与 `SphU.entry` 中使用的资源名一致
-        rule1.setCount(command_issue_rate);                // 平均每秒最多允许调用次数
+        rule1.setCount(RCMD);                // 平均每秒最多允许调用次数
         rule1.setGrade(RuleConstant.FLOW_GRADE_QPS); // 基于 QPS 的控制
         rule1.setControlBehavior(showAll ? RuleConstant.CONTROL_BEHAVIOR_RATE_LIMITER : RuleConstant.CONTROL_BEHAVIOR_DEFAULT);
 //        rule1.setMaxQueueingTimeMs(2500); // 排队等待时间

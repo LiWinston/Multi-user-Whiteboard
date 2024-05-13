@@ -239,7 +239,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
         if (text == null || text.trim().isEmpty()) {
             return; // 避免处理空字符串或只有空格的字符串
         }
-        text = text.substring(0,Math.min(text.length(), 3000)).trim(); // 限制文本长度
+        text = text.substring(0,Math.min(text.length(), 20000)).trim(); // 限制文本长度
 
         Font font = new Font("Arial", Font.PLAIN, fontSize);
         canvasGraphics.setFont(font);
