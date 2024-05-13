@@ -2,6 +2,7 @@ package GUI;
 
 
 import Service.JwtCredential;
+import Service.WBServer;
 import WBSYS.CanvasShape;
 import WBSYS.Properties;
 import com.google.common.collect.ConcurrentHashMultiset;
@@ -701,7 +702,7 @@ public class WhiteBoard implements IWhiteBoard {
 //                futureOK.set(true);
             }
         };
-        previewTmpStream = managerStub.sPushShape(response);
+        previewTmpStream = managerStub.withDeadlineAfter(WBServer.DDL, TimeUnit.SECONDS).sPushShape(response);
 
         return futureOK;
     }

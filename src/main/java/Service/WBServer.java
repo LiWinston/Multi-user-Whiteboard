@@ -25,6 +25,8 @@ public class WBServer {
     private static final Logger logger = Logger.getLogger(WBServer.class.getName());
     private static String port;
     private static int command_issue_rate;
+    private static boolean showAll;
+    public static int DDL;
     private final WhiteBoard wb;
     private Server server;
 
@@ -44,7 +46,8 @@ public class WBServer {
 
                 Map<String, String> extraParams = parseArguments(args, 3);  // 从第四个参数开始解析额外的参数
                 command_issue_rate = Integer.parseInt(extraParams.getOrDefault("RCMD", "2000"));  // 从额外参数中获取命令发行率，或使用默认值
-                
+                showAll = Boolean.parseBoolean(extraParams.getOrDefault("SHOWALL", "false"));  // 从额外参数中获取是否显示所有请求，或使用默认值
+                DDL = Integer.parseInt(extraParams.getOrDefault("DDL", "5"));  // 从额外参数中获取DDL，或使用默认值
                 try {
                     InetAddress inetAddress = InetAddress.getByName(IpAddress);
                     String Ip = inetAddress.getHostAddress();
