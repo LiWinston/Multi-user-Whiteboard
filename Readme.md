@@ -53,3 +53,9 @@ Jar JVM settings
 -Dsun.java2d.trace=[log[,timestamp]],[count],[out:<filename>],[help],[verbose]
 -Dsun.java2d.ddoffscreen=false
 -Dsun.java2d.d3dtexbpp=16
+
+Server start example：
+每秒允许120次更新推送，不要求同步所有预览
+java -jar .\target\WBServer.jar 127.0.0.1 8611 wbn1 -RCMD 120 -SHOWALL false
+未定义白板名 每秒允许240次更新推送，要求同步所有预览（会导致卡顿）
+java -jar .\target\WBServer.jar 127.0.0.1 8611 -RCMD 240 -SHOWALL true

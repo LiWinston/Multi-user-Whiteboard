@@ -2,8 +2,11 @@ package Service;
 
 import GUI.WhiteBoard;
 import WBSYS.CanvasShape;
+import com.alibaba.csp.sentinel.AsyncEntry;
+import com.alibaba.csp.sentinel.SphU;
 import com.alibaba.csp.sentinel.adapter.grpc.SentinelGrpcClientInterceptor;
-import com.alibaba.csp.sentinel.annotation.SentinelResource;
+import com.alibaba.csp.sentinel.context.ContextUtil;
+import com.alibaba.csp.sentinel.slots.block.BlockException;
 import io.grpc.Context;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -13,6 +16,7 @@ import whiteboard.Whiteboard;
 import whiteboard.Whiteboard.Response;
 
 import java.awt.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
 import static Service.Utils.protoShape2Shape;
@@ -179,7 +183,6 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
 
     //客户端流式 没有请求参数 而是返回一个输入流供应用层操作
     @Override
-    @SentinelResource(value = "sPushShape")
     public io.grpc.stub.StreamObserver<whiteboard.Whiteboard._CanvasShape> sPushShape(
             io.grpc.stub.StreamObserver<whiteboard.Whiteboard.Response> responseObserver) {
 
@@ -193,7 +196,25 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
 //                if(wb.checkConflictOk(shape)){
                 if(true){
                     wb.tempShapes.put(_canvasShape.getUsername(), shape);
-                    wb.sbroadCastShape(_canvasShape);
+//                    wb.sbroadCastShape(_canvasShape);
+                    try {
+                        AsyncEntry entry = SphU.asyncEntry("sbroadCastShape");
+                        // Asynchronous invocation.
+                        CompletableFuture.runAsync(()-> {
+                            // 在异步回调中进行上下文变换，通过 AsyncEntry 的 getAsyncContext 方法获取异步 Context
+                            ContextUtil.runOnContext(entry.getAsyncContext(), () -> {
+                                try {
+                                    wb.sbroadCastShape(_canvasShape);
+                                    // 此处嵌套正常的资源调用.
+                                } finally {
+                                    entry.exit();
+                                }
+                            });
+                        });
+                    } catch (BlockException ex) {
+                        // Request blocked.
+                        // Handle the exception (e.g. retry or fallback).
+                    }
                 }else{
                     //中止接收，发送失败消息
                     if(isOk) {

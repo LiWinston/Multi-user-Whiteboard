@@ -677,24 +677,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         if(wb.previewTmpStream == null){
             futurePreviewAccept = wb.sBeginPushShape();
         }else{
-            try {
-                AsyncEntry entry = SphU.asyncEntry("sPushShape");
-                // Asynchronous invocation.
-                CompletableFuture.runAsync(()-> {
-                    // 在异步回调中进行上下文变换，通过 AsyncEntry 的 getAsyncContext 方法获取异步 Context
-                    ContextUtil.runOnContext(entry.getAsyncContext(), () -> {
-                        try {
-                            wb.previewTmpStream.onNext(shape2ProtoShape(tmp));
-                            // 此处嵌套正常的资源调用.
-                        } finally {
-                            entry.exit();
-                        }
-                    });
-                });
-            } catch (BlockException ex) {
-                // Request blocked.
-                // Handle the exception (e.g. retry or fallback).
-            }
+            wb.previewTmpStream.onNext(shape2ProtoShape(tmp));
         }
     }
 

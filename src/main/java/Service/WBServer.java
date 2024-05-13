@@ -25,6 +25,7 @@ public class WBServer {
     private static final Logger logger = Logger.getLogger(WBServer.class.getName());
     private static String port;
     private static int command_issue_rate;
+    private static boolean showAll;
     private final WhiteBoard wb;
     private Server server;
 
@@ -44,7 +45,7 @@ public class WBServer {
 
                 Map<String, String> extraParams = parseArguments(args, 3);  // 从第四个参数开始解析额外的参数
                 command_issue_rate = Integer.parseInt(extraParams.getOrDefault("RCMD", "2000"));  // 从额外参数中获取命令发行率，或使用默认值
-                
+                showAll = Boolean.parseBoolean(extraParams.getOrDefault("SHOWALL", "false"));  // 从额外参数中获取是否显示所有请求，或使用默认值
                 try {
                     InetAddress inetAddress = InetAddress.getByName(IpAddress);
                     String Ip = inetAddress.getHostAddress();
@@ -145,12 +146,12 @@ public class WBServer {
     static void initServerInvokingClientStubFlowQpsRule() {
         ArrayList<FlowRule> rules = new ArrayList<>();
         FlowRule rule1 = new FlowRule();
-        rule1.setResource("sPushShape");  // 资源名，需要与 `SphU.entry` 中使用的资源名一致
-        rule1.setCount(command_issue_rate);                // 平均每秒最多9次调用
+//        rule1.setWarmUpPeriodSec(0);
+        rule1.setResource("sbroadCastShape");  // 资源名，需要与 `SphU.entry` 中使用的资源名一致
+        rule1.setCount(command_issue_rate);                // 平均每秒最多允许调用次数
         rule1.setGrade(RuleConstant.FLOW_GRADE_QPS); // 基于 QPS 的控制
-        rule1.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_RATE_LIMITER); // 限流策略
-//        rule1.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_DEFAULT); // 限流策略：直接拒绝
-//        rule1.setMaxQueueingTimeMs(700); // 排队等待时间
+        rule1.setControlBehavior(showAll ? RuleConstant.CONTROL_BEHAVIOR_RATE_LIMITER : RuleConstant.CONTROL_BEHAVIOR_DEFAULT);
+        rule1.setMaxQueueingTimeMs(2500); // 排队等待时间
         rules.add(rule1);
         FlowRuleManager.loadRules(rules);
     }

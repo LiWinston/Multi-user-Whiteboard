@@ -4,6 +4,7 @@ package GUI;
 import Service.JwtCredential;
 import WBSYS.CanvasShape;
 import WBSYS.Properties;
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.google.common.collect.ConcurrentHashMultiset;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.Empty;
@@ -706,6 +707,7 @@ public class WhiteBoard implements IWhiteBoard {
         return futureOK;
     }
 
+    @SentinelResource(value = "sbroadCastShape")
     public void sbroadCastShape(Whiteboard._CanvasShape _canvasShape) {
         for(Map.Entry<String, WhiteBoardClientServiceGrpc.WhiteBoardClientServiceStub> ent : userAgents.entrySet()) {
             if(ent.getKey().equals(_canvasShape.getUsername())) {
