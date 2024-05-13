@@ -60,6 +60,7 @@ public class WBServer {
                             e.printStackTrace();
                         }
                     }).start();
+                    Utils.initializeAsync();
 
 
                     logger.info("IP address set for sv: " + Ip);

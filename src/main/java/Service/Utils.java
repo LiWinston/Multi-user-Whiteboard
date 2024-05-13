@@ -5,13 +5,36 @@ import whiteboard.Whiteboard;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.IntStream;
 
 public class Utils {
 
     //构造点-protobuf点的缓存，加速编码
-    private static final HashMap<Point2D, Whiteboard.point> pointCache = new HashMap<>();
+    private static final ConcurrentHashMap<Point2D, Whiteboard.point> pointCache = new ConcurrentHashMap<>();
+
+    static void initializeAsync(){
+        Thread.ofPlatform().start(Utils::initializePointCache);
+    }
+
+    private static void initializePointCache() {
+        IntStream.range(0, 1130).parallel().forEach(x -> {
+            IntStream.range(0, 700).forEach(y -> {
+                Point2D point = new Point2D.Double(x, y);
+                Whiteboard.point protoPoint = Whiteboard.point.newBuilder()
+                        .setX(x)
+                        .setY(y)
+                        .build();
+                pointCache.put(point, protoPoint);
+            });
+        });
+        System.out.println("$$$$$$$$$$$$$$$$$ Point cache initialized $$$$$$$$$$$$$$$$$");
+        System.out.println("$$$$$$$$$$$$$$$$$ Point cache initialized $$$$$$$$$$$$$$$$$");
+        System.out.println("$$$$$$$$$$$$$$$$$ Point cache initialized $$$$$$$$$$$$$$$$$");
+    }
 
     public static ArrayList<Point2D> protoPointsToArrayList(List<Whiteboard.point> list){
         ArrayList<Point2D> points = new ArrayList<>(list.size());
