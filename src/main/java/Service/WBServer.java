@@ -28,6 +28,7 @@ public class WBServer {
     public static int RCMD;
     public static boolean showAll;
     public static int DDL;
+    private static boolean FCOFF;
     private final WhiteBoard wb;
     private Server server;
 
@@ -59,6 +60,7 @@ public class WBServer {
                 System.out.println("Server init showAll: " + showAll);
                 DDL = Integer.parseInt(extraParams.getOrDefault("DDL", String.valueOf(Properties.defaultDDL)));  // 从额外参数中获取DDL，或使用默认值
                 System.out.println("Server init DDL: " + DDL);
+                FCOFF = Boolean.parseBoolean(extraParams.getOrDefault("FCOFF", "False"));  // 从额外参数中获取是否关闭流控，或使用默认值
                 try {
                     InetAddress inetAddress = InetAddress.getByName(IpAddress);
                     String Ip = inetAddress.getHostAddress();
@@ -100,27 +102,30 @@ public class WBServer {
 
     private static void showConfigChanges() {
         StringBuilder message = new StringBuilder("<html><body>");
+        if (FCOFF) {
+            message.append("<p>Server Flow Control: <span style='color: red;'><strong>OFF</strong></span></p>");
+        }else {
+            if (RCMD != Properties.defaultRCMD) {
+                message.append("<p>Server broadcast rate limit: <span style='color: red;'><strong>")
+                        .append(RCMD)
+                        .append("</strong></span></p>")
+                        .append("<p style='color: gray;'>Low limit increase lag, high limit allows more bandwidth consumption.</p>");
+            }
 
-        if (RCMD != Properties.defaultRCMD) {
-            message.append("<p>Server broadcast rate limit: <span style='color: red;'><strong>")
-                    .append(RCMD)
-                    .append("</strong></span></p>")
-                    .append("<p style='color: gray;'>Low limit increase lag, high limit allows more bandwidth consumption.</p>");
-        }
+            if (showAll != Properties.defaultShowAll) {
+                message.append("<p>Server Broadcast All Preview?: <span style='color: red;'><strong>")
+                        .append(showAll)
+                        .append("</strong></span><br>")
+                        .append("<span style='color: gray;'>False means whether some frames are abandoned,<br>")
+                        .append("while true means all frames are transmitted, but the delay is longer.</span></p>");
+            }
 
-        if (showAll != Properties.defaultShowAll) {
-            message.append("<p>Server Broadcast All Preview?: <span style='color: red;'><strong>")
-                    .append(showAll)
-                    .append("</strong></span><br>")
-                    .append("<span style='color: gray;'>False means whether some frames are abandoned,<br>")
-                    .append("while true means all frames are transmitted, but the delay is longer.</span></p>");
-        }
-
-        if (DDL != Properties.defaultDDL) {
-            message.append("<p>Server Side DDL: <span style='color: red;'><strong>")
-                    .append(DDL)
-                    .append(" seconds</strong></span>.<br>")
-                    .append("<span style='color: gray;'>This is the deadline for each preview broadcasting gRPC call.</span></p>");
+            if (DDL != Properties.defaultDDL) {
+                message.append("<p>Server Side DDL: <span style='color: red;'><strong>")
+                        .append(DDL)
+                        .append(" seconds</strong></span>.<br>")
+                        .append("<span style='color: gray;'>This is the deadline for each preview broadcasting gRPC call.</span></p>");
+            }
         }
 
         message.append("</body></html>");
@@ -194,6 +199,9 @@ public class WBServer {
 
 
     static void initServerInvokingClientStubFlowQpsRule() {
+        if(FCOFF) {
+            return;
+        }
         ArrayList<FlowRule> rules = new ArrayList<>();
         FlowRule rule1 = new FlowRule();
 //        rule1.setWarmUpPeriodSec(0);
