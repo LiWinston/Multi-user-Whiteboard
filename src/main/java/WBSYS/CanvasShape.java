@@ -158,22 +158,25 @@ public class CanvasShape implements Serializable {
                 return new Line2D.Double(x1, y1, x2, y2);
             }
             case "oval" -> {
-                return new Ellipse2D.Double(x1, y1, x2 - x1, y2 - y1);
+                return new Ellipse2D.Double(x1, y1, Math.abs(x2-x1), Math.abs(y2-y1));
             }
             case "pen", "eraser" -> {
                 if (points.size() < 2) {
-                    return new Rectangle(x1, y1, 1, 1);
+                    return new Rectangle(x1, y1, strokeInt, strokeInt);
                 } else {
                     Path2D path = new Path2D.Double();
                     path.moveTo(points.get(0).getX(), points.get(0).getY());
-                    for (int i = 1; i < points.size(); i++) {
-                        path.lineTo(points.get(i).getX(), points.get(i).getY());
+//                    for (int i = 1; i < points.size(); i++) {
+//                        path.lineTo(points.get(i).getX(), points.get(i).getY());
+//                    }
+                    for (Point2D point : points) {
+                        path.lineTo(point.getX(), point.getY());
                     }
                     return path;
                 }
             }
             default -> {
-                return new Rectangle(x1, y1, x2 - x1, y2 - y1);
+                return new Rectangle(x1, y1, Math.abs(x2-x1), Math.abs(y2-y1));
             }
         }
     }

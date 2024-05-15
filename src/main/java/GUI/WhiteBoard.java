@@ -23,8 +23,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.*;
 
 import static Service.Utils.shape2ProtoShape;
@@ -44,7 +46,7 @@ public class WhiteBoard implements IWhiteBoard {
     private CallCredentials callCredentials;
 
     private IClient selfUI;
-    private boolean allowConflict = false;
+    private volatile boolean allowConflict = false;
 
     public ConcurrentLinkedDeque<CanvasShape> getLocalShapeQ() {
 //        System.out.println("Loc " + localShapeQ.size());
@@ -774,7 +776,7 @@ public class WhiteBoard implements IWhiteBoard {
 //    public void sPreviewShapes(Whiteboard._CanvasShape prvShape) {
 //        getSelfUI().previewShape(prvShape);
 //    }
-
+    private static final Set<String> pointsShape = Set.of("pen", "eraser");
     @Override
     public boolean checkConflictOk(CanvasShape newShape) {
         if (allowConflict) {
@@ -787,7 +789,9 @@ public class WhiteBoard implements IWhiteBoard {
                 if(newShape.getShapeString().equals("text")){
                     return false;
                 }
-                if (newShape.getShapeString().equals("pen") && editingShape.getShapeString().equals("eraser")) {
+//                if (newShape.getShapeString().equals("pen") && editingShape.getShapeString().equals("eraser"))
+
+                if (pointsShape.contains(newShape.getShapeString()) && pointsShape.contains(editingShape.getShapeString())){
                     // 特殊处理，例如逐点比较
                     if (checkPointByPoint(newShape, editingShape)) {
                         return false;
@@ -861,18 +865,16 @@ public class WhiteBoard implements IWhiteBoard {
 
     private boolean overlapBoundingBox(CanvasShape shape1, CanvasShape shape2) {
         // 计算两个形状的边界框是否重叠
-        Rectangle rect1 = shape1.toShape().getBounds();
-        Rectangle rect2 = shape2.toShape().getBounds();
+        Rectangle2D rect1 = shape1.toShape().getBounds2D();
+        Rectangle2D rect2 = shape2.toShape().getBounds2D();
         System.out.println(rect1);
         System.out.println(rect2);
 
         return rect1.intersects(rect2);
-//        return shape1.getX1() < shape2.getX2() && shape1.getX2() > shape2.getX1() &&
-//                shape1.getY1() < shape2.getY2() && shape1.getY2() > shape2.getY1();
     }
 
     private boolean checkPointByPoint(CanvasShape newShape, CanvasShape existingShape) {
-        // 详细的逐点比较，适用于“笔画”和“橡皮”之间的冲突检测
+        // 详细的逐点比较，适用于单方面涉及“笔画”和“橡皮”的冲突检测
 //        Shape shape1Shape = newShape.toShape();
         Shape shape2Shape = existingShape.toShape();
         for (Point2D point : newShape.getPoints()) {
