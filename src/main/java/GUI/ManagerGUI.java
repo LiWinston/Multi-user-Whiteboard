@@ -2,10 +2,6 @@ package GUI;
 
 import WBSYS.CanvasShape;
 import WBSYS.Properties;
-import com.alibaba.csp.sentinel.AsyncEntry;
-import com.alibaba.csp.sentinel.SphU;
-import com.alibaba.csp.sentinel.context.ContextUtil;
-import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
@@ -23,9 +19,9 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.Point2D;
 import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -51,9 +47,11 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     private Graphics2D canvasGraphics;
     private boolean isFill = false;
     volatile SettableFuture<Boolean> futurePreviewAccept;
+    File canvasFile;
 
     public ManagerGUI(WhiteBoard whiteBoard, String IpAddress, String port, String WBName, ManagedChannel channel) {
         initComponents();
+        canvasFile = null;
         this.wb = whiteBoard;
         username = "Manager";
         this.WBName = WBName;
@@ -110,7 +108,6 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 JFileChooser jFileChooser = new JFileChooser();
                 jFileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
                 jFileChooser.setDialogTitle("please choose file path to open");
-                File canvasFile = null;
 
                 if (JFileChooser.APPROVE_OPTION == jFileChooser.showOpenDialog(managerFrame)) {
                     canvasFile = jFileChooser.getSelectedFile();
@@ -155,23 +152,47 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFileChooser jFileChooser = new JFileChooser();
-                jFileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-                jFileChooser.setDialogTitle("please choose file path to save");
-                File canvasFile = null;
-                if (JFileChooser.APPROVE_OPTION == jFileChooser.showSaveDialog(managerFrame)) {
-                    canvasFile = jFileChooser.getSelectedFile();
-                    if (canvasFile != null) {
-                        try {
-                            FileOutputStream fileOutputStream = new FileOutputStream(canvasFile);
-                            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
-                            objectOutputStream.writeObject(wb.getLocalShapeQ());
-                            objectOutputStream.close();
-                            fileOutputStream.close();
-                            JOptionPane.showMessageDialog(managerFrame, "file saved.");
-                        } catch (IOException fileNotFoundException) {
-                            JOptionPane.showMessageDialog(managerFrame, "File save error, try again..");
+                if (canvasFile == null) {
+                    //save to a new file and set value to canvasFile
+                    JFileChooser jFileChooser = new JFileChooser();
+                    jFileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+                    jFileChooser.setDialogTitle("please choose file path to save");
+                    if (JFileChooser.APPROVE_OPTION == jFileChooser.showSaveDialog(managerFrame)) {
+                        canvasFile = jFileChooser.getSelectedFile();
+                        if (canvasFile != null) {
+                            if (canvasFile.exists()) {
+                                int response = JOptionPane.showConfirmDialog(managerFrame,
+                                        "The file already exists. Do you want to replace it?",
+                                        "Confirm Overwrite",
+                                        JOptionPane.YES_NO_OPTION,
+                                        JOptionPane.WARNING_MESSAGE);
+                                if (response != JOptionPane.YES_OPTION) {
+                                    return;
+                                }
+                            }
+                            try {
+                                FileOutputStream fileOutputStream = new FileOutputStream(canvasFile);
+                                ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+                                objectOutputStream.writeObject(wb.getLocalShapeQ());
+                                objectOutputStream.close();
+                                fileOutputStream.close();
+                                JOptionPane.showMessageDialog(managerFrame, "file saved.");
+                            } catch (IOException fileNotFoundException) {
+                                JOptionPane.showMessageDialog(managerFrame, "File save error, try again..");
+                            }
                         }
+                    }
+                }else {
+                    //save to the originally opened file
+                    try {
+                        FileOutputStream fileOutputStream = new FileOutputStream(canvasFile);
+                        ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+                        objectOutputStream.writeObject(wb.getLocalShapeQ());
+                        objectOutputStream.close();
+                        fileOutputStream.close();
+                        JOptionPane.showMessageDialog(managerFrame, canvasFile.getName() + " : Saved.");
+                    } catch (IOException fileNotFoundException) {
+                        JOptionPane.showMessageDialog(managerFrame, "File save error, try again..");
                     }
 
                 }
@@ -183,12 +204,35 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 JFileChooser jFileChooser = new JFileChooser();
                 jFileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
                 jFileChooser.setDialogTitle("please choose file path to save");
-                File canvasFile = null;
+                File saveAsFile = null;
                 if (JFileChooser.APPROVE_OPTION == jFileChooser.showSaveDialog(managerFrame)) {
-                    canvasFile = jFileChooser.getSelectedFile();
-                    if (canvasFile != null) {
+                    saveAsFile = jFileChooser.getSelectedFile();
+                    if (saveAsFile != null) {
+                        if (saveAsFile.exists()) {
+                            System.out.println("saveAsFile = " + saveAsFile);
+                            System.out.println("canvasFile = " + canvasFile);
+//                            if (saveAsFile.getAbsoluteFile() == canvasFile.getAbsoluteFile()) {
+                            try {
+                                if (Files.isSameFile(saveAsFile.toPath(), canvasFile.toPath())) {
+                                    //Select current file
+                                    JOptionPane.showMessageDialog(managerFrame, "Selected current file, it will be replaced.");
+                                }else{
+                                    //Select a file that already exists other than current file
+                                    int response = JOptionPane.showConfirmDialog(managerFrame,
+                                            "The file already exists. Do you want to replace it?",
+                                            "Confirm Overwrite",
+                                            JOptionPane.YES_NO_OPTION,
+                                            JOptionPane.WARNING_MESSAGE);
+                                    if (response != JOptionPane.YES_OPTION) {
+                                        return;
+                                    }
+                                }
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        }
                         try {
-                            FileOutputStream fileOutputStream = new FileOutputStream(canvasFile);
+                            FileOutputStream fileOutputStream = new FileOutputStream(saveAsFile);
                             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
                             objectOutputStream.writeObject(wb.getLocalShapeQ());
                             objectOutputStream.close();
@@ -900,13 +944,13 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
             managerPanel.setPreferredSize(new Dimension(1490, 850));
             managerPanel.setBackground(Color.white);
             managerPanel.setName("managerPanel");
-            managerPanel.setBorder (new javax. swing. border. CompoundBorder( new javax .swing .border .TitledBorder (new javax
-            . swing. border. EmptyBorder( 0, 0, 0, 0) , "JFor\u006dDesi\u0067ner \u0045valu\u0061tion", javax. swing
-            . border. TitledBorder. CENTER, javax. swing. border. TitledBorder. BOTTOM, new java .awt .
-            Font ("Dia\u006cog" ,java .awt .Font .BOLD ,12 ), java. awt. Color. red
-            ) ,managerPanel. getBorder( )) ); managerPanel. addPropertyChangeListener (new java. beans. PropertyChangeListener( ){ @Override
-            public void propertyChange (java .beans .PropertyChangeEvent e) {if ("bord\u0065r" .equals (e .getPropertyName (
-            ) )) throw new RuntimeException( ); }} );
+            managerPanel.setBorder(new javax.swing.border.CompoundBorder(new javax.swing.border.TitledBorder(new javax
+            .swing.border.EmptyBorder(0,0,0,0), "JFor\u006dDesi\u0067ner \u0045valu\u0061tion",javax.swing
+            .border.TitledBorder.CENTER,javax.swing.border.TitledBorder.BOTTOM,new java.awt.
+            Font("Dia\u006cog",java.awt.Font.BOLD,12),java.awt.Color.red
+            ),managerPanel. getBorder()));managerPanel. addPropertyChangeListener(new java.beans.PropertyChangeListener(){@Override
+            public void propertyChange(java.beans.PropertyChangeEvent e){if("bord\u0065r".equals(e.getPropertyName(
+            )))throw new RuntimeException();}});
             managerPanel.setLayout(new GridLayoutManager(5, 2, new Insets(0, 0, 0, 0), -1, -1));
 
             //======== canvasPanel ========
