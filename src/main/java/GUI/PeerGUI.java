@@ -366,9 +366,9 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
                 tmp.setText("Other user is typing...");
                 if (wb.previewTmpStream == null) {
                     futurePreviewAccept = wb.sBeginPushShape();
-                }else{
-                    wb.previewTmpStream.onNext(shape2ProtoShape(tmp));  // 发送消息
                 }
+                    wb.previewTmpStream.onNext(shape2ProtoShape(tmp));  // 发送消息
+
             }
         }else{
             if(currentShapeType.equals("pen") || currentShapeType.equals("eraser")){

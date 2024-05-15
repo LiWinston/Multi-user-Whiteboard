@@ -193,8 +193,8 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
                 logger.info(" Stream_IN Shape: " + _canvasShape.getShapeString() + "### PREVIEW ###");
                 CanvasShape shape = protoShape2Shape(_canvasShape);
                 //shape间的交叠冲突检测，委派wb处理
-//                if(wb.checkConflictOk(shape)){
-                if(true){
+                if(wb.checkConflictOk(shape)){
+//                if(true){
                     wb.tempShapes.put(_canvasShape.getUsername(), shape);
 //                    wb.sbroadCastShape(_canvasShape);
                     try {

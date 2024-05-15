@@ -1,5 +1,6 @@
 package GUI;
 
+import javax.swing.event.ChangeEvent;
 import WBSYS.CanvasShape;
 import WBSYS.Properties;
 import com.google.common.util.concurrent.FutureCallback;
@@ -534,7 +535,6 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 //                        try {
 //                            Thread.sleep(20);  // 等待200毫秒
 //                        } catch (InterruptedException f) {
-//                            Thread.currentThread().interrupt();
 //                            System.err.println("Sending thread was interrupted.");
 //                            break;
 //                        }
@@ -545,9 +545,9 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 tmp.setText("Other user is typing...");
                 if (wb.previewTmpStream == null) {
                     futurePreviewAccept = wb.sBeginPushShape();
-                }else{
-                    wb.previewTmpStream.onNext(shape2ProtoShape(tmp));  // 发送消息
                 }
+                wb.previewTmpStream.onNext(shape2ProtoShape(tmp));  // 发送消息
+
             }
         }else{
             if(currentShapeType.equals("pen") || currentShapeType.equals("eraser")){
@@ -896,6 +896,18 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         }
     }
 
+    private void ConIntersectCB(ActionEvent e) {
+        if (ConIntersectCB.isSelected()) {
+            wb.setConIntersect(true);
+            JOptionPane.showMessageDialog(managerFrame, "Concurrent intersection is enabled.");
+        } else {
+            wb.setConIntersect(false);
+            JOptionPane.showMessageDialog(managerFrame, "Concurrent intersection is disabled.");
+        }
+    }
+
+
+
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
         // Generated using JFormDesigner Evaluation license - yongchun
@@ -912,6 +924,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         saveButton = new JButton();
         saveAsButton = new JButton();
         closeButton = new JButton();
+        ConIntersectCB = new JCheckBox();
         hSpacer19 = new JPanel(null);
         var label1 = new JLabel();
         IpLabel = new JLabel();
@@ -945,13 +958,13 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
             managerPanel.setPreferredSize(new Dimension(1490, 850));
             managerPanel.setBackground(Color.white);
             managerPanel.setName("managerPanel");
-            managerPanel.setBorder(new javax.swing.border.CompoundBorder(new javax.swing.border.TitledBorder(new javax
-            .swing.border.EmptyBorder(0,0,0,0), "JFor\u006dDesi\u0067ner \u0045valu\u0061tion",javax.swing
-            .border.TitledBorder.CENTER,javax.swing.border.TitledBorder.BOTTOM,new java.awt.
-            Font("Dia\u006cog",java.awt.Font.BOLD,12),java.awt.Color.red
-            ),managerPanel. getBorder()));managerPanel. addPropertyChangeListener(new java.beans.PropertyChangeListener(){@Override
-            public void propertyChange(java.beans.PropertyChangeEvent e){if("bord\u0065r".equals(e.getPropertyName(
-            )))throw new RuntimeException();}});
+            managerPanel.setBorder ( new javax . swing. border .CompoundBorder ( new javax . swing. border .TitledBorder ( new
+            javax . swing. border .EmptyBorder ( 0, 0 ,0 , 0) ,  "JF\u006frmDes\u0069gner \u0045valua\u0074ion" , javax
+            . swing .border . TitledBorder. CENTER ,javax . swing. border .TitledBorder . BOTTOM, new java
+            . awt .Font ( "D\u0069alog", java .awt . Font. BOLD ,12 ) ,java . awt
+            . Color .red ) ,managerPanel. getBorder () ) ); managerPanel. addPropertyChangeListener( new java. beans .
+            PropertyChangeListener ( ){ @Override public void propertyChange (java . beans. PropertyChangeEvent e) { if( "\u0062order" .
+            equals ( e. getPropertyName () ) )throw new RuntimeException( ) ;} } );
             managerPanel.setLayout(new GridLayoutManager(5, 2, new Insets(0, 0, 0, 0), -1, -1));
 
             //======== canvasPanel ========
@@ -1070,6 +1083,12 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 closeButton.setPreferredSize(new Dimension(61, 18));
                 closeButton.setName("closeButton");
                 settingBar.add(closeButton);
+
+                //---- ConIntersectCB ----
+                ConIntersectCB.setText("Allow Concurrent Intersection");
+                ConIntersectCB.setName("ConIntersectCB");
+                ConIntersectCB.addActionListener(e -> ConIntersectCB(e));
+                settingBar.add(ConIntersectCB);
 
                 //---- hSpacer19 ----
                 hSpacer19.setForeground(Color.white);
@@ -1293,6 +1312,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     private JButton saveButton;
     private JButton saveAsButton;
     private JButton closeButton;
+    private JCheckBox ConIntersectCB;
     private JPanel hSpacer19;
     private JLabel IpLabel;
     private JLabel portLabel;

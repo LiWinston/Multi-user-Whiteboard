@@ -58,4 +58,6 @@ public interface IWhiteBoard{
     void requestForceClearTmp();
 
     void broadCastForceClearTmp(String username);
+
+    void setConIntersect(boolean b);
 }

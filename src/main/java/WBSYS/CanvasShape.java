@@ -152,27 +152,46 @@ public class CanvasShape implements Serializable {
     }
 
     public Shape toShape() {
-        if (shapeString.equals("line")) {
-            return new Line2D.Double(x1, y1, x2, y2);
-        } else if (shapeString.equals("rect")) {
-            return new Rectangle(x1, y1, x2 - x1, y2 - y1);
-        } else if (shapeString.equals("oval")) {
-            return new Ellipse2D.Double(x1, y1, x2 - x1, y2 - y1);
-        } else if (shapeString.equals("text")) {
-            return new Rectangle(x1, y1, x2 - x1, y2 - y1);
-        } else if (shapeString.equals("pen") || shapeString.equals("eraser")) {
-            if (points.size() < 2) {
-                return new Rectangle(x1, y1, 1, 1);
-            }else {
-                Path2D path = new Path2D.Double();
-                path.moveTo(points.get(0).getX(), points.get(0).getY());
-                for (int i = 1; i < points.size(); i++) {
-                    path.lineTo(points.get(i).getX(), points.get(i).getY());
-                }
-                return path;
+        System.out.println(this);
+        switch (shapeString) {
+            case "line" -> {
+                return new Line2D.Double(x1, y1, x2, y2);
             }
-        } else {
-            return new Rectangle(x1, y1, x2 - x1, y2 - y1);
+            case "oval" -> {
+                return new Ellipse2D.Double(x1, y1, x2 - x1, y2 - y1);
+            }
+            case "pen", "eraser" -> {
+                if (points.size() < 2) {
+                    return new Rectangle(x1, y1, 1, 1);
+                } else {
+                    Path2D path = new Path2D.Double();
+                    path.moveTo(points.get(0).getX(), points.get(0).getY());
+                    for (int i = 1; i < points.size(); i++) {
+                        path.lineTo(points.get(i).getX(), points.get(i).getY());
+                    }
+                    return path;
+                }
+            }
+            default -> {
+                return new Rectangle(x1, y1, x2 - x1, y2 - y1);
+            }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "CanvasShape{" +
+                "type='" + shapeString + '\'' +
+                ", color=" + color +
+                ", x1=" + x1 +
+                ", x2=" + x2 +
+                ", y1=" + y1 +
+                ", y2=" + y2 +
+                ", text='" + text + '\'' +
+                ", fill=" + fill +
+                ", username='" + username + '\'' +
+                ", points=" + points +
+                ", strokeInt=" + strokeInt +
+                '}';
     }
 }

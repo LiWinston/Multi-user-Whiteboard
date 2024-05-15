@@ -44,9 +44,10 @@ public class WhiteBoard implements IWhiteBoard {
     private CallCredentials callCredentials;
 
     private IClient selfUI;
+    private boolean allowConflict = false;
 
     public ConcurrentLinkedDeque<CanvasShape> getLocalShapeQ() {
-        System.out.println("Loc " + localShapeQ.size());
+//        System.out.println("Loc " + localShapeQ.size());
         return localShapeQ;
     }
 
@@ -61,7 +62,7 @@ public class WhiteBoard implements IWhiteBoard {
 //    }
 
     public ConcurrentHashMap<String, CanvasShape> getTempShapes() {
-        System.out.println("Tmp " + tempShapes.size());
+//        System.out.println("Tmp " + tempShapes.size());
         return tempShapes;
     }
 
@@ -718,6 +719,12 @@ public class WhiteBoard implements IWhiteBoard {
             @Override
             public void onError(Throwable t) {
                 futureOK.set(false);
+                if (t.getMessage().contains("Conflict")) {
+//                    JOptionPane.showMessageDialog(null, "Conflict detected with another user, please try again.");
+
+                } else {
+                    System.out.println(t.getMessage());
+                }
                 System.out.println(t.getMessage());
             }
 
@@ -770,7 +777,11 @@ public class WhiteBoard implements IWhiteBoard {
 
     @Override
     public boolean checkConflictOk(CanvasShape newShape) {
+        if (allowConflict) {
+            return true;
+        }
         for (CanvasShape editingShape : tempShapes.values()) {
+            if (editingShape.getUsername().equals(newShape.getUsername())) continue;
             // 使用边界框来初步判断重叠
             if (overlapBoundingBox(newShape, editingShape)) {
                 if(newShape.getShapeString().equals("text")){
@@ -843,10 +854,18 @@ public class WhiteBoard implements IWhiteBoard {
         }
     }
 
+    @Override
+    public void setConIntersect(boolean b) {
+        allowConflict = b;
+    }
+
     private boolean overlapBoundingBox(CanvasShape shape1, CanvasShape shape2) {
         // 计算两个形状的边界框是否重叠
         Rectangle rect1 = shape1.toShape().getBounds();
         Rectangle rect2 = shape2.toShape().getBounds();
+        System.out.println(rect1);
+        System.out.println(rect2);
+
         return rect1.intersects(rect2);
 //        return shape1.getX1() < shape2.getX2() && shape1.getX2() > shape2.getX1() &&
 //                shape1.getY1() < shape2.getY2() && shape1.getY2() > shape2.getY1();

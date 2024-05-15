@@ -127,6 +127,11 @@ new FormModel {
 					"cursor": #Cursor0
 					"preferredSize": new java.awt.Dimension( 61, 18 )
 				} )
+				add( new FormComponent( "javax.swing.JCheckBox" ) {
+					name: "ConIntersectCB"
+					"text": "Allow Concurrent Intersection"
+					addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "ConIntersectCB", true ) )
+				} )
 				add( new FormComponent( "com.jformdesigner.designer.wrapper.HSpacer" ) {
 					name: "hSpacer19"
 					"foreground": new java.awt.Color( 255, 255, 255, 255 )
