@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static WBSYS.Properties.isValidPort;
@@ -38,7 +39,8 @@ public class WBServer {
 
     public static void main(String[] args) {
         if (args.length >= 2) {
-
+            Logger rootLogger = Logger.getLogger("");
+            rootLogger.setLevel(Level.OFF);
             if (!isValidPort(args[1])) {
                 showUsage(2);
             } else {

@@ -14,6 +14,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static WBSYS.Properties.isValidPort;
@@ -56,6 +57,8 @@ public class WBClient {
     }
 
     public static void main(String[] args) {
+        Logger rootLogger = Logger.getLogger("");
+        rootLogger.setLevel(Level.OFF);
         if (args.length == 3 || args.length == 4) {
             if (!isValidPort(args[1])) {
                 System.out.println("Expected args : <serverIPAddress> <serverPort> username");
