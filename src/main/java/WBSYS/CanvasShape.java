@@ -160,6 +160,13 @@ public class CanvasShape implements Serializable {
             case "oval" -> {
                 return new Ellipse2D.Double(x1, y1, Math.abs(x2-x1), Math.abs(y2-y1));
             }
+            case "rectangle" -> {
+                return new Rectangle(x1, y1, Math.abs(x2-x1), Math.abs(y2-y1));
+            }
+            case "circle" -> {
+                int radius = Math.min(Math.abs(x2-x1), Math.abs(y2-y1));
+                return new Ellipse2D.Double(x1, y1, radius, radius);
+            }
             case "pen", "eraser" -> {
                 if (points.size() < 2) {
                     return new Rectangle(x1, y1, strokeInt, strokeInt);

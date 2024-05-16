@@ -776,40 +776,6 @@ public class WhiteBoard implements IWhiteBoard {
         }
     }
 
-//    public void sPreviewShapes(Whiteboard._CanvasShape prvShape) {
-//        getSelfUI().previewShape(prvShape);
-//    }
-    private static final Set<String> pointsShape = Set.of("pen", "eraser");
-    @Override
-    public boolean checkConflictOk(CanvasShape newShape) {
-        if (allowConflict) {
-            return true;
-        }
-        for (CanvasShape editingShape : tempShapes.values()) {
-            if (editingShape.getUsername().equals(newShape.getUsername())) continue;
-            // 使用边界框来初步判断重叠
-            if (overlapBoundingBox(newShape, editingShape)) {
-                if(newShape.getShapeString().equals("text")){
-                    return false;
-                }
-//                if (newShape.getShapeString().equals("pen") && editingShape.getShapeString().equals("eraser"))
-
-                if (pointsShape.contains(newShape.getShapeString()) && pointsShape.contains(editingShape.getShapeString())){
-                    // 特殊处理，例如逐点比较
-                    if (checkPointByPoint(newShape, editingShape)) {
-                        return false;
-                    }
-                } else {
-                    // 如果是其他类型的形状，可以进一步进行精确的几何交叉检查
-                    if (checkShapeIntersection(newShape, editingShape)) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
-    }
-
     @Override
     public void requestForceClearTmp() {
         Context.current().fork().run(() -> {
@@ -866,18 +832,51 @@ public class WhiteBoard implements IWhiteBoard {
         allowConflict = b;
     }
 
+    //    public void sPreviewShapes(Whiteboard._CanvasShape prvShape) {
+//        getSelfUI().previewShape(prvShape);
+//    }
+    private static final Set<String> pointsShape = Set.of("pen", "eraser");
+    @Override
+    public boolean checkConflictOk(CanvasShape newShape) {
+        if (allowConflict) {
+            return true;
+        }
+        for (CanvasShape editingShape : tempShapes.values()) {
+            if (editingShape.getUsername().equals(newShape.getUsername())) continue;
+            // 使用边界框来初步判断重叠
+            if (overlapBoundingBox(newShape, editingShape)) {
+//                if (newShape.getShapeString().equals("pen") && editingShape.getShapeString().equals("eraser"))
+
+                if (pointsShape.contains(newShape.getShapeString()) && pointsShape.contains(editingShape.getShapeString())){
+                    // 逐点比较
+                    if (checkPointByPoint(newShape, editingShape)) {
+                        return false;
+                    }
+                } else if (newShape.getShapeString().equals("text")) {
+                    return false;
+                } else {
+                    // 如果是其他情形，进一步用Area交叉检查
+                    if (checkShapeIntersection(newShape, editingShape)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
     private boolean overlapBoundingBox(CanvasShape shape1, CanvasShape shape2) {
         // 计算两个形状的边界框是否重叠
         Rectangle2D rect1 = shape1.toShape().getBounds2D();
         Rectangle2D rect2 = shape2.toShape().getBounds2D();
-        System.out.println(rect1);
-        System.out.println(rect2);
+//        System.out.println(rect1);
+//        System.out.println(rect2);
 
-        return rect1.intersects(rect2);
+        return rect1.intersects(rect2) || rect2.intersects(rect1);
     }
 
     private boolean checkPointByPoint(CanvasShape newShape, CanvasShape existingShape) {
-        // 详细的逐点比较，适用于单方面涉及“笔画”和“橡皮”的冲突检测
+        // 逐点比较，适用于双方均是纯点型(“笔画”和“橡皮”)的冲突检测
 //        Shape shape1Shape = newShape.toShape();
         Shape shape2Shape = existingShape.toShape();
         for (Point2D point : newShape.getPoints()) {
@@ -890,7 +889,7 @@ public class WhiteBoard implements IWhiteBoard {
     }
 
     private boolean checkShapeIntersection(CanvasShape shape1, CanvasShape shape2) {
-        // 使用Area类来判断形状间的几何交叉
+        // 使用Area类来判断形状间的几何交叉(二者即使是全包含关系也不允许)
         Area area1 = new Area(shape1.toShape());
         Area area2 = new Area(shape2.toShape());
         area1.intersect(area2);
