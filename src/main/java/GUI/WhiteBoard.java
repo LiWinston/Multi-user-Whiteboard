@@ -645,6 +645,9 @@ public class WhiteBoard implements IWhiteBoard {
 
     public void acceptRemoteShape(CanvasShape canvasShape) {
         tempShapes.remove(canvasShape.getUsername());
+        if(canvasShape.getShapeString().equals("text") && canvasShape.getText().isBlank()){
+            return;
+        }
         localShapeQ.add(canvasShape);
 //        getSelfUI().updateShapes(canvasShape);
     }

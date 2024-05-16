@@ -164,7 +164,6 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
 
     @Override
     public synchronized void pushShape(Whiteboard._CanvasShape requestShape, StreamObserver<com.google.protobuf.Empty> responseObserver) {
-        // 业务逻辑- 拆分出网络功能
         logger.severe("Received shape: " + requestShape.getShapeString());
         CanvasShape shape = protoShape2Shape(requestShape);
 
@@ -194,26 +193,28 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
                 CanvasShape shape = protoShape2Shape(_canvasShape);
                 //shape间的交叠冲突检测，委派wb处理
                 if(wb.checkConflictOk(shape)){
-//                if(true){
                     wb.tempShapes.put(_canvasShape.getUsername(), shape);
-//                    wb.sbroadCastShape(_canvasShape);
-                    try {
-                        AsyncEntry entry = SphU.asyncEntry("sbroadCastShape");
-                        // Asynchronous invocation.
-                        CompletableFuture.runAsync(()-> {
-                            // 在异步回调中进行上下文变换，通过 AsyncEntry 的 getAsyncContext 方法获取异步 Context
-                            ContextUtil.runOnContext(entry.getAsyncContext(), () -> {
-                                try {
-                                    wb.sbroadCastShape(_canvasShape);
-                                    // 此处嵌套正常的资源调用.
-                                } finally {
-                                    entry.exit();
-                                }
+                    if(WBServer.FCOFF) {
+                        wb.sbroadCastShape(_canvasShape);
+                    }else{
+                        try {
+                            AsyncEntry entry = SphU.asyncEntry("sbroadCastShape");
+                            // Asynchronous invocation.
+                            CompletableFuture.runAsync(()-> {
+                                // 在异步回调中进行上下文变换，通过 AsyncEntry 的 getAsyncContext 方法获取异步 Context
+                                ContextUtil.runOnContext(entry.getAsyncContext(), () -> {
+                                    try {
+                                        wb.sbroadCastShape(_canvasShape);
+                                        // 此处嵌套正常的资源调用.
+                                    } finally {
+                                        entry.exit();
+                                    }
+                                });
                             });
-                        });
-                    } catch (BlockException ex) {
-                        // Request blocked.
-                        // Handle the exception (e.g. retry or fallback).
+                        } catch (BlockException ex) {
+                            // Request blocked.
+                            // Handle the exception (e.g. retry or fallback).
+                        }
                     }
                 }else{
                     //中止接收，发送失败消息

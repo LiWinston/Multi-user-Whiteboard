@@ -28,7 +28,7 @@ public class WBServer {
     public static int RCMD;
     public static boolean showAll;
     public static int DDL;
-    private static boolean FCOFF;
+    public static boolean FCOFF;
     private final WhiteBoard wb;
     private Server server;
 

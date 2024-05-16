@@ -541,8 +541,11 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 //                    }
 //                }).start();  // 启动线程
             }else{
-                CanvasShape tmp = new CanvasShape(currentShapeType, Color.GRAY, x1 - 5, x1 + 5, y1 - 5, y1 + 5, Integer.parseInt(strokeCB.getSelectedItem().toString()));
-                tmp.setText("Other user is typing...");
+                int strokeInShape = Integer.parseInt(Objects.requireNonNull(strokeCB.getSelectedItem()).toString());
+                CanvasShape tmp = new CanvasShape(currentShapeType,color, x1 - strokeInShape/2, x1 + strokeInShape/2,
+                        y1 - strokeInShape/2, y1 + strokeInShape/2, Integer.parseInt(strokeCB.getSelectedItem().toString()));
+                tmp.setText("User is typing...");
+                tmp.setStrokeInt(strokeInShape);
                 if (wb.previewTmpStream == null) {
                     futurePreviewAccept = wb.sBeginPushShape();
                 }
@@ -618,18 +621,20 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                             }
                             canvasShape = new CanvasShape(currentShapeType, tempColor, username, new ArrayList<>(pointQ), strokeInShape);
                         } else if (currentShapeType.equals("text")) {
-                            canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
                             try{
                                 String texts = JOptionPane.showInputDialog(managerFrame, "input your text", "text", JOptionPane.PLAIN_MESSAGE, null, null, null).toString();
-                                if (texts.isEmpty()) {
-                                    wb.requestForceClearTmp();
-                                    return;
-                                }
+//                                if (texts.isEmpty()) {
+//                                    wb.requestForceClearTmp();
+//                                    return;
+//                                }
+                                canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
                                 canvasShape.setText(texts);
                                 canvasShape.setStrokeInt(Integer.parseInt(strokeCB.getSelectedItem().toString()));
                             }catch (Exception ex){
-                                wb.requestForceClearTmp();
-                                return;
+                                canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
+                                canvasShape.setText("");
+//                                wb.requestForceClearTmp();
+//                                return;
                             }
                         } else {
                             //起终点可界定的图形
@@ -640,9 +645,14 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                         }
 
                         canvasShape.setFill(isFill);
-                        wb.getLocalShapeQ().add(canvasShape);
-                        reDraw();//让pen落实到画布上
-                        wb.pushShape(canvasShape);
+                        if(canvasShape.getShapeString().equals("text") && canvasShape.getText().isEmpty()){
+                            reDraw();//让pen落实到画布上
+                            wb.pushShape(canvasShape);
+                        }else{
+                            wb.getLocalShapeQ().add(canvasShape);
+                            reDraw();//让pen落实到画布上
+                            wb.pushShape(canvasShape);
+                        }
                     }else{
                         System.out.println("preview rejected");
                         wb.requestForceClearTmp();
