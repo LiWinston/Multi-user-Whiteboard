@@ -1,6 +1,5 @@
 package GUI;
 
-import javax.swing.event.ChangeEvent;
 import WBSYS.CanvasShape;
 import WBSYS.Properties;
 import com.google.common.util.concurrent.FutureCallback;
@@ -40,19 +39,56 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     private final WhiteBoard wb;
     private final String IpAddress;
     private final ManagedChannel channel;
+    volatile SettableFuture<Boolean> futurePreviewAccept;
+    File file;
     private int ipAddress;
     private String currentShapeType = "pen";
-    private Color color = Color.BLACK;
+    private Color currentColor = Color.BLACK;
     private int x1, x2, y1, y2;
     private ConcurrentLinkedDeque<Point2D> pointQ;
     private Graphics2D canvasGraphics;
     private boolean isFill = false;
-    volatile SettableFuture<Boolean> futurePreviewAccept;
-    File canvasFile;
+    // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables  @formatter:off
+    // Generated using JFormDesigner Evaluation license - yongchun
+    private JPanel managerPanel;
+    private JPanel canvasPanel;
+    private JPanel chatPanel;
+    private JScrollPane usersSP;
+    private JTextArea userTA;
+    private JScrollPane ChatSP;
+    private JTextArea chatTA;
+    private JToolBar settingBar;
+    private JButton newFileButton;
+    private JButton openButton;
+    private JButton saveButton;
+    private JButton saveAsButton;
+    private JButton closeButton;
+    private JCheckBox ConIntersectCB;
+    private JPanel hSpacer19;
+    private JLabel IpLabel;
+    private JLabel portLabel;
+    private JPanel hSpacer1;
+    private JLabel nameLabel;
+    private JToolBar shapeColorBar;
+    private JButton colorButton;
+    private JLabel colorLabel;
+    private JButton penButton;
+    private JButton lineButton;
+    private JButton circleButton;
+    private JButton ovalButton;
+    private JButton rectButton;
+    private JButton earserButton;
+    private JButton textButton;
+    private JButton fillButton;
+    private JComboBox strokeCB;
+    private JButton kickButton;
+    private JLabel editingJLabel;
+    private JButton SendButton;
+    private JTextField sendTextField;
 
     public ManagerGUI(WhiteBoard whiteBoard, String IpAddress, String port, String WBName, ManagedChannel channel) {
         initComponents();
-        canvasFile = null;
+        file = null;
         this.wb = whiteBoard;
         username = "Manager";
         this.WBName = WBName;
@@ -91,9 +127,6 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         managerFrame.setVisible(true);
     }
 
-
-
-
     private void setFileButtons() {
         newFileButton.addActionListener(new ActionListener() {
             @Override
@@ -124,7 +157,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                                     ConcurrentLinkedDeque<CanvasShape> shapes = (ConcurrentLinkedDeque<CanvasShape>) deque;
                                     wb.openFile(shapes);
                                     wb.pushMessage(Properties.managerMessage("Open new file: " + openFile.getName()));
-                                    canvasFile = openFile;
+                                    file = openFile;
                                     JOptionPane.showMessageDialog(managerFrame, "Open file successfully.");
                                 } else {
                                     JOptionPane.showMessageDialog(managerFrame, "The file does not contain valid shapes.");
@@ -154,15 +187,15 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (canvasFile == null) {
+                if (file == null) {
                     //save to a new file and set value to canvasFile
                     JFileChooser jFileChooser = new JFileChooser();
                     jFileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
                     jFileChooser.setDialogTitle("please choose file path to save");
                     if (JFileChooser.APPROVE_OPTION == jFileChooser.showSaveDialog(managerFrame)) {
-                        canvasFile = jFileChooser.getSelectedFile();
-                        if (canvasFile != null) {
-                            if (canvasFile.exists()) {
+                        file = jFileChooser.getSelectedFile();
+                        if (file != null) {
+                            if (file.exists()) {
                                 int response = JOptionPane.showConfirmDialog(managerFrame,
                                         "The file already exists. Do you want to replace it?",
                                         "Confirm Overwrite",
@@ -173,7 +206,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                                 }
                             }
                             try {
-                                FileOutputStream fileOutputStream = new FileOutputStream(canvasFile);
+                                FileOutputStream fileOutputStream = new FileOutputStream(file);
                                 ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
                                 objectOutputStream.writeObject(wb.getLocalShapeQ());
                                 objectOutputStream.close();
@@ -187,12 +220,12 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                 }else {
                     //save to the originally opened file
                     try {
-                        FileOutputStream fileOutputStream = new FileOutputStream(canvasFile);
+                        FileOutputStream fileOutputStream = new FileOutputStream(file);
                         ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
                         objectOutputStream.writeObject(wb.getLocalShapeQ());
                         objectOutputStream.close();
                         fileOutputStream.close();
-                        JOptionPane.showMessageDialog(managerFrame, canvasFile.getName() + " : Saved.");
+                        JOptionPane.showMessageDialog(managerFrame, file.getName() + " : Saved.");
                     } catch (IOException fileNotFoundException) {
                         JOptionPane.showMessageDialog(managerFrame, "File save error, try again..");
                     }
@@ -203,19 +236,19 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         saveAsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFileChooser jFileChooser = new JFileChooser();
-                jFileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-                jFileChooser.setDialogTitle("please choose file path to save");
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+                fileChooser.setDialogTitle("please choose file path to save");
                 File saveAsFile = null;
-                if (JFileChooser.APPROVE_OPTION == jFileChooser.showSaveDialog(managerFrame)) {
-                    saveAsFile = jFileChooser.getSelectedFile();
+                if (JFileChooser.APPROVE_OPTION == fileChooser.showSaveDialog(managerFrame)) {
+                    saveAsFile = fileChooser.getSelectedFile();
                     if (saveAsFile != null) {
                         if (saveAsFile.exists()) {
                             System.out.println("saveAsFile = " + saveAsFile);
-                            System.out.println("canvasFile = " + canvasFile);
+                            System.out.println("canvasFile = " + file);
 //                            if (saveAsFile.getAbsoluteFile() == canvasFile.getAbsoluteFile()) {
                             try {
-                                if (Files.isSameFile(saveAsFile.toPath(), canvasFile.toPath())) {
+                                if (Files.isSameFile(saveAsFile.toPath(), file.toPath())) {
                                     //Select current file
                                     JOptionPane.showMessageDialog(managerFrame, "Selected current file, it will be replaced.");
                                 }else{
@@ -264,11 +297,11 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         colorButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                color = JColorChooser.showDialog(managerFrame, "choose color", null);
-                if (color == null) {
+                currentColor = JColorChooser.showDialog(managerFrame, "choose color", null);
+                if (currentColor == null) {
                     return;
                 }
-                colorLabel.setBackground(color);
+                colorLabel.setBackground(currentColor);
             }
         });
     }
@@ -338,7 +371,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                     canvasGraphics = (Graphics2D) canvasPanel.getGraphics();
                 }
 
-                String shapeType = canvasShape.getShapeString();
+                String shapeType = canvasShape.getType();
                 int x1 = canvasShape.getX1();
                 int y1 = canvasShape.getY1();
                 int x2 = canvasShape.getX2();
@@ -475,7 +508,6 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         }
     }
 
-
     private void setShapeButtons() {
         JButton[] buttons = {penButton, lineButton, circleButton, ovalButton, rectButton, earserButton, textButton};
         for (int i = 0; i < buttons.length; i++) {
@@ -493,7 +525,6 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
             buttons[i].setBackground(i == index ? Color.lightGray : Color.WHITE);
         }
     }
-
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -542,7 +573,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 //                }).start();  // 启动线程
             }else{
                 int strokeInShape = Integer.parseInt(Objects.requireNonNull(strokeCB.getSelectedItem()).toString());
-                CanvasShape tmp = new CanvasShape(currentShapeType,color, x1 - strokeInShape/2, x1 + strokeInShape/2,
+                CanvasShape tmp = new CanvasShape(currentShapeType, currentColor, x1 - strokeInShape/2, x1 + strokeInShape/2,
                         y1 - strokeInShape/2, y1 + strokeInShape/2, Integer.parseInt(strokeCB.getSelectedItem().toString()));
                 tmp.setText("User is typing...");
                 tmp.setStrokeInt(strokeInShape);
@@ -555,7 +586,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         }else{
             if(currentShapeType.equals("pen") || currentShapeType.equals("eraser")){
                 pointQ.add(new Point(x1, y1));
-                Color tempColor = currentShapeType.equals("pen") ? color : Color.white;
+                Color tempColor = currentShapeType.equals("pen") ? currentColor : Color.white;
                 CanvasShape tmp = new CanvasShape(currentShapeType, tempColor, username, new ArrayList<>(pointQ), Integer.parseInt(strokeCB.getSelectedItem().toString()));
                 drawCanvasShape(tmp);
                 if (wb.previewTmpStream == null) {
@@ -569,7 +600,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                     futurePreviewAccept = wb.sBeginPushShape();
                 }
                 int strokeInShape = Integer.parseInt(Objects.requireNonNull(strokeCB.getSelectedItem()).toString());
-                CanvasShape tmp = new CanvasShape(currentShapeType, color, x1, x1 + strokeInShape, y1, y1 + strokeInShape, strokeInShape);
+                CanvasShape tmp = new CanvasShape(currentShapeType, currentColor, x1, x1 + strokeInShape, y1, y1 + strokeInShape, strokeInShape);
                 drawCanvasShape(tmp);
                 if (wb.previewTmpStream == null) {
                     futurePreviewAccept = wb.sBeginPushShape();
@@ -615,7 +646,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 
                         CanvasShape canvasShape;
                         if (currentShapeType.equals("pen") || currentShapeType.equals("eraser")) {
-                            Color tempColor = color;
+                            Color tempColor = currentColor;
                             if (currentShapeType.equals("eraser")) {
                                 tempColor = Color.white;
                             }
@@ -627,11 +658,11 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 //                                    wb.requestForceClearTmp();
 //                                    return;
 //                                }
-                                canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
+                                canvasShape = new CanvasShape(currentShapeType, currentColor, x1, x2, y1, y2, strokeInShape);
                                 canvasShape.setText(texts);
                                 canvasShape.setStrokeInt(Integer.parseInt(strokeCB.getSelectedItem().toString()));
                             }catch (Exception ex){
-                                canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
+                                canvasShape = new CanvasShape(currentShapeType, currentColor, x1, x2, y1, y2, strokeInShape);
                                 canvasShape.setText("");
 //                                wb.requestForceClearTmp();
 //                                return;
@@ -641,11 +672,11 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
                             //若按下没动，设为笔触大小的相应形
                             x2 = x2 == x1 ? x1 + strokeInShape : x2;
                             y2 = y2 == y1 ? y1 + strokeInShape : y2;
-                            canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
+                            canvasShape = new CanvasShape(currentShapeType, currentColor, x1, x2, y1, y2, strokeInShape);
                         }
 
                         canvasShape.setFill(isFill);
-                        if(canvasShape.getShapeString().equals("text") && canvasShape.getText().isEmpty()){
+                        if(canvasShape.getType().equals("text") && canvasShape.getText().isEmpty()){
                             reDraw();//让pen落实到画布上
                             wb.pushShape(canvasShape);
                         }else{
@@ -677,7 +708,6 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         }, Executors.newSingleThreadExecutor());
     }
 
-
     @Override
     public void mouseEntered(MouseEvent e) {
 
@@ -687,7 +717,6 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
     public void mouseExited(MouseEvent e) {
 
     }
-
 
     @Override
     public void mouseDragged(MouseEvent e) {
@@ -709,7 +738,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
             if (currentShapeType.equals("eraser")) {
                 tempColor = Color.gray;
             }else {
-                tempColor = color;
+                tempColor = currentColor;
             }
 //            int finalX = x4, finalY = y4;
 //            SwingUtilities.invokeLater(() -> {
@@ -723,7 +752,7 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
 //            SwingUtilities.invokeLater(() -> drawCanvasShape(tmp));
 //            wb.tempShapes.put(username, tmp);
         }else{
-            tmp = new CanvasShape(currentShapeType, color, x1, x3, y1, y3, Integer.parseInt(strokeCB.getSelectedItem().toString()));
+            tmp = new CanvasShape(currentShapeType, currentColor, x1, x3, y1, y3, Integer.parseInt(strokeCB.getSelectedItem().toString()));
             SwingUtilities.invokeLater(() -> drawCanvasShape(tmp));
 //            wb.tempShapes.put(username, tmp);
         }
@@ -809,7 +838,6 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
             }).start();
         });
     }
-
 
     @Override
     public void closeWindow(String message) {
@@ -915,8 +943,6 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
             JOptionPane.showMessageDialog(managerFrame, "Concurrent intersection is disabled.");
         }
     }
-
-
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
@@ -1306,43 +1332,5 @@ public class ManagerGUI implements IClient, MouseListener, MouseMotionListener, 
         // JFormDesigner - End of component initialization  //GEN-END:initComponents  @formatter:on
 
     }
-
-    // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables  @formatter:off
-    // Generated using JFormDesigner Evaluation license - yongchun
-    private JPanel managerPanel;
-    private JPanel canvasPanel;
-    private JPanel chatPanel;
-    private JScrollPane usersSP;
-    private JTextArea userTA;
-    private JScrollPane ChatSP;
-    private JTextArea chatTA;
-    private JToolBar settingBar;
-    private JButton newFileButton;
-    private JButton openButton;
-    private JButton saveButton;
-    private JButton saveAsButton;
-    private JButton closeButton;
-    private JCheckBox ConIntersectCB;
-    private JPanel hSpacer19;
-    private JLabel IpLabel;
-    private JLabel portLabel;
-    private JPanel hSpacer1;
-    private JLabel nameLabel;
-    private JToolBar shapeColorBar;
-    private JButton colorButton;
-    private JLabel colorLabel;
-    private JButton penButton;
-    private JButton lineButton;
-    private JButton circleButton;
-    private JButton ovalButton;
-    private JButton rectButton;
-    private JButton earserButton;
-    private JButton textButton;
-    private JButton fillButton;
-    private JComboBox strokeCB;
-    private JButton kickButton;
-    private JLabel editingJLabel;
-    private JButton SendButton;
-    private JTextField sendTextField;
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 }

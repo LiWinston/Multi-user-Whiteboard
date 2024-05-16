@@ -645,7 +645,7 @@ public class WhiteBoard implements IWhiteBoard {
 
     public void acceptRemoteShape(CanvasShape canvasShape) {
         tempShapes.remove(canvasShape.getUsername());
-        if(canvasShape.getShapeString().equals("text") && canvasShape.getText().isBlank()){
+        if(canvasShape.getType().equals("text") && canvasShape.getText().isBlank()){
             return;
         }
         localShapeQ.add(canvasShape);
@@ -847,12 +847,12 @@ public class WhiteBoard implements IWhiteBoard {
             if (overlapBoundingBox(newShape, editingShape)) {
 //                if (newShape.getShapeString().equals("pen") && editingShape.getShapeString().equals("eraser"))
 
-                if (pointsShape.contains(newShape.getShapeString()) && pointsShape.contains(editingShape.getShapeString())){
+                if (pointsShape.contains(newShape.getType()) && pointsShape.contains(editingShape.getType())){
                     // 逐点比较
                     if (checkPointByPoint(newShape, editingShape)) {
                         return false;
                     }
-                } else if (newShape.getShapeString().equals("text")) {
+                } else if (newShape.getType().equals("text")) {
                     return false;
                 } else {
                     // 如果是其他情形，进一步用Area交叉检查

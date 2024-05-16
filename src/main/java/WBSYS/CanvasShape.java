@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class CanvasShape implements Serializable {
-    private String shapeString = "";
+    private String type = "";
     private Color color = Color.BLACK;
     private int x1 = 0, x2 = 0, y1 = 0, y2 = 0;
     private String text = "";
@@ -19,8 +19,8 @@ public class CanvasShape implements Serializable {
     private int strokeInt = 1;
 
 
-    public CanvasShape(String shapeString, Color color, int x1, int x2, int y1, int y2, int strokeInt) {
-        this.shapeString = shapeString;
+    public CanvasShape(String type, Color color, int x1, int x2, int y1, int y2, int strokeInt) {
+        this.type = type;
         this.color = color;
         this.x1 = x1;
         this.x2 = x2;
@@ -29,8 +29,8 @@ public class CanvasShape implements Serializable {
         this.strokeInt = strokeInt;
     }
 
-    public CanvasShape(String shapeString, Color color, int x1, int x2, int y1, int y2, boolean fill, String username, int strokeInt) {
-        this.shapeString = shapeString;
+    public CanvasShape(String type, Color color, int x1, int x2, int y1, int y2, boolean fill, String username, int strokeInt) {
+        this.type = type;
         this.color = color;
         this.x1 = x1;
         this.x2 = x2;
@@ -41,8 +41,8 @@ public class CanvasShape implements Serializable {
         this.strokeInt = strokeInt;
     }
 
-    public CanvasShape(String shapeString, Color color, int x1, int x2, int y1, int y2, String text, boolean fill, String username, int strokeInt) {
-        this.shapeString = shapeString;
+    public CanvasShape(String type, Color color, int x1, int x2, int y1, int y2, String text, boolean fill, String username, int strokeInt) {
+        this.type = type;
         this.color = color;
         this.x1 = x1;
         this.x2 = x2;
@@ -55,20 +55,20 @@ public class CanvasShape implements Serializable {
     }
 
 
-    public CanvasShape(String shapeString, Color color, String username, ArrayList<Point2D> points, int strokeInt) {
-        this.shapeString = shapeString;
+    public CanvasShape(String type, Color color, String username, ArrayList<Point2D> points, int strokeInt) {
+        this.type = type;
         this.color = color;
         this.username = username;
         this.points = points;
         this.strokeInt = strokeInt;
     }
 
-    public String getShapeString() {
-        return shapeString;
+    public String getType() {
+        return type;
     }
 
-    public void setShapeString(String shapeString) {
-        this.shapeString = shapeString;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public Color getColor() {
@@ -153,7 +153,7 @@ public class CanvasShape implements Serializable {
 
     public Shape toShape() {
         System.out.println(this);
-        switch (shapeString) {
+        switch (type) {
             case "line" -> {
                 return new Line2D.Double(x1, y1, x2, y2);
             }
@@ -191,7 +191,7 @@ public class CanvasShape implements Serializable {
     @Override
     public String toString() {
         return "CanvasShape{" +
-                "type='" + shapeString + '\'' +
+                "type='" + type + '\'' +
                 ", color=" + color +
                 ", x1=" + x1 +
                 ", x2=" + x2 +

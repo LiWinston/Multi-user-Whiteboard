@@ -158,6 +158,22 @@ public class WBServer {
         }
     }
 
+    static void initServerInvokingClientStubFlowQpsRule() {
+        if(FCOFF) {
+            return;
+        }
+        ArrayList<FlowRule> rules = new ArrayList<>();
+        FlowRule rule1 = new FlowRule();
+//        rule1.setWarmUpPeriodSec(0);
+        rule1.setResource("sbroadCastShape");  // 资源名，需要与 `SphU.entry` 中使用的资源名一致
+        rule1.setCount(RCMD);                // 平均每秒最多允许调用次数
+        rule1.setGrade(RuleConstant.FLOW_GRADE_QPS); // 基于 QPS 的控制
+        rule1.setControlBehavior(showAll ? RuleConstant.CONTROL_BEHAVIOR_RATE_LIMITER : RuleConstant.CONTROL_BEHAVIOR_DEFAULT);
+//        rule1.setMaxQueueingTimeMs(2500); // 排队等待时间
+        rules.add(rule1);
+        FlowRuleManager.loadRules(rules);
+    }
+
     public void start() throws IOException {
         initServerInvokingClientStubFlowQpsRule();
         server = ServerBuilder.forPort(Integer.parseInt(port)).
@@ -195,22 +211,5 @@ public class WBServer {
         if (server != null) {
             server.awaitTermination();
         }
-    }
-
-
-    static void initServerInvokingClientStubFlowQpsRule() {
-        if(FCOFF) {
-            return;
-        }
-        ArrayList<FlowRule> rules = new ArrayList<>();
-        FlowRule rule1 = new FlowRule();
-//        rule1.setWarmUpPeriodSec(0);
-        rule1.setResource("sbroadCastShape");  // 资源名，需要与 `SphU.entry` 中使用的资源名一致
-        rule1.setCount(RCMD);                // 平均每秒最多允许调用次数
-        rule1.setGrade(RuleConstant.FLOW_GRADE_QPS); // 基于 QPS 的控制
-        rule1.setControlBehavior(showAll ? RuleConstant.CONTROL_BEHAVIOR_RATE_LIMITER : RuleConstant.CONTROL_BEHAVIOR_DEFAULT);
-//        rule1.setMaxQueueingTimeMs(2500); // 排队等待时间
-        rules.add(rule1);
-        FlowRuleManager.loadRules(rules);
     }
 }

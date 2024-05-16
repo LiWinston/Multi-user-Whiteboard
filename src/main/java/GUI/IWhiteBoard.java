@@ -9,10 +9,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public interface IWhiteBoard{
-    public void setDDL(int d);
+    void setDDL(int d);
     IClient getSelfUI();
 
-    public void setLocalShapeQ(Collection<CanvasShape> localShapeQ);
     void pushShape(CanvasShape canvasShape);
 
     void broadCastShape(CanvasShape canvasShape);
@@ -30,6 +29,8 @@ public interface IWhiteBoard{
     void registerManager(String IpAddress, String port, String name, ManagedChannel channel);
 
     ConcurrentLinkedDeque<CanvasShape> getLocalShapeQ();
+
+    void setLocalShapeQ(Collection<CanvasShape> localShapeQ);
 
     void reportUpdEditing(String operation, String username);
 

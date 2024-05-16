@@ -25,11 +25,11 @@ public class WBClient {
     private static String destPort;
     private static String selfIp;
     private static int selfPort;
-    private WhiteBoard wb;
-    Server clientServer;
+    private final WhiteBoard wb;
     private final ManagedChannel channel;
-    private WhiteBoardServiceGrpc.WhiteBoardServiceStub stub;
-    private WhiteBoardSecuredServiceGrpc.WhiteBoardSecuredServiceStub SecuredStub;
+    private final WhiteBoardServiceGrpc.WhiteBoardServiceStub stub;
+    private final WhiteBoardSecuredServiceGrpc.WhiteBoardSecuredServiceStub SecuredStub;
+    Server clientServer;
 
 
     public WBClient(WhiteBoard wb, String destHost,int destPort) {
@@ -52,48 +52,6 @@ public class WBClient {
             return socket.getLocalPort();  // Automatically finds a free port
         } catch (IOException e) {
             throw new IOException("Failed to find a free port", e);
-        }
-    }
-
-    public void start() throws IOException {
-        InetAddress inetAddress = InetAddress.getLocalHost();
-        selfIp = inetAddress.getHostAddress();
-        selfPort = findFreePort();
-        if(selfPort == -1) {
-            logger.info("Cannot find free port, please check.");
-            return;
-        }else {
-            logger.info("Successfully find free port: " + selfPort);
-        }
-        clientServer = ServerBuilder.forPort(selfPort).
-                addService(new WhiteBoardClientImpl(wb, logger)).
-                keepAliveTime(15, TimeUnit.MINUTES).
-                permitKeepAliveWithoutCalls(true).
-                maxConnectionAgeGrace(3, TimeUnit.SECONDS). // 允许3s的宽限期完成正在进行的RPC
-                build().start();
-        logger.info("grpc Server started, listening on " + selfPort);
-
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-
-            @Override
-            public void run() {
-                wb.peerExit(wb.getSelfUI().getUsername());
-                System.err.println("*** shutting down gRPC server since JVM is shutting down");
-                WBClient.this.stop();
-                System.err.println("*** server shut down");
-            }
-        });
-    }
-
-    private void stop() {
-        if (clientServer != null) {
-            clientServer.shutdown();
-        }
-    }
-
-    private void blockUntilShutdown() throws InterruptedException {
-        if (clientServer != null) {
-            clientServer.awaitTermination();
         }
     }
 
@@ -186,7 +144,7 @@ public class WBClient {
                             logger.info(response.getMessage() + ", Please try again.");
                             if (null != wb.getSelfUI()) {
                                 wb.getSelfUI().closeWindow("Cannot connect to whiteboard");
-                            };
+                            }
                             clientDownLatch.countDown();
 //                            exit(0);
                         }
@@ -225,6 +183,48 @@ public class WBClient {
         } else {
             System.out.println("Expected args : <serverIPAddress> <serverPort> username");
             System.out.println("optionally add <board name> to end of args");
+        }
+    }
+
+    public void start() throws IOException {
+        InetAddress inetAddress = InetAddress.getLocalHost();
+        selfIp = inetAddress.getHostAddress();
+        selfPort = findFreePort();
+        if(selfPort == -1) {
+            logger.info("Cannot find free port, please check.");
+            return;
+        }else {
+            logger.info("Successfully find free port: " + selfPort);
+        }
+        clientServer = ServerBuilder.forPort(selfPort).
+                addService(new WhiteBoardClientImpl(wb, logger)).
+                keepAliveTime(15, TimeUnit.MINUTES).
+                permitKeepAliveWithoutCalls(true).
+                maxConnectionAgeGrace(3, TimeUnit.SECONDS). // 允许3s的宽限期完成正在进行的RPC
+                build().start();
+        logger.info("grpc Server started, listening on " + selfPort);
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+
+            @Override
+            public void run() {
+                wb.peerExit(wb.getSelfUI().getUsername());
+                System.err.println("*** shutting down gRPC server since JVM is shutting down");
+                WBClient.this.stop();
+                System.err.println("*** server shut down");
+            }
+        });
+    }
+
+    private void stop() {
+        if (clientServer != null) {
+            clientServer.shutdown();
+        }
+    }
+
+    private void blockUntilShutdown() throws InterruptedException {
+        if (clientServer != null) {
+            clientServer.awaitTermination();
         }
     }
 

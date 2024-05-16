@@ -19,7 +19,7 @@ public class Utils {
             points.add(new Point2D.Double(point.getX(), point.getY()));
         }
         return points;
-    };
+    }
 
     public static whiteboard.Whiteboard.point convertToPointProto(Point2D point) {
         return pointCache.computeIfAbsent(point, p -> whiteboard.Whiteboard.point.newBuilder()
@@ -31,7 +31,7 @@ public class Utils {
     public static Whiteboard._CanvasShape shape2ProtoShape(WBSYS.CanvasShape canvasShape) {
         var points = canvasShape.getPoints();
         return Whiteboard._CanvasShape.newBuilder().
-                setShapeString(canvasShape.getShapeString()).
+                setShapeString(canvasShape.getType()).
                 setColor(String.valueOf(canvasShape.getColor().getRGB())).
                 addX(canvasShape.getX1()).addX(canvasShape.getX2()).addX(canvasShape.getY1()).addX(canvasShape.getY2()).
                 setText(canvasShape.getText() == null ? "" : canvasShape.getText()).

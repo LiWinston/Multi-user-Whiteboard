@@ -34,8 +34,6 @@ build/
 ### Mac OS ###
 .DS_Store
 /.idea
-/.idea
-/.idea
 /out
 /src
 dependency-reduced-pom.xml

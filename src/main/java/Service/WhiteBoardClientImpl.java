@@ -77,8 +77,8 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
 
     @Override
     public void updEditing(whiteboard.Whiteboard.SynchronizeUserRequest request,
-                                   io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
-        logger.severe("Received synchronize editing BCast: " + request.getOperation() +" "+ request.getUsername());
+                           io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
+        logger.severe("Received synchronize editing BCast: " + request.getOperation() + " " + request.getUsername());
         wb.updEditing(request.getOperation(), request.getUsername());
         responseObserver.onNext(com.google.protobuf.Empty.newBuilder().build());
         responseObserver.onCompleted();
@@ -120,7 +120,7 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
                               io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
         logger.severe("Received force clear tmp BCast: " + request.getUsername());
         wb.getTempShapes().remove(request.getUsername());
-        logger.severe("删了 " + request.getUsername()+ " 的临时图形,现在还有" + wb.getTempShapes().size() + "个");
+        logger.severe("Del " + request.getUsername() + " 's tmp shape" + wb.getTempShapes().size() + " remaining.");
         SwingUtilities.invokeLater(() -> {
             wb.getSelfUI().reDraw();
         });
@@ -135,9 +135,9 @@ public class WhiteBoardClientImpl extends WhiteBoardClientServiceGrpc.WhiteBoard
         wb.getSelfUI().clearCanvas();
         wb.setLocalShapeQ(protoShapes2Shapes(request));
         wb.getSelfUI().reDraw();
-        if(wb.getLocalShapeQ().size() != request.getShapesCount()){
+        if (wb.getLocalShapeQ().size() != request.getShapesCount()) {
             responseObserver.onNext(whiteboard.Whiteboard.Response.newBuilder().setSuccess(false).setMessage("Shape list size not match").build());
-        }else{
+        } else {
             responseObserver.onNext(whiteboard.Whiteboard.Response.newBuilder().setSuccess(true).setMessage("Successfully upd shapelist").build());
         }
         responseObserver.onCompleted();

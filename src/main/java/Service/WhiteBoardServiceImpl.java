@@ -230,7 +230,7 @@ public class WhiteBoardServiceImpl extends WhiteBoardServiceGrpc.WhiteBoardServi
 
             @Override
             public void onError(Throwable throwable) {
-                logger.severe("sPushShape中断：" + throwable.getMessage());
+                logger.severe("中断：sPushShape terminated" + throwable.getMessage());
             }
 
             @Override

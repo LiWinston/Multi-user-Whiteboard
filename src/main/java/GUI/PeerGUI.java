@@ -32,26 +32,39 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
     private final String[] shapes = {"pen", "line", "circle", "oval", "rectangle", "eraser", "text"};
     private final String username;
     private final WhiteBoard wb;
+    volatile SettableFuture<Boolean> futurePreviewAccept;
     private JFrame peerFrame;
-    private int portNumber;
-    private String WBName;
-    private JButton newFileButton;
-    private JButton openButton;
-    private JButton saveButton;
-    private JButton saveAsButton;
-    private JButton closeButton;
-    private JColorChooser colorChooser;
     private String currentShapeType = "pen";
-    private Color color = Color.BLACK;
+    private Color currentColor = Color.BLACK;
     private int x1, x2, y1, y2;
-    private JLabel IpLabel;
-    private JLabel portLabel;
-    private JButton kickButton;
     private ConcurrentLinkedDeque<Point2D> pointQ;
     private Graphics2D canvasGraphics;
     private boolean isFill = false;
-    volatile SettableFuture<Boolean> futurePreviewAccept;
-
+    // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables  @formatter:off
+    // Generated using JFormDesigner Evaluation license - yongchun
+    private JPanel peerPanel;
+    private JPanel canvasPanel;
+    private JPanel chatPanel;
+    private JScrollPane usersSP;
+    private JTextArea userTA;
+    private JScrollPane ChatSP;
+    private JTextArea chatTA;
+    private JToolBar settingBar;
+    private JToolBar shapeColorBar;
+    private JButton colorButton;
+    private JLabel colorLabel;
+    private JButton penButton;
+    private JButton lineButton;
+    private JButton circleButton;
+    private JButton ovalButton;
+    private JButton rectButton;
+    private JButton earserButton;
+    private JButton textButton;
+    private JButton fillButton;
+    private JComboBox strokeCB;
+    private JLabel editingJLabel;
+    private JButton SendButton;
+    private JTextField sendTextField;
 
     public PeerGUI(WhiteBoard whiteBoard, String username) {
 
@@ -87,20 +100,16 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
         System.out.println("peerGUI built. _______From PeerUI________");
     }
 
-    private void setFileButtons() {
-
-    }
-
     private void setColorChooser() {
         colorLabel.setOpaque(true);
         colorButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                color = JColorChooser.showDialog(peerFrame, "choose color", null);
-                if (color == null) {
+                currentColor = JColorChooser.showDialog(peerFrame, "choose color", null);
+                if (currentColor == null) {
                     return;
                 }
-                colorLabel.setBackground(color);
+                colorLabel.setBackground(currentColor);
             }
         });
     }
@@ -156,7 +165,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
                     canvasGraphics = (Graphics2D) canvasPanel.getGraphics();
                 }
 
-                String shapeType = canvasShape.getShapeString();
+                String shapeType = canvasShape.getType();
                 int x1 = canvasShape.getX1();
                 int y1 = canvasShape.getY1();
                 int x2 = canvasShape.getX2();
@@ -295,7 +304,6 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
         }
     }
 
-
     private void setShapeButtons() {
         JButton[] buttons = {penButton, lineButton, circleButton, ovalButton, rectButton, earserButton, textButton};
         for (int i = 0; i < buttons.length; i++) {
@@ -313,7 +321,6 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
             buttons[i].setBackground(i == index ? Color.lightGray : Color.WHITE);
         }
     }
-
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -363,7 +370,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
 //                }).start();  // 启动线程
             }else{
                 int strokeInShape = Integer.parseInt(Objects.requireNonNull(strokeCB.getSelectedItem()).toString());
-                CanvasShape tmp = new CanvasShape(currentShapeType,color, x1 - strokeInShape/2, x1 + strokeInShape/2,
+                CanvasShape tmp = new CanvasShape(currentShapeType, currentColor, x1 - strokeInShape/2, x1 + strokeInShape/2,
                         y1 - strokeInShape/2, y1 + strokeInShape/2, Integer.parseInt(strokeCB.getSelectedItem().toString()));
                 tmp.setText("User is typing...");
                 tmp.setStrokeInt(strokeInShape);
@@ -376,7 +383,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
         }else{
             if(currentShapeType.equals("pen") || currentShapeType.equals("eraser")){
                 pointQ.add(new Point(x1, y1));
-                Color tempColor = currentShapeType.equals("pen") ? color : Color.white;
+                Color tempColor = currentShapeType.equals("pen") ? currentColor : Color.white;
                 CanvasShape tmp = new CanvasShape(currentShapeType, tempColor, username, new ArrayList<>(pointQ), Integer.parseInt(strokeCB.getSelectedItem().toString()));
                 drawCanvasShape(tmp);
                 if (wb.previewTmpStream == null) {
@@ -390,7 +397,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
                     futurePreviewAccept = wb.sBeginPushShape();
                 }
                 int strokeInShape = Integer.parseInt(Objects.requireNonNull(strokeCB.getSelectedItem()).toString());
-                CanvasShape tmp = new CanvasShape(currentShapeType, color, x1, x1 + strokeInShape, y1, y1 + strokeInShape, strokeInShape);
+                CanvasShape tmp = new CanvasShape(currentShapeType, currentColor, x1, x1 + strokeInShape, y1, y1 + strokeInShape, strokeInShape);
                 drawCanvasShape(tmp);
                 if (wb.previewTmpStream == null) {
                     futurePreviewAccept = wb.sBeginPushShape();
@@ -437,7 +444,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
 
                         CanvasShape canvasShape;
                         if (currentShapeType.equals("pen") || currentShapeType.equals("eraser")) {
-                            Color tempColor = color;
+                            Color tempColor = currentColor;
                             if (currentShapeType.equals("eraser")) {
                                 tempColor = Color.white;
                             }
@@ -449,11 +456,11 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
 //                                    wb.requestForceClearTmp();
 //                                    return;
 //                                }
-                                canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
+                                canvasShape = new CanvasShape(currentShapeType, currentColor, x1, x2, y1, y2, strokeInShape);
                                 canvasShape.setText(texts);
                                 canvasShape.setStrokeInt(Integer.parseInt(strokeCB.getSelectedItem().toString()));
                             }catch (Exception ex){
-                                canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
+                                canvasShape = new CanvasShape(currentShapeType, currentColor, x1, x2, y1, y2, strokeInShape);
                                 canvasShape.setText("");
 //                                wb.requestForceClearTmp();
 //                                return;
@@ -463,11 +470,11 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
                             //若按下没动，设为笔触大小的相应形
                             x2 = x2 == x1 ? x1 + strokeInShape : x2;
                             y2 = y2 == y1 ? y1 + strokeInShape : y2;
-                            canvasShape = new CanvasShape(currentShapeType, color, x1, x2, y1, y2, strokeInShape);
+                            canvasShape = new CanvasShape(currentShapeType, currentColor, x1, x2, y1, y2, strokeInShape);
                         }
 
                         canvasShape.setFill(isFill);
-                        if(canvasShape.getShapeString().equals("text") && canvasShape.getText().isEmpty()){
+                        if(canvasShape.getType().equals("text") && canvasShape.getText().isEmpty()){
                             reDraw();//让pen落实到画布上
                             wb.pushShape(canvasShape);
                         }else{
@@ -499,6 +506,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
         }, Executors.newSingleThreadExecutor());
 
     }
+
     @Override
     public void mouseEntered(MouseEvent e) {
 
@@ -508,7 +516,6 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
     public void mouseExited(MouseEvent e) {
 
     }
-
 
     @Override
     public void mouseDragged(MouseEvent e) {
@@ -530,7 +537,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
             if (currentShapeType.equals("eraser")) {
                 tempColor = Color.gray;
             }else {
-                tempColor = color;
+                tempColor = currentColor;
             }
 //            int finalX = x4, finalY = y4;
 //            SwingUtilities.invokeLater(() -> {
@@ -544,7 +551,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
             SwingUtilities.invokeLater(() -> drawCanvasShape(tmp));
 //            wb.tempShapes.put(username, tmp);
         }else{
-            tmp = new CanvasShape(currentShapeType, color, x1, x3, y1, y3, Integer.parseInt(strokeCB.getSelectedItem().toString()));
+            tmp = new CanvasShape(currentShapeType, currentColor, x1, x3, y1, y3, Integer.parseInt(strokeCB.getSelectedItem().toString()));
             SwingUtilities.invokeLater(() -> drawCanvasShape(tmp));
             wb.tempShapes.put(username, tmp);
         }
@@ -561,7 +568,6 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
     public void mouseMoved(MouseEvent e) {
 
     }
-
 
     @Override
     public void warningFromManager(String message) {
@@ -633,7 +639,6 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
         });
     }
 
-
     @Override
     public void closeWindow(String message) {
         Thread.ofVirtual().start((() -> {
@@ -674,6 +679,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
             }
         }.start();
     }
+
     @Override
     public void windowOpened(WindowEvent e) {
 
@@ -715,6 +721,7 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
         loseFocus();
         reDraw();
     }
+
     public void loseFocus() {
         if(wb.previewTmpStream != null) {
             wb.previewTmpStream.onCompleted();
@@ -1020,31 +1027,5 @@ public class PeerGUI implements IClient, MouseListener, MouseMotionListener, Act
         }
         // JFormDesigner - End of component initialization  //GEN-END:initComponents  @formatter:on
     }
-
-    // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables  @formatter:off
-    // Generated using JFormDesigner Evaluation license - yongchun
-    private JPanel peerPanel;
-    private JPanel canvasPanel;
-    private JPanel chatPanel;
-    private JScrollPane usersSP;
-    private JTextArea userTA;
-    private JScrollPane ChatSP;
-    private JTextArea chatTA;
-    private JToolBar settingBar;
-    private JToolBar shapeColorBar;
-    private JButton colorButton;
-    private JLabel colorLabel;
-    private JButton penButton;
-    private JButton lineButton;
-    private JButton circleButton;
-    private JButton ovalButton;
-    private JButton rectButton;
-    private JButton earserButton;
-    private JButton textButton;
-    private JButton fillButton;
-    private JComboBox strokeCB;
-    private JLabel editingJLabel;
-    private JButton SendButton;
-    private JTextField sendTextField;
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 }
