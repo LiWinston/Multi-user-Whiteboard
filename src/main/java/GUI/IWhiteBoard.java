@@ -8,56 +8,60 @@ import java.util.Deque;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-public interface IWhiteBoard{
-    public void setDDL(int d);
-    IClient getSelfUI();
+public interface IWhiteBoard {
 
-    public void setLocalShapeQ(Collection<CanvasShape> localShapeQ);
-    void pushShape(CanvasShape canvasShape);
+	public void setDDL(int d);
 
-    void broadCastShape(CanvasShape canvasShape);
+	IClient getSelfUI();
 
-    void acceptRemoteShape(CanvasShape canvasShape);
+	public void setLocalShapeQ(Collection<CanvasShape> localShapeQ);
 
-    void pushMessage(String chatMessage);
+	void pushShape(CanvasShape canvasShape);
 
-    void SynchronizeUser(String operation, String username);
+	void broadCastShape(CanvasShape canvasShape);
 
-    boolean getApproveFromUI(String request);
+	void acceptRemoteShape(CanvasShape canvasShape);
 
-    void registerPeer(String username, String IpAddress, String port, ManagedChannel channel);
+	void pushMessage(String chatMessage);
 
-    void registerManager(String IpAddress, String port, String name, ManagedChannel channel);
+	void SynchronizeUser(String operation, String username);
 
-    ConcurrentLinkedDeque<CanvasShape> getLocalShapeQ();
+	boolean getApproveFromUI(String request);
 
-    void reportUpdEditing(String operation, String username);
+	void registerPeer(String username, String IpAddress, String port, ManagedChannel channel);
 
-    void removePeer(String username);
+	void registerManager(String IpAddress, String port, String name, ManagedChannel channel);
 
-    void peerExit(String username);
+	ConcurrentLinkedDeque<CanvasShape> getLocalShapeQ();
 
-    void newFile();
+	void reportUpdEditing(String operation, String username);
 
-    void openFile(Collection<CanvasShape> newShapes);
+	void removePeer(String username);
 
-    void managerClose();
+	void peerExit(String username);
 
-    void broadCastEditing(String operation, String username);
+	void newFile();
 
-    void updEditing(String operation, String username);
+	void openFile(Collection<CanvasShape> newShapes);
 
-    void broadCastChatMessage(String message);
+	void managerClose();
 
-    <E> Deque<E> getMessageArrayList();
+	void broadCastEditing(String operation, String username);
 
-    boolean checkConflictOk(CanvasShape shape);
+	void updEditing(String operation, String username);
 
-    <K, V> Map<K,V> getTempShapes();
+	void broadCastChatMessage(String message);
 
-    void requestForceClearTmp();
+	<E> Deque<E> getMessageArrayList();
 
-    void broadCastForceClearTmp(String username);
+	boolean checkConflictOk(CanvasShape shape);
 
-    void setConIntersect(boolean b);
+	<K, V> Map<K, V> getTempShapes();
+
+	void requestForceClearTmp();
+
+	void broadCastForceClearTmp(String username);
+
+	void setConIntersect(boolean b);
+
 }

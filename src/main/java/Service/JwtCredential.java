@@ -24,37 +24,38 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.concurrent.Executor;
 
 /**
- * CallCredentials implementation, which carries the JWT value that will be propagated to the
- * server in the request metadata with the "Authorization" key and the "Bearer" prefix.
+ * CallCredentials implementation, which carries the JWT value that will be propagated to
+ * the server in the request metadata with the "Authorization" key and the "Bearer"
+ * prefix.
  */
 public class JwtCredential extends CallCredentials {
 
-  private final String subject;
+	private final String subject;
 
-  public JwtCredential(String subject) {
-    this.subject = subject;
-  }
+	public JwtCredential(String subject) {
+		this.subject = subject;
+	}
 
-  @Override
-  public void applyRequestMetadata(final RequestInfo requestInfo, final Executor executor,
-      final MetadataApplier metadataApplier) {
-    // Make a JWT compact serialized string.
-    // This example omits setting the expiration, but a real application should do it.
-    final String jwt =
-        Jwts.builder()
-            .setSubject(subject)
-            .signWith(SignatureAlgorithm.HS256, Constants.JWT_KEY)
-            .compact();
+	@Override
+	public void applyRequestMetadata(final RequestInfo requestInfo, final Executor executor,
+			final MetadataApplier metadataApplier) {
+		// Make a JWT compact serialized string.
+		// This example omits setting the expiration, but a real application should do it.
+		final String jwt = Jwts.builder()
+			.setSubject(subject)
+			.signWith(SignatureAlgorithm.HS256, Constants.JWT_KEY)
+			.compact();
 
-    executor.execute(() -> {
-      try {
-        Metadata headers = new Metadata();
-        headers.put(Constants.AUTHORIZATION_METADATA_KEY,
-            String.format("%s %s", Constants.BEARER_TYPE, jwt));
-        metadataApplier.apply(headers);
-      } catch (Throwable e) {
-        metadataApplier.fail(Status.UNAUTHENTICATED.withCause(e));
-      }
-    });
-  }
+		executor.execute(() -> {
+			try {
+				Metadata headers = new Metadata();
+				headers.put(Constants.AUTHORIZATION_METADATA_KEY, String.format("%s %s", Constants.BEARER_TYPE, jwt));
+				metadataApplier.apply(headers);
+			}
+			catch (Throwable e) {
+				metadataApplier.fail(Status.UNAUTHENTICATED.withCause(e));
+			}
+		});
+	}
+
 }

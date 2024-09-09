@@ -4,30 +4,32 @@ import WBSYS.CanvasShape;
 
 import java.util.ArrayList;
 
-public interface IClient{
-    void warningFromManager(String message);
+public interface IClient {
 
-    void updateShapes(CanvasShape canvasShape);
+	void warningFromManager(String message);
 
-    void updateChatBox(String chatMessage);
+	void updateShapes(CanvasShape canvasShape);
 
-    boolean approveClientRequest(String username);
+	void updateChatBox(String chatMessage);
 
-    void updatePeerList(ArrayList<String> userList);
+	boolean approveClientRequest(String username);
 
-    boolean requestFromPeer(String request);
+	void updatePeerList(ArrayList<String> userList);
 
-    String getUsername();
+	boolean requestFromPeer(String request);
 
-    void reDraw();
+	String getUsername();
 
-    void closeWindow(String message);
+	void reDraw();
 
-    void exit();
+	void closeWindow(String message);
 
-    void clearCanvas();
+	void exit();
 
-    void showEditing();
+	void clearCanvas();
 
-    void drawCanvasShape(CanvasShape canvasShape);
+	void showEditing();
+
+	void drawCanvasShape(CanvasShape canvasShape);
+
 }
